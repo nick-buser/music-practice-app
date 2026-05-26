@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="0.8" stroke-linecap="round">
+  <g opacity="0.85">
+    
+    <path d="M0 120 C 60 110, 110 100, 160 90 S 240 70, 300 60 S 380 55, 440 65 S 520 90, 580 110 S 680 130, 800 140"></path>
+    <path d="M0 130 C 60 122, 110 112, 160 100 S 240 80, 300 70 S 380 64, 440 73 S 520 100, 580 118 S 680 135, 800 145" opacity="0.6"></path>
+    <path d="M0 112 C 60 102, 110 92, 160 82 S 240 62, 300 52 S 380 48, 440 58 S 520 82, 580 102 S 680 122, 800 132" opacity="0.6"></path>
+  </g>
+  
+  <g stroke-width="1.4" opacity="0.9">
+    <line x1="20" y1="160" x2="20" y2="180"></line>
+    <line x1="40" y1="160" x2="40" y2="180"></line>
+    <line x1="58" y1="160" x2="58" y2="180"></line>
+    <line x1="74" y1="160" x2="74" y2="180"></line>
+    <line x1="88" y1="160" x2="88" y2="180"></line>
+    <line x1="101" y1="160" x2="101" y2="180"></line>
+    <line x1="113" y1="160" x2="113" y2="180"></line>
+    <line x1="124" y1="160" x2="124" y2="180"></line>
+  </g>
+  
+  <g stroke-width="1.2" opacity="0.7">
+    <line x1="640" y1="165" x2="640" y2="178"></line>
+    <line x1="662" y1="165" x2="662" y2="178"></line>
+    <line x1="688" y1="165" x2="688" y2="178"></line>
+    <line x1="718" y1="165" x2="718" y2="178"></line>
+    <line x1="752" y1="165" x2="752" y2="178"></line>
+  </g>
+</svg>

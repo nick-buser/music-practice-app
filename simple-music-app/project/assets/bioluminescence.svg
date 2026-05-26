@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" fill="currentColor">
+  <defs>
+    <filter id="bio-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b1"></feGaussianBlur>
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="b2"></feGaussianBlur>
+      <feMerge>
+        <feMergeNode in="b2"></feMergeNode>
+        <feMergeNode in="b1"></feMergeNode>
+        <feMergeNode in="SourceGraphic"></feMergeNode>
+      </feMerge>
+    </filter>
+    <radialGradient id="bio-pt" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="currentColor" stop-opacity="1"></stop>
+      <stop offset="60%" stop-color="currentColor" stop-opacity="0.4"></stop>
+      <stop offset="100%" stop-color="currentColor" stop-opacity="0"></stop>
+    </radialGradient>
+  </defs>
+
+  <g filter="url(#bio-glow)">
+    
+    <circle cx="180" cy="220" r="3.5" opacity="0.95"></circle>
+    <circle cx="1620" cy="160" r="3" opacity="0.85"></circle>
+    <circle cx="940" cy="780" r="4" opacity="0.95"></circle>
+    <circle cx="320" cy="920" r="3.5" opacity="0.9"></circle>
+    <circle cx="1480" cy="880" r="3.2" opacity="0.9"></circle>
+    <circle cx="780" cy="120" r="2.8" opacity="0.85"></circle>
+    <circle cx="1820" cy="540" r="3.5" opacity="0.9"></circle>
+    <circle cx="80" cy="600" r="3" opacity="0.85"></circle>
+
+    
+    <circle cx="280" cy="380" r="1.8" opacity="0.75"></circle>
+    <circle cx="420" cy="280" r="1.6" opacity="0.7"></circle>
+    <circle cx="540" cy="460" r="2" opacity="0.8"></circle>
+    <circle cx="700" cy="340" r="1.7" opacity="0.75"></circle>
+    <circle cx="860" cy="520" r="1.8" opacity="0.75"></circle>
+    <circle cx="1080" cy="420" r="2" opacity="0.8"></circle>
+    <circle cx="1240" cy="320" r="1.6" opacity="0.7"></circle>
+    <circle cx="1380" cy="500" r="1.8" opacity="0.75"></circle>
+    <circle cx="1540" cy="360" r="1.7" opacity="0.7"></circle>
+    <circle cx="1700" cy="700" r="2" opacity="0.8"></circle>
+    <circle cx="220" cy="720" r="1.8" opacity="0.75"></circle>
+    <circle cx="460" cy="640" r="1.6" opacity="0.7"></circle>
+    <circle cx="620" cy="820" r="2" opacity="0.8"></circle>
+    <circle cx="1140" cy="860" r="1.7" opacity="0.75"></circle>
+    <circle cx="1300" cy="740" r="1.8" opacity="0.75"></circle>
+    <circle cx="1600" cy="980" r="1.6" opacity="0.7"></circle>
+    <circle cx="160" cy="980" r="1.5" opacity="0.7"></circle>
+    <circle cx="40" cy="340" r="1.4" opacity="0.65"></circle>
+
+    
+    <circle cx="380" cy="180" r="0.9" opacity="0.5"></circle>
+    <circle cx="640" cy="220" r="1" opacity="0.55"></circle>
+    <circle cx="820" cy="280" r="0.9" opacity="0.5"></circle>
+    <circle cx="1180" cy="200" r="0.9" opacity="0.5"></circle>
+    <circle cx="1340" cy="140" r="1" opacity="0.55"></circle>
+    <circle cx="1500" cy="240" r="0.8" opacity="0.45"></circle>
+    <circle cx="1760" cy="380" r="0.9" opacity="0.5"></circle>
+    <circle cx="60" cy="160" r="0.9" opacity="0.5"></circle>
+    <circle cx="200" cy="500" r="0.8" opacity="0.45"></circle>
+    <circle cx="380" cy="560" r="0.9" opacity="0.5"></circle>
+    <circle cx="560" cy="720" r="0.8" opacity="0.45"></circle>
+    <circle cx="900" cy="660" r="0.9" opacity="0.5"></circle>
+    <circle cx="1020" cy="760" r="1" opacity="0.55"></circle>
+    <circle cx="1220" cy="600" r="0.9" opacity="0.5"></circle>
+    <circle cx="1440" cy="660" r="0.8" opacity="0.45"></circle>
+    <circle cx="1640" cy="820" r="0.9" opacity="0.5"></circle>
+    <circle cx="1860" cy="220" r="0.8" opacity="0.45"></circle>
+    <circle cx="100" cy="800" r="0.9" opacity="0.5"></circle>
+    <circle cx="740" cy="940" r="0.9" opacity="0.5"></circle>
+    <circle cx="1080" cy="60" r="0.9" opacity="0.5"></circle>
+
+    
+    <path d="M 1180 540 q 30 -8 60 -2" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" fill="none" opacity="0.65"></path>
+    <path d="M 340 460 q -28 6 -56 -2" stroke="currentColor" stroke-width="0.8" stroke-linecap="round" fill="none" opacity="0.55"></path>
+    <path d="M 1500 760 q 38 -5 76 2" stroke="currentColor" stroke-width="0.9" stroke-linecap="round" fill="none" opacity="0.6"></path>
+    <path d="M 720 240 q 24 8 48 0" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" fill="none" opacity="0.5"></path>
+  </g>
+</svg>
