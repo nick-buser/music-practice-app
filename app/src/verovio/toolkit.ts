@@ -75,13 +75,14 @@ const DEFAULTS: Required<
  */
 export async function renderToSvg(data: string, options: RenderOptions = {}): Promise<string> {
   const tk = await getVerovio();
-  const opts = { ...DEFAULTS, ...options };
-  tk.setOptions(opts as unknown as Record<string, unknown>);
+  const { measureRange, ...toolkitOpts } = { ...DEFAULTS, ...options };
+  tk.setOptions(toolkitOpts as unknown as Record<string, unknown>);
   if (!tk.loadData(data)) {
     throw new Error('Verovio: failed to load score data');
   }
-  if (options.measureRange) {
-    tk.select({ measureRange: options.measureRange });
+  if (measureRange) {
+    tk.select({ measureRange });
+    tk.redoLayout();
   }
   return tk.renderToSVG(1);
 }

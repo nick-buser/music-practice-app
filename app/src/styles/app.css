@@ -423,31 +423,50 @@ button { font-family: inherit; }
 /* ─── Score thumb (Verovio rendered) ───────────────────── */
 .score-thumb {
   width: 160px;
-  height: 56px;
+  height: 70px;
   overflow: hidden;
   position: relative;
-  color: var(--mist);
   display: flex; align-items: center;
   border-left: 1px solid color-mix(in oklch, var(--lumen) 20%, transparent);
   padding-left: 12px;
-  opacity: 0.85;
+  opacity: 0.78;
   transition: opacity var(--dur-quick) var(--ease-glide);
 }
-.piece-row:hover .score-thumb {
-  opacity: 1;
-  color: var(--foam);
-}
+.piece-row:hover .score-thumb { opacity: 1; }
 .score-thumb svg {
   max-width: 100%;
   max-height: 100%;
   display: block;
 }
-.score-thumb svg * { color: inherit; }
+/* Verovio paints in black by default — recolor every path/text/etc. for dark UI */
+.score-thumb svg * {
+  fill: var(--mist) !important;
+  stroke: var(--mist) !important;
+}
+.piece-row:hover .score-thumb svg * {
+  fill: var(--lumen-bright) !important;
+  stroke: var(--lumen-bright) !important;
+}
 .score-thumb .loading {
   font-family: var(--font-mono);
   font-size: 10px;
   color: var(--shoal);
   letter-spacing: 0.12em;
+}
+
+/* ─── Big Score (for piece/session views) ────────────────── */
+.score-big {
+  width: 100%;
+  padding: 24px;
+  background: var(--abyss-soft);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+}
+.score-big svg { max-width: 100%; height: auto; }
+.score-big svg * {
+  fill: var(--foam) !important;
+  stroke: var(--foam) !important;
 }
 
 /* ─── Today / queue / depth rail ──────────────────────── */

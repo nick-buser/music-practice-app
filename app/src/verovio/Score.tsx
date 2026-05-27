@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { renderToSvg, type RenderOptions } from './toolkit';
 
 interface Props {
@@ -12,44 +12,41 @@ interface Props {
 /**
  * Renders a music score via Verovio. The toolkit is shared across instances —
  * each Score awaits the shared promise, then re-renders on `data`/`options` change.
+ * Uses dangerouslySetInnerHTML so React owns the SVG subtree (avoids reconciliation
+ * conflicts with the WASM-generated DOM).
  */
 export function Score({ data, options, className, ariaLabel }: Props) {
-  const hostRef = useRef<HTMLDivElement | null>(null);
+  const [svg, setSvg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  // Stable string key for options so callers can pass inline literals safely.
   const optsKey = JSON.stringify(options ?? {});
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     setError(null);
     renderToSvg(data, options)
-      .then((svg) => {
-        if (cancelled || !hostRef.current) return;
-        hostRef.current.innerHTML = svg;
-        const svgEl = hostRef.current.querySelector('svg');
-        if (svgEl && ariaLabel) svgEl.setAttribute('aria-label', ariaLabel);
-        setLoading(false);
+      .then((rendered) => {
+        if (cancelled) return;
+        const tagged = ariaLabel
+          ? rendered.replace(/^<svg/, `<svg aria-label="${ariaLabel.replace(/"/g, '&quot;')}"`)
+          : rendered;
+        setSvg(tagged);
       })
       .catch((e: unknown) => {
         if (cancelled) return;
         setError(e instanceof Error ? e.message : String(e));
-        setLoading(false);
       });
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, optsKey]);
+  }, [data, optsKey, ariaLabel]);
 
   if (error) {
     return <div className={className}><span className="loading">score · error</span></div>;
   }
-  return (
-    <div ref={hostRef} className={className}>
-      {loading ? <span className="loading">— sounding —</span> : null}
-    </div>
-  );
+  if (svg === null) {
+    return <div className={className}><span className="loading">— sounding —</span></div>;
+  }
+  return <div className={className} dangerouslySetInnerHTML={{ __html: svg }} />;
 }
