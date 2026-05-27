@@ -1,0 +1,417 @@
+/* ============================================================
+   SOUNDING — Whale Design System
+   Foundations: colors + typography
+   ============================================================ */
+
+/* -- Web fonts (Google Fonts) --
+   Display: Newsreader   — editorial / literary, slightly literary-magazine feel
+   Body:    Spectral     — scholarly long-form serif
+   Sans:    IBM Plex Sans — scientific UI / labels / captions
+   Mono:    IBM Plex Mono — data, scientific notation, sonar timecodes
+*/
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,300;1,6..72,400;1,6..72,500&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+
+:root {
+  /* ─── Depth-zone palette ──────────────────────────────────
+     The ocean isn't one blue — it's a vertical gradient of
+     light extinction. These tokens follow the actual ocean
+     zones from epipelagic (sunlight) down to hadal (trench).
+  */
+
+  /* Voids — the deepest, almost-black blues. Backgrounds. */
+  --abyss-ink:    #03060f;   /* hadal — the trench */
+  --abyss-deep:   #060c1c;   /* abyssal — primary deep bg */
+  --abyss:        #0a1730;   /* bathyal — primary surface */
+  --abyss-soft:   #102245;   /* mesopelagic — raised surface / cards */
+
+  /* Mid blues — borders, dividers, secondary elements */
+  --midnight:     #1a2f5c;   /* outline / quiet divider */
+  --twilight:     #2c4a82;   /* hover / active state on dark */
+  --shoal:        #5b82b8;   /* muted iconography on dark */
+
+  /* Light — text, foam, surface inversions */
+  --mist:         #b6c8df;   /* secondary text on dark */
+  --foam:         #eef3fa;   /* primary text on dark */
+  --surface:      #f6f4ee;   /* warm paper — light surface bg  */
+  --vellum:       #ece6d6;   /* warm paper, deeper */
+
+  /* The Spark — bioluminescence. Pushed hard — highlighter
+     on dark-mirror glass. Used as a luminous overlay, not a tint. */
+  --lumen:        #4afdc6;   /* electric mint — primary accent */
+  --lumen-bright: #c6ffe6;   /* near-white, for hover / highlight */
+  --lumen-core:   #00ffc4;   /* purest hue — glow centers only */
+  --lumen-deep:   #1f7d62;   /* pressed / depressed state */
+  --lumen-ink:    #052a23;   /* deep ink against bright lumen */
+  --lumen-wash:   color-mix(in oklch, var(--lumen) 22%, transparent); /* highlighter wash */
+
+  /* Whale-fall — rare warm accent (sun pillars, marker buoys) */
+  --krill:        #ffb472;   /* faint warm amber */
+  --krill-deep:   #c4793a;
+
+  /* Alarm — for "lost contact" / warning states. Extremely rare. */
+  --coral:        #ff6b54;
+
+  /* ─── Semantic surface tokens ─────────────────────────────
+     Use these in components rather than raw colors so themes
+     can shift (e.g. light "field-notes" mode vs dark "deck" mode).
+  */
+  --bg:           var(--abyss-deep);
+  --bg-raised:    var(--abyss);
+  --bg-card:      var(--abyss-soft);
+
+  --fg:           var(--foam);
+  --fg-muted:     var(--mist);
+  --fg-quiet:     var(--shoal);
+
+  --line:         color-mix(in oklch, var(--foam) 12%, transparent);
+  --line-strong:  color-mix(in oklch, var(--foam) 22%, transparent);
+
+  --accent:       var(--lumen);
+  --accent-ink:   var(--lumen-ink);
+
+  /* ─── Typography ──────────────────────────────────────── */
+
+  --font-display: 'Newsreader', 'Times New Roman', serif;
+  --font-body:    'Spectral', Georgia, 'Times New Roman', serif;
+  --font-sans:    'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono:    'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
+
+  /* Type scale — fluid, monumental. Uses optical-size axis of Newsreader. */
+  --t-hero:    clamp(4rem, 9vw, 9.5rem);     /* 144px+ — slide titles, hero */
+  --t-display: clamp(3rem, 6vw, 5.5rem);     /* 88px   — section openers */
+  --t-h1:      clamp(2.25rem, 4vw, 3.5rem);  /* 56px   — page titles */
+  --t-h2:      clamp(1.75rem, 2.4vw, 2.25rem); /* 36px */
+  --t-h3:      1.5rem;                       /* 24px */
+  --t-lede:    1.375rem;                     /* 22px   — opening paragraph */
+  --t-body:    1.0625rem;                    /* 17px   — body */
+  --t-small:   0.9375rem;                    /* 15px   — caption */
+  --t-micro:   0.75rem;                      /* 12px   — eyebrow / labels */
+
+  --lh-tight:   1.05;
+  --lh-snug:    1.2;
+  --lh-body:    1.55;
+  --lh-loose:   1.7;
+
+  --tr-tight:   -0.025em;
+  --tr-display: -0.018em;
+  --tr-body:    0;
+  --tr-label:   0.18em;
+  --tr-wide:    0.32em;
+
+  /* ─── Spacing scale (8pt with editorial half-steps) ─── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  24px;
+  --space-6:  32px;
+  --space-7:  48px;
+  --space-8:  64px;
+  --space-9:  96px;
+  --space-10: 144px;
+  --space-11: 200px;
+
+  /* ─── Corner radii ────────────────────────────────────
+     The system is mostly hard-edged (sea charts, scientific
+     plates) with one rounded element: the "lozenge" — a pill
+     that recalls a whale's silhouette / sonar blip.
+  */
+  --r-none:  0;
+  --r-soft:  3px;
+  --r-card:  6px;
+  --r-lozenge: 999px;
+
+  /* ─── Borders ───────────────────────────────────────── */
+  --b-hair:  1px solid var(--line);
+  --b-rule:  1px solid var(--line-strong);
+  --b-glow:  1px solid color-mix(in oklch, var(--lumen) 50%, transparent);
+
+  /* ─── Shadows / depth ────────────────────────────────
+     Two systems:
+     - "sounding"  — soft inner glow, suggests light in fog
+     - "deep"      — large soft drop, suggests floating in column
+  */
+  --shadow-deep:
+      0 1px 0 color-mix(in oklch, var(--foam) 5%, transparent) inset,
+      0 24px 60px -20px rgba(0,0,0,0.55),
+      0 6px 16px -8px rgba(0,0,0,0.4);
+  --shadow-card:
+      0 1px 0 color-mix(in oklch, var(--foam) 4%, transparent) inset,
+      0 8px 24px -12px rgba(0,0,0,0.45);
+  --shadow-lumen:
+      0 0 0 1px color-mix(in oklch, var(--lumen) 60%, transparent),
+      0 0 28px -2px color-mix(in oklch, var(--lumen) 65%, transparent),
+      0 0 80px -8px color-mix(in oklch, var(--lumen) 40%, transparent);
+  --shadow-lumen-soft:
+      0 0 32px -8px color-mix(in oklch, var(--lumen) 55%, transparent);
+
+  /* Drop-shadow filter strings for SVGs and text */
+  --glow-soft:   drop-shadow(0 0 6px color-mix(in oklch, var(--lumen) 80%, transparent));
+  --glow-strong: drop-shadow(0 0 12px var(--lumen-core))
+                 drop-shadow(0 0 36px color-mix(in oklch, var(--lumen-core) 55%, transparent));
+  --glow-text:
+      0 0 12px color-mix(in oklch, var(--lumen) 75%, transparent),
+      0 0 32px color-mix(in oklch, var(--lumen) 35%, transparent);
+
+  /* ─── Easing ──────────────────────────────────────────
+     Slow & oceanic. Nothing snaps. Everything has weight.
+  */
+  --ease-glide:   cubic-bezier(0.22, 0.61, 0.36, 1);    /* whale glide */
+  --ease-sound:   cubic-bezier(0.16, 1, 0.3, 1);        /* sonar expansion */
+  --ease-current: cubic-bezier(0.65, 0, 0.35, 1);       /* slow current */
+
+  --dur-quick:  240ms;
+  --dur-normal: 480ms;
+  --dur-slow:   900ms;
+  --dur-drift:  1800ms;
+}
+
+/* ============================================================
+   Semantic typography classes
+   ============================================================ */
+
+html, body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Eyebrows — labels above section titles. Always sans, always wide. */
+.eyebrow,
+.label {
+  font-family: var(--font-sans);
+  font-size: var(--t-micro);
+  text-transform: uppercase;
+  letter-spacing: var(--tr-label);
+  font-weight: 500;
+  color: var(--fg-quiet);
+}
+
+.eyebrow--lumen {
+  color: var(--lumen);
+  text-shadow: var(--glow-text);
+}
+
+/* ====== HIGHLIGHTER + GLOW =================================
+   The dramatic luminous overlay. Used to mark emphasis the way
+   a yellow highlighter does on paper — but on dark glass, in
+   bioluminescent cyan. Several variants:
+   - .hl       : a glowing wash behind the text (highlighter strip)
+   - .hl-line  : a single glowing underline under the word
+   - .glow     : color + text-shadow combined, for stark emphasis
+*/
+.hl {
+  background-image: linear-gradient(
+    transparent 0%, transparent 55%,
+    var(--lumen-wash) 55%, var(--lumen-wash) 92%,
+    transparent 92%
+  );
+  background-repeat: no-repeat;
+  padding: 0 0.12em;
+  color: var(--foam);
+  border-radius: 1px;
+}
+.hl-line {
+  position: relative;
+  color: var(--foam);
+  white-space: nowrap;
+}
+.hl-line::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -0.08em;
+  height: 0.08em;
+  background: var(--lumen);
+  box-shadow: 0 0 12px var(--lumen-core),
+              0 0 28px color-mix(in oklch, var(--lumen-core) 60%, transparent);
+  border-radius: 1px;
+}
+.glow {
+  color: var(--lumen);
+  text-shadow: var(--glow-text);
+}
+.glow-strong {
+  color: var(--lumen-bright);
+  text-shadow:
+      0 0 8px var(--lumen-core),
+      0 0 24px var(--lumen-core),
+      0 0 64px color-mix(in oklch, var(--lumen-core) 60%, transparent);
+}
+
+/* Hero — for slide titles and the very top of pages */
+.hero {
+  font-family: var(--font-display);
+  font-size: var(--t-hero);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tr-tight);
+  font-weight: 400;
+  font-variation-settings: 'opsz' 60;
+  color: var(--fg);
+  text-wrap: balance;
+}
+
+/* Display — section openers */
+.display {
+  font-family: var(--font-display);
+  font-size: var(--t-display);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tr-display);
+  font-weight: 400;
+  font-variation-settings: 'opsz' 48;
+  text-wrap: balance;
+}
+
+h1, .h1 {
+  font-family: var(--font-display);
+  font-size: var(--t-h1);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tr-display);
+  font-weight: 400;
+  font-variation-settings: 'opsz' 36;
+  text-wrap: balance;
+  margin: 0;
+}
+
+h2, .h2 {
+  font-family: var(--font-display);
+  font-size: var(--t-h2);
+  line-height: var(--lh-snug);
+  letter-spacing: -0.012em;
+  font-weight: 400;
+  margin: 0;
+}
+
+h3, .h3 {
+  font-family: var(--font-display);
+  font-size: var(--t-h3);
+  line-height: var(--lh-snug);
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Lede — the opening pull-paragraph of a section.
+   Italic Newsreader for warmth. */
+.lede {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: var(--t-lede);
+  line-height: var(--lh-loose);
+  color: var(--fg-muted);
+  text-wrap: pretty;
+}
+
+p, .p {
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  margin: 0 0 1em 0;
+  max-width: 65ch;
+  text-wrap: pretty;
+}
+
+.small {
+  font-size: var(--t-small);
+  color: var(--fg-muted);
+}
+
+.caption {
+  font-family: var(--font-sans);
+  font-size: var(--t-small);
+  color: var(--fg-muted);
+  letter-spacing: 0.005em;
+}
+
+/* Mono — data, coordinates, sonar timecodes, taxonomy */
+code, .mono, .data {
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  font-feature-settings: 'tnum';
+}
+
+/* Coordinates — a stylized way of writing lat/long, depths, frequencies */
+.coord {
+  font-family: var(--font-mono);
+  font-size: var(--t-small);
+  letter-spacing: 0.02em;
+  color: var(--fg-muted);
+  font-feature-settings: 'tnum', 'zero';
+}
+
+/* Pull-quote — for the BigQuote slide and editorial highlights */
+.pullquote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 1.18;
+  letter-spacing: -0.012em;
+  color: var(--fg);
+  text-wrap: balance;
+}
+
+/* Numeric scale — for stats / data figures */
+.numeric {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7vw, 7rem);
+  font-weight: 300;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--lumen-bright);
+  text-shadow:
+      0 0 14px var(--lumen-core),
+      0 0 48px color-mix(in oklch, var(--lumen-core) 60%, transparent),
+      0 0 120px color-mix(in oklch, var(--lumen-core) 30%, transparent);
+}
+.numeric sup,
+.numeric .unit {
+  font-family: var(--font-sans);
+  font-size: 0.22em;
+  letter-spacing: var(--tr-label);
+  text-transform: uppercase;
+  color: var(--fg-quiet);
+  vertical-align: top;
+  margin-left: 0.4em;
+}
+
+/* Inline helpers */
+em, .italic { font-style: italic; }
+strong       { font-weight: 600; color: var(--fg); }
+.lumen       { color: var(--lumen); }
+.krill       { color: var(--krill); }
+.muted       { color: var(--fg-muted); }
+.quiet       { color: var(--fg-quiet); }
+
+/* Hairline rule used to separate sections (a depth contour line) */
+.contour {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: var(--space-7) 0;
+}
+.contour--strong { border-top-color: var(--line-strong); }
+
+/* Common dot-leaders / coordinate brackets */
+.bracket::before { content: '[ '; color: var(--fg-quiet); }
+.bracket::after  { content: ' ]'; color: var(--fg-quiet); }
+
+/* ============================================================
+   Selection & focus
+   ============================================================ */
+::selection {
+  background: var(--lumen);
+  color: var(--lumen-ink);
+  text-shadow: none;
+}
+:focus-visible {
+  outline: 2px solid var(--lumen);
+  outline-offset: 3px;
+  border-radius: 2px;
+  box-shadow: var(--shadow-lumen-soft);
+}
