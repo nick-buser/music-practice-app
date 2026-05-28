@@ -36,9 +36,24 @@ export const PIECES: Piece[] = [
       { text: 'Cadenza (bar 26) at 40 bpm with metronome on beat 1.', done: false },
       { text: 'Full run-through from memory by Friday.', done: false },
     ],
-    sections: [],
-    notes: [],
-    history: [],
+    sections: [
+      { id: 's1', range: 'mm. 1–8',   label: 'Opening theme',         subtitle: 'cantabile, simple',          heat: 0.85, conf: 4, tempo: 'q=60',   reps: 38 },
+      { id: 's2', range: 'mm. 9–16',  label: 'Theme · ornamented',    subtitle: 'añadidos, the first turn',   heat: 0.62, conf: 3, tempo: 'q=60',   reps: 29 },
+      { id: 's3', range: 'mm. 17–24', label: 'Figuration variation',  subtitle: 'where the right hand opens', heat: 0.28, conf: 2, tempo: 'q=44',   reps: 51, struggle: true, active: true },
+      { id: 's4', range: 'mm. 25–28', label: 'Cadenza',               subtitle: 'the unmeasured run',         heat: 0.12, conf: 1, tempo: 'rubato', reps: 22, struggle: true },
+      { id: 's5', range: 'mm. 29–34', label: 'Return & coda',         subtitle: 'fade to nothing',            heat: 0.74, conf: 4, tempo: 'q=58',   reps: 18 },
+    ],
+    notes: [
+      { when: '2026-05-19 · last session', body: 'Bar 21 LH leap — keep the elbow loose. Felt the connection finally when I stopped *aiming* at the bottom note.' },
+      { when: '2026-05-17',                body: 'Right-hand thirds in bar 14 are settling. Pedal change is now on beat 4 of the previous bar — much cleaner.' },
+      { when: '2026-05-12',                body: 'Recorded a run-through. Tempo drifts faster between bars 17 and 24 — every time. Probably tension.' },
+      { when: '2026-05-04 · teacher',      body: '"The rubato has to *breathe*, not lurch." She demonstrated by singing the melody first, then playing what she sang.' },
+    ],
+    history: [
+      { date: 'May 19', mins: 42 }, { date: 'May 18', mins: 28 }, { date: 'May 16', mins: 55 },
+      { date: 'May 14', mins: 35 }, { date: 'May 13', mins: 22 }, { date: 'May 11', mins: 48 },
+      { date: 'May 9',  mins: 30 }, { date: 'May 7',  mins: 40 }, { date: 'May 6',  mins: 18 },
+    ],
   },
   {
     id: 'bach-prelude-cmaj',
@@ -61,10 +76,23 @@ export const PIECES: Piece[] = [
     sessions: 84,
     streakDays: 4,
     tags: ['memorized', 'voicing', 'recital ready'],
-    plan: [],
-    sections: [],
-    notes: [],
-    history: [],
+    plan: [
+      { text: 'Maintain — one slow run weekly at 50 bpm.', done: false, active: true },
+      { text: 'Schroeder voicing exercise: bring out the bass line.', done: false },
+    ],
+    sections: [
+      { id: 's1', range: 'mm. 1–11',  label: 'Tonic ascent',  subtitle: 'broken chords climb', heat: 0.92, conf: 5, tempo: 'q=72', reps: 64 },
+      { id: 's2', range: 'mm. 12–19', label: 'Modulation',    subtitle: 'the unsteady middle', heat: 0.74, conf: 4, tempo: 'q=68', reps: 48 },
+      { id: 's3', range: 'mm. 20–27', label: 'Pedal point',   subtitle: 'D-pedal arrival',     heat: 0.88, conf: 5, tempo: 'q=72', reps: 39 },
+      { id: 's4', range: 'mm. 28–35', label: 'Final cadence', subtitle: 'breath, breath, rest', heat: 0.95, conf: 5, tempo: 'q=66', reps: 41 },
+    ],
+    notes: [
+      { when: '2026-05-18', body: 'Recital-ready. Played for J. — said the *D-pedal* finally lands.' },
+      { when: '2026-04-22', body: 'Worked the voicing exercise: shape the line as if the bass is humming. Helps.' },
+    ],
+    history: [
+      { date: 'May 18', mins: 12 }, { date: 'May 14', mins: 10 }, { date: 'May 7', mins: 15 }, { date: 'Apr 30', mins: 20 },
+    ],
   },
   {
     id: 'debussy-clair',

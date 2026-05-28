@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Sidebar, type View } from './components/Sidebar';
 import { LibraryView } from './views/LibraryView';
+import { PieceView } from './views/PieceView';
 import { StubView } from './views/StubView';
 
 export default function App() {
   const [view, setView] = useState<View>('library');
-  const [, setPieceId] = useState<string>('chopin-9-2');
+  const [pieceId, setPieceId] = useState<string>('chopin-9-2');
 
   const openPiece = (id: string) => { setPieceId(id); setView('piece'); };
   const startSession = (id: string) => { setPieceId(id); setView('session'); };
@@ -14,7 +15,7 @@ export default function App() {
   if (view === 'library') {
     body = <LibraryView onOpenPiece={openPiece} onStartSession={startSession} />;
   } else if (view === 'piece') {
-    body = <StubView label="Piece detail" title="Piece" />;
+    body = <PieceView pieceId={pieceId} onBack={() => setView('library')} onStartSession={startSession} />;
   } else if (view === 'session') {
     body = <StubView label="Practice session" title="Session" />;
   } else if (view === 'stats') {
