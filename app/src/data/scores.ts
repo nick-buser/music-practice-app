@@ -12,11 +12,15 @@ M:12/8
 L:1/8
 Q:1/4=60
 K:Eb
-%%score 1 2
+%%score (1 2)
 V:1 clef=treble
 V:2 clef=bass
-[V:1] B3 G3 F3 G3 | B3 (G3F3) G6 |
-[V:2] [E,,B,,E,G,]3 z3 [F,,C,F,A,]3 z3 | [E,,B,,E,G,]3 z3 z6 |`,
+[V:1] B3 G3 F3 G3 | B3 G3 F3 G3 | B3 G3 F3 G3 | (B3 G3) (F3 G3) |
+       e3 c3 (Bc) cB | (3eef g3 B3 d3 | A3 F3 E3 F3 | A3 F3 E3 F3 |
+[V:2] E,,B,,E,G, z3 z3 F,,C,F,A, z3 z3 | E,,B,,E,G, z3 z3 F,,C,F,A, z3 z3 |
+       E,,B,,E,G, z3 z3 F,,C,F,A, z3 z3 | E,,B,,E,G, z3 z3 F,,C,F,A, z3 z3 |
+       C,G,,C,E, z3 z3 A,,E,,A,,C, z3 z3 | C,G,,C,E, z3 z3 G,,D,,G,,B, z3 z3 |
+       F,,C,F,A, z3 z3 G,,D,G,B, z3 z3 | F,,C,F,A, z3 z3 G,,D,G,B, z3 z3 |`,
 
   'bach-prelude-cmaj': `X:1
 T:Prelude in C major, BWV 846
@@ -25,11 +29,13 @@ M:4/4
 L:1/16
 Q:1/4=72
 K:C
-%%score 1 2
+%%score (1 2)
 V:1 clef=treble
 V:2 clef=bass
 [V:1] CEGc eGce CEGc eGce | CDFA dFAd CDFA dFAd |
-[V:2] C,,C,2 z2 z4 z8 | C,,C,2 z2 z4 z8 |`,
+       BDGB dGBd BDGB dGBd | CEGc eGce CEGc eGce |
+[V:2] C,,C,2 z2 z4 z8 | C,,C,2 z2 z4 z8 |
+       C,,B,,2 z2 z4 z8 | C,,C,2 z2 z4 z8 |`,
 
   'debussy-clair': `X:1
 T:Clair de lune
