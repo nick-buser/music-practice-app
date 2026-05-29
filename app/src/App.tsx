@@ -4,7 +4,7 @@ import { LibraryView } from './views/LibraryView';
 import { PieceView } from './views/PieceView';
 import { SessionView } from './views/SessionView';
 import { StatsView } from './views/StatsView';
-import { StubView } from './views/StubView';
+import { SketchbookView } from './views/SketchbookView';
 
 export default function App() {
   const [view, setView] = useState<View>('library');
@@ -23,7 +23,7 @@ export default function App() {
   } else if (view === 'stats') {
     body = <StatsView />;
   } else {
-    body = <StubView label="Sketchbook" title="Sketchbook" />;
+    body = <SketchbookView />;
   }
 
   return (

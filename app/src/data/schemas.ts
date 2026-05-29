@@ -91,3 +91,32 @@ export const Quote = z.object({
   who: z.string(),
 });
 export type Quote = z.infer<typeof Quote>;
+
+export const Chord = z.object({
+  /** Chord symbol, e.g. "F♯m", "D maj9". */
+  symbol: z.string(),
+  /** Roman-numeral function, e.g. "i", "VI". */
+  roman: z.string(),
+});
+export type Chord = z.infer<typeof Chord>;
+
+export const Sketch = z.object({
+  id: z.string(),
+  title: z.string(),
+  subtitle: z.string(),
+  status: z.string(),
+  started: z.string(),
+  lastTouched: z.string(),
+  keyArea: z.string(),
+  meter: z.string(),
+  duration: z.string(),
+  tags: z.array(z.string()),
+  /** Lyric / program note, with [section] markers and { } annotations. */
+  lyric: z.string(),
+  plan: z.array(PlanItem),
+  /** Optional chord progression for the harmony tab. */
+  harmony: z.array(Chord).optional(),
+  /** Optional ABC snippet engraved (via Verovio) under the harmony tab. */
+  harmonyAbc: z.string().optional(),
+});
+export type Sketch = z.infer<typeof Sketch>;
