@@ -86,3 +86,43 @@ export async function renderToSvg(data: string, options: RenderOptions = {}): Pr
   }
   return tk.renderToSVG(1);
 }
+
+/** One entry of Verovio's timemap: a moment in score-time and the notes that change there. */
+export interface TimemapEntry {
+  /** Milliseconds at the score's encoded tempo. */
+  tstamp: number;
+  /** Position in quarter notes. */
+  qstamp: number;
+  /** Note element ids that begin sounding at this moment. */
+  on?: string[];
+  /** Note element ids that stop sounding at this moment. */
+  off?: string[];
+  /** Tempo (bpm) in effect from this moment, if it changes here. */
+  tempo?: number;
+}
+
+/**
+ * Render a score AND capture its timemap in a single load, so the SVG note ids
+ * and the timemap entries are guaranteed to refer to the same engraving.
+ *
+ * The timemap is a snapshot — once returned it's plain data, so it survives the
+ * shared toolkit being reused by other components (thumbnails, etc.).
+ */
+export async function renderWithTimemap(
+  data: string,
+  options: RenderOptions = {},
+): Promise<{ svg: string; timemap: TimemapEntry[] }> {
+  const tk = await getVerovio();
+  const { measureRange, ...toolkitOpts } = { ...DEFAULTS, ...options };
+  tk.setOptions(toolkitOpts as unknown as Record<string, unknown>);
+  if (!tk.loadData(data)) {
+    throw new Error('Verovio: failed to load score data');
+  }
+  if (measureRange) {
+    tk.select({ measureRange });
+    tk.redoLayout();
+  }
+  const svg = tk.renderToSVG(1);
+  const timemap = tk.renderToTimemap({ includeMeasures: true, includeRests: false }) as TimemapEntry[];
+  return { svg, timemap };
+}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Sidebar, type View } from './components/Sidebar';
 import { LibraryView } from './views/LibraryView';
 import { PieceView } from './views/PieceView';
+import { SessionView } from './views/SessionView';
 import { StubView } from './views/StubView';
 
 export default function App() {
@@ -17,7 +18,7 @@ export default function App() {
   } else if (view === 'piece') {
     body = <PieceView pieceId={pieceId} onBack={() => setView('library')} onStartSession={startSession} />;
   } else if (view === 'session') {
-    body = <StubView label="Practice session" title="Session" />;
+    body = <SessionView pieceId={pieceId} onEnd={() => setView('library')} onOpenPiece={openPiece} />;
   } else if (view === 'stats') {
     body = <StubView label="Stats & journal" title="Stats" />;
   } else {

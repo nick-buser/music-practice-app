@@ -17,6 +17,9 @@ declare module 'verovio/esm' {
     getOptions(): Record<string, unknown>;
     loadData(data: string): boolean;
     renderToSVG(pageNo: number): string;
+    renderToTimemap(opts?: Record<string, unknown>): unknown;
+    renderToMIDI(): string;
+    getElementsAtTime(ms: number): { notes?: string[]; page?: number; measure?: string };
     select(opts: Record<string, unknown>): void;
     getPageCount(): number;
     redoLayout(): void;
