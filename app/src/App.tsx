@@ -3,6 +3,7 @@ import { Sidebar, type View } from './components/Sidebar';
 import { LibraryView } from './views/LibraryView';
 import { PieceView } from './views/PieceView';
 import { SessionView } from './views/SessionView';
+import { StatsView } from './views/StatsView';
 import { StubView } from './views/StubView';
 
 export default function App() {
@@ -20,7 +21,7 @@ export default function App() {
   } else if (view === 'session') {
     body = <SessionView pieceId={pieceId} onEnd={() => setView('library')} onOpenPiece={openPiece} />;
   } else if (view === 'stats') {
-    body = <StubView label="Stats & journal" title="Stats" />;
+    body = <StatsView />;
   } else {
     body = <StubView label="Sketchbook" title="Sketchbook" />;
   }
