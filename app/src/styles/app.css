@@ -996,6 +996,393 @@ button { font-family: inherit; }
   opacity: 0.36 !important;
 }
 
+/* ============================================================
+   SESSION (active practice)
+   ============================================================ */
+.recording-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--lumen);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.session-page {
+  position: relative;
+  min-height: calc(100vh - 200px);
+}
+.session-page .bio-bg {
+  position: absolute; inset: -40px -56px 0 -56px;
+  color: var(--lumen-core);
+  opacity: 0.30;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 0;
+}
+.session-page .bio-bg img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.session-page > .layer { position: relative; z-index: 1; }
+
+.session-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 56px;
+  margin-top: 20px;
+}
+.session-stage {
+  background: color-mix(in oklch, var(--abyss) 88%, transparent);
+  border: 1px solid var(--line);
+  border-top: 1px solid color-mix(in oklch, var(--lumen) 50%, transparent);
+  border-radius: 6px;
+  padding: 40px 44px;
+  display: flex; flex-direction: column; gap: 28px;
+  backdrop-filter: blur(2px);
+}
+.session-piece {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 32px;
+}
+.session-piece .eyebrow {
+  font-family: var(--font-sans);
+  font-size: 10px; letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--lumen);
+  margin-bottom: 8px;
+}
+.session-piece h2 {
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 400;
+  letter-spacing: -0.022em;
+  line-height: 1.04;
+  color: var(--foam);
+  margin: 0;
+}
+.session-piece h2 em {
+  font-style: italic;
+  color: var(--mist);
+  font-weight: 300;
+  display: block;
+  font-size: 18px;
+  margin-top: 6px;
+}
+.session-piece .right {
+  display: flex; flex-direction: column; gap: 6px;
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--shoal);
+  letter-spacing: 0.04em;
+}
+.session-piece .right .v { color: var(--foam); }
+
+.session-focus {
+  text-align: center;
+  padding: 32px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.session-focus .eyebrow {
+  font-family: var(--font-sans);
+  font-size: 10px; letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--shoal);
+  margin-bottom: 14px;
+}
+.session-focus .title {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 32px;
+  line-height: 1.2;
+  color: var(--foam);
+  margin: 0 0 12px;
+  text-wrap: balance;
+}
+.session-focus .meas {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--mist);
+}
+
+.session-timer {
+  display: flex; justify-content: center; align-items: center; gap: 48px;
+}
+.session-timer .clock-col { width: 320px; max-width: 50%; }
+.session-timer .clock {
+  font-family: var(--font-display);
+  font-size: 96px;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--lumen-bright);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  text-shadow:
+      0 0 16px var(--lumen-core),
+      0 0 56px var(--lumen-core),
+      0 0 120px color-mix(in oklch, var(--lumen-core) 35%, transparent);
+}
+.session-timer .clock.paused { color: var(--mist); text-shadow: none; }
+.session-timer .clock .sm {
+  font-size: 0.32em; color: var(--shoal);
+  text-shadow: none;
+  margin-left: 6px;
+}
+.session-timer .goal-bar {
+  height: 3px;
+  background: color-mix(in oklch, var(--foam) 8%, transparent);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+  position: relative;
+}
+.session-timer .goal-bar .fill {
+  position: absolute; inset: 0;
+  background: var(--lumen);
+  box-shadow: 0 0 6px var(--lumen-core);
+  transform-origin: left;
+  transition: transform 400ms var(--ease-glide);
+}
+.session-timer .goal-legend {
+  display: flex; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 11px; color: var(--shoal);
+  letter-spacing: 0.04em; margin-top: 8px;
+}
+.session-timer .controls {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.session-timer .controls .play-btn {
+  width: 84px; height: 84px;
+  border-radius: 50%;
+  background: var(--lumen);
+  color: var(--lumen-ink);
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-lumen);
+  transition: transform var(--dur-quick) var(--ease-glide);
+}
+.session-timer .controls .play-btn:hover { transform: scale(1.05); }
+
+/* Metronome */
+.metro {
+  display: flex; align-items: center; justify-content: center; gap: 22px;
+  padding: 18px 0;
+}
+.metro .pips { display: flex; gap: 10px; }
+.metro .pip {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: color-mix(in oklch, var(--foam) 12%, transparent);
+  transition: all 80ms var(--ease-glide);
+}
+.metro .pip.active {
+  background: var(--lumen);
+  box-shadow: 0 0 12px var(--lumen-core), 0 0 28px color-mix(in oklch, var(--lumen-core) 60%, transparent);
+}
+.metro .pip.downbeat {
+  width: 14px; height: 14px;
+  background: var(--lumen-bright);
+  box-shadow: 0 0 16px var(--lumen-core), 0 0 36px var(--lumen-core);
+}
+.metro .bpm {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 300;
+  color: var(--foam);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  display: flex; align-items: baseline; gap: 8px;
+}
+.metro .bpm .unit {
+  font-family: var(--font-sans); font-size: 11px;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--shoal);
+}
+.metro .tempo-ctl { display: flex; gap: 6px; align-items: center; }
+.metro .tempo-ctl button {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--mist);
+  font-family: var(--font-mono); font-size: 14px;
+  cursor: pointer;
+  transition: all var(--dur-quick) var(--ease-glide);
+}
+.metro .tempo-ctl button:hover { color: var(--foam); border-color: var(--shoal); }
+
+/* Session mini-score + playback cursor */
+.session-score-block { border-top: 1px solid var(--line); padding-top: 18px; }
+.session-score-block .score-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-family: var(--font-sans); font-size: 10px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--shoal); margin-bottom: 12px;
+}
+.session-score-block .score-head .open-full { cursor: pointer; color: var(--mist); }
+.session-score-block .score-head .open-full:hover { color: var(--lumen); }
+.session-score {
+  background: var(--abyss-deep);
+  border-radius: 4px;
+  padding: 12px;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 80px;
+}
+.session-score svg { max-width: 100%; height: auto; }
+/* Notation paints in mist; the playback cursor lights notes up in lumen. */
+.session-score svg g.note,
+.session-score svg g.rest,
+.session-score svg .staff path,
+.session-score svg .barLine path { fill: var(--mist); stroke: var(--mist); }
+.session-score svg g.note.note-playing,
+.session-score svg g.note.note-playing * {
+  fill: var(--lumen-bright) !important;
+  stroke: var(--lumen-bright) !important;
+  filter: drop-shadow(0 0 5px var(--lumen-core));
+}
+.session-score .loading {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--shoal); letter-spacing: 0.12em;
+}
+.session-score-block .score-pos {
+  height: 3px; margin-top: 10px;
+  background: color-mix(in oklch, var(--foam) 8%, transparent);
+  border-radius: 2px; overflow: hidden; position: relative;
+}
+.session-score-block .score-pos .fill {
+  position: absolute; inset: 0;
+  background: var(--lumen-core);
+  box-shadow: 0 0 8px var(--lumen-core);
+  transform-origin: left;
+}
+
+/* Session rail */
+.session-rail { display: flex; flex-direction: column; gap: 24px; }
+.loop-card, .quick-notes, .session-prog {
+  background: var(--abyss);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 22px 24px;
+}
+.loop-card .eyebrow, .quick-notes .eyebrow, .session-prog .eyebrow {
+  font-family: var(--font-sans);
+  font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--shoal);
+  margin-bottom: 12px;
+}
+.loop-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.loop-row:first-of-type { border-top: 0; }
+.loop-row .name { font-family: var(--font-body); font-size: 14px; color: var(--foam); font-style: italic; }
+.loop-row .meas { font-family: var(--font-mono); font-size: 11px; color: var(--shoal); }
+.loop-row .pick {
+  font-family: var(--font-sans); font-size: 10px; letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mist); cursor: pointer;
+  background: transparent; border: none;
+  transition: color var(--dur-quick) var(--ease-glide);
+}
+.loop-row .pick:hover { color: var(--lumen); }
+.loop-row.active .name { color: var(--lumen); }
+.loop-row.active .pick { color: var(--lumen); }
+
+.quick-notes textarea {
+  width: 100%;
+  background: var(--abyss-deep);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--foam);
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 12px;
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.5;
+}
+.quick-notes textarea:focus {
+  outline: none;
+  border-color: color-mix(in oklch, var(--lumen) 40%, transparent);
+  box-shadow: var(--shadow-lumen-soft);
+}
+.quick-notes .saved {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--lumen);
+  margin-top: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.quick-notes .saved .pulse {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--lumen);
+  box-shadow: 0 0 8px var(--lumen-core);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.log-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+
+.session-prog .ring-wrap {
+  display: flex; justify-content: center; align-items: center;
+  padding: 8px 0 16px;
+  position: relative;
+  height: 180px;
+}
+.session-prog .ring-wrap .center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.session-prog .ring-wrap .center .n {
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 300;
+  color: var(--lumen-bright);
+  text-shadow: var(--glow-text);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.session-prog .ring-wrap .center .l {
+  font-family: var(--font-sans);
+  font-size: 10px; letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--shoal);
+  margin-top: 4px;
+}
+.session-prog .sub-row {
+  display: flex; justify-content: space-between;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--shoal);
+  letter-spacing: 0.04em;
+}
+.session-prog .sub-row .v { color: var(--foam); }
+
+/* ─── Chip (used by session log tags) ─────────────────── */
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  color: var(--mist);
+  background: transparent;
+}
+.chip.lumen {
+  color: var(--lumen);
+  border-color: color-mix(in oklch, var(--lumen) 45%, transparent);
+  background: color-mix(in oklch, var(--lumen) 8%, transparent);
+}
+
 /* ─── Stub view (placeholders for not-yet-built screens) ── */
 .stub {
   display: flex; flex-direction: column; gap: 18px;
