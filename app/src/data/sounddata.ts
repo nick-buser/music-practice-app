@@ -1,4 +1,4 @@
-import type { Instrument, Piece, QueueItem, Quote } from './schemas';
+import type { Instrument, InstrumentId, Piece, QueueItem, Quote } from './schemas';
 
 export const INSTRUMENTS: Instrument[] = [
   { id: 'piano', name: 'Piano', latin: 'Pianoforte', count: 4 },
@@ -241,3 +241,113 @@ export const QUOTES: Quote[] = [
 
 export const TODAY_TOTAL_MIN = 78;
 export const WEEK_TOTAL_MIN = 364;
+
+/* ─── Stats data ──────────────────────────────────────── */
+
+/** "Today" for the journal — fixed so the mock data is deterministic. */
+export const JOURNAL_TODAY = new Date('2026-05-29');
+
+export interface HeatDay {
+  /** ISO date (yyyy-mm-dd). */
+  date: string;
+  /** Practice minutes, or null for days in the future. */
+  minutes: number | null;
+}
+
+/**
+ * 53 weeks of daily practice minutes ending on the week containing
+ * JOURNAL_TODAY. Index 0 is a Sunday, so a calendar grid can place each day at
+ * column = floor(i / 7), row = i % 7. Future days are null. Deterministic via a
+ * tiny LCG so the chart is stable across reloads.
+ */
+function buildHeatmap(): HeatDay[] {
+  const today = JOURNAL_TODAY;
+  // This week's Sunday, then back 52 weeks → the grid's first Sunday.
+  const start = new Date(today);
+  start.setDate(start.getDate() - today.getDay() - 52 * 7);
+
+  let seed = 9173;
+  const rng = () => {
+    seed = (seed * 9301 + 49297) % 233280;
+    return seed / 233280;
+  };
+
+  const cells: HeatDay[] = [];
+  for (let i = 0; i < 53 * 7; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const iso = d.toISOString().slice(0, 10);
+
+    if (d > today) {
+      cells.push({ date: iso, minutes: null });
+      continue;
+    }
+    // Recent ~100 days trend denser; older days thin out.
+    const recent = i > 53 * 7 - 100;
+    const r = rng();
+    let minutes: number;
+    if (r < 0.3) minutes = 0;
+    else if (r < 0.55) minutes = Math.round(15 + r * 25);
+    else if (r < 0.8) minutes = Math.round(40 + r * 35);
+    else minutes = Math.round(75 + r * 60);
+    if (!recent && r > 0.55) minutes = Math.round(minutes * 0.55);
+    cells.push({ date: iso, minutes });
+  }
+  return cells;
+}
+
+export const HEATMAP: HeatDay[] = buildHeatmap();
+
+export interface TimeByPiece {
+  name: string;
+  who: InstrumentId;
+  mins: number;
+}
+
+export const TIME_BY_PIECE: TimeByPiece[] = [
+  { name: 'Chopin — Nocturne E♭ Op. 9 No. 2',   who: 'piano',   mins: 1840 },
+  { name: 'Tárrega — Recuerdos de la Alhambra', who: 'guitar',  mins: 1640 },
+  { name: 'Litany for a Falling Whale',         who: 'compose', mins: 920 },
+  { name: 'Debussy — Clair de lune',            who: 'piano',   mins: 980 },
+  { name: 'Bach — Bourrée BWV 996',             who: 'guitar',  mins: 800 },
+  { name: 'Satie — Gymnopédie No. 1',           who: 'piano',   mins: 720 },
+  { name: 'Caldara — Sebben, crudele',          who: 'voice',   mins: 360 },
+];
+
+export interface WeekDay {
+  day: string;
+  date: number;
+  piano: number;
+  guitar: number;
+  compose: number;
+  today?: boolean;
+}
+
+export const WEEK: WeekDay[] = [
+  { day: 'Mon', date: 23, piano: 22, guitar: 12, compose: 8 },
+  { day: 'Tue', date: 24, piano: 30, guitar: 28, compose: 0 },
+  { day: 'Wed', date: 25, piano: 18, guitar: 22, compose: 14 },
+  { day: 'Thu', date: 26, piano: 28, guitar: 0,  compose: 12 },
+  { day: 'Fri', date: 27, piano: 42, guitar: 18, compose: 0 },
+  { day: 'Sat', date: 28, piano: 12, guitar: 20, compose: 0 },
+  { day: 'Sun', date: 29, piano: 42, guitar: 36, compose: 0, today: true },
+];
+
+export interface RecentSession {
+  when: string;
+  what: string;
+  sub: string;
+  mins: number;
+  mood: number;
+}
+
+export const RECENT: RecentSession[] = [
+  { when: 'today · 06:42',  what: 'Tárrega · Recuerdos',     sub: 'guitar',   mins: 36, mood: 4 },
+  { when: 'today · 05:50',  what: 'Chopin · Nocturne E♭',    sub: 'piano',    mins: 42, mood: 5 },
+  { when: 'yest. · 18:10',  what: 'Caldara · Sebben',        sub: 'voice',    mins: 22, mood: 3 },
+  { when: 'yest. · 07:08',  what: 'Bach · Bourrée',          sub: 'guitar',   mins: 20, mood: 4 },
+  { when: 'May 27 · 19:32', what: 'Debussy · Clair de lune', sub: 'piano',    mins: 38, mood: 3 },
+  { when: 'May 27 · 07:11', what: 'Tárrega · Recuerdos',     sub: 'guitar',   mins: 42, mood: 4 },
+  { when: 'May 26 · 18:45', what: 'Litany — bridge sketch',  sub: 'compose',  mins: 35, mood: 5 },
+  { when: 'May 26 · 07:30', what: 'Chopin · Nocturne E♭',    sub: 'piano',    mins: 55, mood: 4 },
+];
