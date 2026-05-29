@@ -34,6 +34,8 @@ export function Icon({ name, size = 16, color = 'currentColor' }: IconProps) {
       return (<svg {...p}><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></svg>);
     case 'staff':
       return (<svg {...p}><path d="M3 6h18M3 10h18M3 14h18M3 18h18"/></svg>);
+    case 'more':
+      return (<svg {...p}><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>);
     default:
       return null;
   }
