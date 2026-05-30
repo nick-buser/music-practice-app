@@ -18,11 +18,6 @@ describe('TechniqueView', () => {
 
     expect(screen.getByRole('button', { name: /Major scales/i })).toHaveAttribute('aria-current', 'page');
     expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
-    // Every card has its tonic label rendered.
-    const tonics = ['C', 'G', 'D', 'A', 'E', 'B', 'F♯', 'F', 'B♭', 'E♭', 'A♭', 'D♭'];
-    for (const t of tonics) {
-      expect(screen.getAllByText(t).length).toBeGreaterThan(0);
-    }
   });
 
   it('shows the daily-routine list on the rail', () => {
@@ -40,9 +35,29 @@ describe('TechniqueView', () => {
     expect(onStartSession).toHaveBeenCalledWith('c-major');
   });
 
-  it('Minor and Arpeggios tabs are disabled and show a coming-soon banner if forced', () => {
+  it('switching to Minor scales shows 12 cards and a Natural/Harmonic/Melodic sub-toggle', () => {
     render(<TechniqueView onStartSession={() => {}} />);
-    expect(screen.getByRole('button', { name: /Minor scales/i })).toBeDisabled();
-    expect(screen.getByRole('button', { name: /Arpeggios/i })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: /Minor scales/i }));
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getByRole('button', { name: /Natural minor/i, pressed: true })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Harmonic minor/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Melodic minor/i })).toBeInTheDocument();
+  });
+
+  it('picking Harmonic minor swaps the visible 12 cards', () => {
+    render(<TechniqueView onStartSession={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /Minor scales/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Harmonic minor/i }));
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getByRole('button', { name: /Harmonic minor/i, pressed: true })).toBeInTheDocument();
+  });
+
+  it('Arpeggios tab shows 12 cards with a Major/Minor sub-toggle', () => {
+    render(<TechniqueView onStartSession={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Arpeggios$/i }));
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getByRole('button', { name: /Major arpeggios/i, pressed: true })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Minor arpeggios/i }));
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
   });
 });

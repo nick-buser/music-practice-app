@@ -2116,3 +2116,33 @@ button { font-family: inherit; }
   color: var(--lumen);
   font-style: normal;
 }
+
+/* Sub-toggle for Minor variants / Arpeggio quality */
+.tech-sub-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.tech-sub-toggle .sub-chip {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  color: var(--mist);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--dur-quick) var(--ease-glide);
+}
+.tech-sub-toggle .sub-chip:hover:not(.active) {
+  color: var(--foam);
+  border-color: var(--shoal);
+}
+.tech-sub-toggle .sub-chip.active {
+  background: var(--lumen);
+  color: var(--lumen-ink);
+  border-color: var(--lumen);
+}

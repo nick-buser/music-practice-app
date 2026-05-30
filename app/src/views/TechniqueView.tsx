@@ -1,20 +1,30 @@
 import { useMemo, useState } from 'react';
 import { Topbar } from '../components/Topbar';
 import { Score } from '../verovio/Score';
-import { DAILY_ROUTINE_IDS, SCALES } from '../data/scales';
+import {
+  ARP_FAMILY_BY_QUALITY,
+  ArpeggioQuality,
+  ARPEGGIO_QUALITIES,
+  DAILY_ROUTINE_IDS,
+  MINOR_FAMILY_BY_VARIANT,
+  MINOR_VARIANTS,
+  MinorVariant,
+  SCALES,
+} from '../data/scales';
 import { relTime } from '../lib/time';
-import type { Scale, TechniqueFamily } from '../data/schemas';
+import type { Scale } from '../data/schemas';
 
 interface Props {
   onStartSession: (id: string) => void;
 }
 
-type Tab = TechniqueFamily;
+/** Top-level category — these are the visible tabs. */
+type Category = 'major' | 'minor' | 'arpeggio';
 
-const TABS: Array<{ id: Tab; label: string; ready: boolean }> = [
-  { id: 'major',     label: 'Major scales', ready: true },
-  { id: 'minor',     label: 'Minor scales', ready: false },
-  { id: 'arpeggio',  label: 'Arpeggios',    ready: false },
+const TABS: Array<{ id: Category; label: string }> = [
+  { id: 'major',    label: 'Major scales' },
+  { id: 'minor',    label: 'Minor scales' },
+  { id: 'arpeggio', label: 'Arpeggios' },
 ];
 
 const SCALE_THUMB_OPTS = {
@@ -30,10 +40,6 @@ const SCALE_THUMB_OPTS = {
   pageMarginBottom: 0,
 };
 
-/**
- * Comfort bands match the depth-strip / heatmap gradient so a glance at the
- * grid reads the same way as the rest of the app.
- */
 function comfortClass(c: number): string {
   if (c > 0.8) return 'deep';
   if (c > 0.55) return 'shallow';
@@ -42,9 +48,19 @@ function comfortClass(c: number): string {
 }
 
 export function TechniqueView({ onStartSession }: Props) {
-  const [tab, setTab] = useState<Tab>('major');
+  const [category, setCategory] = useState<Category>('major');
+  const [minorVariant, setMinorVariant] = useState<MinorVariant>('natural');
+  const [arpQuality, setArpQuality] = useState<ArpeggioQuality>('major');
 
-  const scales = useMemo(() => SCALES.filter((s) => s.family === tab), [tab]);
+  const visible = useMemo(() => {
+    if (category === 'major') return SCALES.filter((s) => s.family === 'major');
+    if (category === 'minor') {
+      const fam = MINOR_FAMILY_BY_VARIANT[minorVariant];
+      return SCALES.filter((s) => s.family === fam);
+    }
+    const fam = ARP_FAMILY_BY_QUALITY[arpQuality];
+    return SCALES.filter((s) => s.family === fam);
+  }, [category, minorVariant, arpQuality]);
 
   const routine = useMemo(() => {
     const byId = new Map(SCALES.map((s) => [s.id, s]));
@@ -52,11 +68,11 @@ export function TechniqueView({ onStartSession }: Props) {
   }, []);
 
   const stats = useMemo(() => {
-    const all = SCALES.filter((s) => s.family === 'major');
-    const avgComfort = all.reduce((a, s) => a + s.comfort, 0) / Math.max(1, all.length);
-    const fluent = all.filter((s) => s.comfort > 0.8).length;
-    const totalReps = all.reduce((a, s) => a + s.reps, 0);
-    return { avgComfort, fluent, totalReps, total: all.length };
+    const total = SCALES.length;
+    const fluent = SCALES.filter((s) => s.comfort > 0.8).length;
+    const avg = SCALES.reduce((a, s) => a + s.comfort, 0) / Math.max(1, total);
+    const reps = SCALES.reduce((a, s) => a + s.reps, 0);
+    return { total, fluent, avg, reps };
   }, []);
 
   return (
@@ -75,8 +91,8 @@ export function TechniqueView({ onStartSession }: Props) {
         </div>
         <div className="meta-col">
           <div>Fluent at target <span className="v">{stats.fluent} / {stats.total}</span></div>
-          <div>Average comfort <span className="v">{Math.round(stats.avgComfort * 100)}%</span></div>
-          <div>Reps logged <span className="v">{stats.totalReps.toLocaleString()}</span></div>
+          <div>Average comfort <span className="v">{Math.round(stats.avg * 100)}%</span></div>
+          <div>Reps logged <span className="v">{stats.reps.toLocaleString()}</span></div>
           <div>Last warmup <span className="v">today · 06:18</span></div>
         </div>
       </div>
@@ -85,82 +101,117 @@ export function TechniqueView({ onStartSession }: Props) {
         {TABS.map((t) => (
           <button
             key={t.id}
-            className={`tech-tab ${tab === t.id ? 'active' : ''}`}
-            onClick={() => t.ready && setTab(t.id)}
-            aria-current={tab === t.id ? 'page' : undefined}
-            disabled={!t.ready}
+            className={`tech-tab ${category === t.id ? 'active' : ''}`}
+            onClick={() => setCategory(t.id)}
+            aria-current={category === t.id ? 'page' : undefined}
           >
             {t.label}
-            {!t.ready && <span className="soon">soon</span>}
           </button>
         ))}
       </div>
 
-      {!TABS.find((t) => t.id === tab)?.ready ? (
-        <ComingSoon family={tab} />
-      ) : (
-        <div className="tech-layout">
-          <div>
-            <div className="tech-grid">
-              {scales.map((s) => (
-                <ScaleCard key={s.id} scale={s} onStartSession={onStartSession} />
+      {category === 'minor' && (
+        <SubToggle
+          options={MINOR_VARIANTS}
+          value={minorVariant}
+          onChange={setMinorVariant}
+          labelFor={(v) => `${v[0].toUpperCase()}${v.slice(1)} minor`}
+        />
+      )}
+      {category === 'arpeggio' && (
+        <SubToggle
+          options={ARPEGGIO_QUALITIES}
+          value={arpQuality}
+          onChange={setArpQuality}
+          labelFor={(q) => `${q[0].toUpperCase()}${q.slice(1)} arpeggios`}
+        />
+      )}
+
+      <div className="tech-layout">
+        <div>
+          <div className="tech-grid">
+            {visible.map((s) => (
+              <ScaleCard key={s.id} scale={s} onStartSession={onStartSession} />
+            ))}
+          </div>
+        </div>
+
+        <aside className="tech-rail">
+          <div className="today-panel">
+            <div className="head">
+              <span className="l">— today's routine</span>
+              <span className="date">{routine.length} items · ~{Math.round(routine.length * 2.5)} min</span>
+            </div>
+            <div className="routine-list">
+              {routine.map((s, i) => (
+                <div key={s.id} className="routine-item" onClick={() => onStartSession(s.id)}>
+                  <div className="ord">{String(i + 1).padStart(2, '0')}</div>
+                  <div className="what">
+                    <div className="t">{s.name}</div>
+                    <div className="s">
+                      target ♩ = {s.bpmTarget} · working ♩ = {s.bpmCurrent}
+                    </div>
+                  </div>
+                  <span className={`dot ${comfortClass(s.comfort)}`} />
+                </div>
               ))}
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
+              <button className="btn btn-primary" onClick={() => onStartSession(routine[0].id)}>
+                Begin warmup <span className="arrow">→</span>
+              </button>
+              <button className="btn btn-ghost">Shuffle</button>
             </div>
           </div>
 
-          <aside className="tech-rail">
-            <div className="today-panel">
-              <div className="head">
-                <span className="l">— today's routine</span>
-                <span className="date">5 scales · ~12 min</span>
-              </div>
-              <div className="routine-list">
-                {routine.map((s, i) => (
-                  <div key={s.id} className="routine-item" onClick={() => onStartSession(s.id)}>
-                    <div className="ord">{String(i + 1).padStart(2, '0')}</div>
-                    <div className="what">
-                      <div className="t">{s.name}</div>
-                      <div className="s">
-                        target ♩ = {s.bpmTarget} · working ♩ = {s.bpmCurrent}
-                      </div>
-                    </div>
-                    <span className={`dot ${comfortClass(s.comfort)}`} />
-                  </div>
-                ))}
-              </div>
-              <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
-                <button className="btn btn-primary" onClick={() => onStartSession(routine[0].id)}>
-                  Begin warmup <span className="arrow">→</span>
-                </button>
-                <button className="btn btn-ghost">Shuffle</button>
-              </div>
+          <div className="card">
+            <div className="head">
+              <h3>Comfort across the circle</h3>
+              <span className="eyebrow">— mastery</span>
             </div>
+            <div className="depth-strip">
+              {visible.map((s) => (
+                <div key={s.id} className="row">
+                  <div className="name">{s.tonic}</div>
+                  <div className="bar">
+                    <span className="pin" style={{ left: `${Math.round(s.comfort * 100)}%` }} />
+                  </div>
+                  <div className="num">{Math.round(s.comfort * 100)}%</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', color: 'var(--shoal)', fontSize: 13, marginTop: 14, lineHeight: 1.5 }}>
+              The sharps after E and the flats past E♭ are where the line
+              <span className="lumen"> goes deep</span>. Slow them down before
+              the metronome edges up.
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
 
-            <div className="card">
-              <div className="head">
-                <h3>Comfort across the circle</h3>
-                <span className="eyebrow">— mastery</span>
-              </div>
-              <div className="depth-strip">
-                {scales.map((s) => (
-                  <div key={s.id} className="row">
-                    <div className="name">{s.tonic}</div>
-                    <div className="bar">
-                      <span className="pin" style={{ left: `${Math.round(s.comfort * 100)}%` }} />
-                    </div>
-                    <div className="num">{Math.round(s.comfort * 100)}%</div>
-                  </div>
-                ))}
-              </div>
-              <div style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', color: 'var(--shoal)', fontSize: 13, marginTop: 14, lineHeight: 1.5 }}>
-                The sharps after E and the flats past E♭ are where the line
-                <span className="lumen"> goes deep</span>. Slow them down before
-                the metronome edges up.
-              </div>
-            </div>
-          </aside>
-        </div>
-      )}
+interface SubToggleProps<T extends string> {
+  options: readonly T[];
+  value: T;
+  onChange: (v: T) => void;
+  labelFor: (v: T) => string;
+}
+
+function SubToggle<T extends string>({ options, value, onChange, labelFor }: SubToggleProps<T>) {
+  return (
+    <div className="tech-sub-toggle">
+      {options.map((opt) => (
+        <button
+          key={opt}
+          className={`sub-chip ${opt === value ? 'active' : ''}`}
+          onClick={() => onChange(opt)}
+          aria-pressed={opt === value}
+        >
+          {labelFor(opt)}
+        </button>
+      ))}
     </div>
   );
 }
@@ -173,19 +224,24 @@ interface CardProps {
 function ScaleCard({ scale, onStartSession }: CardProps) {
   const last = scale.lastTouched ? relTime(scale.lastTouched) : 'never';
   const atTarget = scale.bpmCurrent >= scale.bpmTarget;
+  const subtitle = subtitleFor(scale);
   return (
     <article className="scale-card" data-comfort={comfortClass(scale.comfort)}>
       <header>
         <div className="tonic">{scale.tonic}</div>
         <div className="name">
           <div className="n">{scale.name}</div>
-          <div className="s">major scale · one octave</div>
+          <div className="s">{subtitle}</div>
         </div>
         <span className={`dot ${comfortClass(scale.comfort)}`} />
       </header>
 
       <div className="engraving">
-        <Score data={scale.abc} options={SCALE_THUMB_OPTS} ariaLabel={`${scale.name} scale, one octave ascending`} />
+        <Score
+          data={scale.abc}
+          options={SCALE_THUMB_OPTS}
+          ariaLabel={`${scale.name}, one octave`}
+        />
       </div>
 
       <div className="meta">
@@ -209,15 +265,19 @@ function ScaleCard({ scale, onStartSession }: CardProps) {
   );
 }
 
-function ComingSoon({ family }: { family: TechniqueFamily }) {
-  const label = family === 'minor' ? 'Minor scales' : 'Arpeggios';
-  return (
-    <div className="tech-soon">
-      <div className="label">— {label.toLowerCase()} · coming soon</div>
-      <div>
-        Next pass: the twelve {family === 'arpeggio' ? 'major and minor arpeggios' : 'natural / harmonic / melodic minors'},
-        engraved in the same way, with shared comfort tracking.
-      </div>
-    </div>
-  );
+function subtitleFor(scale: Scale): string {
+  switch (scale.family) {
+    case 'major':
+      return 'major scale · one octave';
+    case 'natural-minor':
+      return 'natural minor · one octave';
+    case 'harmonic-minor':
+      return 'harmonic minor · raised 7th';
+    case 'melodic-minor':
+      return 'melodic ascending · raised 6 + 7';
+    case 'major-arpeggio':
+      return 'major arpeggio · 1 · 3 · 5 · 8';
+    case 'minor-arpeggio':
+      return 'minor arpeggio · 1 · ♭3 · 5 · 8';
+  }
 }
