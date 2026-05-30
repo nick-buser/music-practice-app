@@ -34,6 +34,16 @@ export function Icon({ name, size = 16, color = 'currentColor' }: IconProps) {
       return (<svg {...p}><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></svg>);
     case 'staff':
       return (<svg {...p}><path d="M3 6h18M3 10h18M3 14h18M3 18h18"/></svg>);
+    case 'scales':
+      // A stepwise rising glyph — eight notes ascending across the box.
+      return (
+        <svg {...p}>
+          <path d="M3 20h18" />
+          <path d="M5 18l2-2 2-1 2-2 2-1 2-2 2-1 2-2 2-1" />
+          <circle cx="5" cy="18" r="0.8" fill={color} stroke="none" />
+          <circle cx="19" cy="6" r="0.8" fill={color} stroke="none" />
+        </svg>
+      );
     case 'more':
       return (<svg {...p}><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>);
     default:

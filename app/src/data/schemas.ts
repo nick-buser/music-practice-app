@@ -120,3 +120,28 @@ export const Sketch = z.object({
   harmonyAbc: z.string().optional(),
 });
 export type Sketch = z.infer<typeof Sketch>;
+
+export const TechniqueFamily = z.enum(['major', 'minor', 'arpeggio']);
+export type TechniqueFamily = z.infer<typeof TechniqueFamily>;
+
+export const Scale = z.object({
+  id: z.string(),
+  /** Display name, e.g. "C major", "F♯ major". */
+  name: z.string(),
+  /** Tonic letter (with accidental), e.g. "C", "F♯". */
+  tonic: z.string(),
+  family: TechniqueFamily,
+  /** ABC engraving of one octave ascending. */
+  abc: z.string(),
+  /** 0–1, mirrors piece-depth color bands. */
+  comfort: z.number().min(0).max(1),
+  /** ISO date of the last time this was practised. Null if never. */
+  lastTouched: z.string().nullable(),
+  /** The student's "aim for" tempo on this scale, in bpm of the unit note. */
+  bpmTarget: z.number().int().positive(),
+  /** Where they're working today. */
+  bpmCurrent: z.number().int().positive(),
+  /** Practice reps logged across all sessions. */
+  reps: z.number().int().nonnegative(),
+});
+export type Scale = z.infer<typeof Scale>;
