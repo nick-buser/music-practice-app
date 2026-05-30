@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { Drill, type TechniqueFamily } from './schemas';
-import { DAILY_ROUTINE_IDS, DRILLS, DRILL_BY_ID } from './drills';
+import {
+  CHORD_CATEGORIES,
+  CHORD_TYPE_META,
+  CHORD_TYPES,
+  DAILY_ROUTINE_IDS,
+  DRILLS,
+  DRILL_BY_ID,
+} from './drills';
 
 describe('DRILLS', () => {
   it('has 12 major scales', () => {
@@ -18,13 +25,19 @@ describe('DRILLS', () => {
     expect(DRILLS.filter((d) => d.family === 'minor-arpeggio')).toHaveLength(12);
   });
 
-  it('has 24 chords (12 major triads + 12 minor triads)', () => {
+  it('has 24 triad chords (12 major + 12 minor, root position)', () => {
     expect(DRILLS.filter((d) => d.family === 'major-chord')).toHaveLength(12);
     expect(DRILLS.filter((d) => d.family === 'minor-chord')).toHaveLength(12);
   });
 
-  it('totals 96 entries', () => {
-    expect(DRILLS).toHaveLength(96);
+  it('has 36 seventh chords (12 maj7 + 12 dom7 + 12 m7)', () => {
+    expect(DRILLS.filter((d) => d.family === 'maj7-chord')).toHaveLength(12);
+    expect(DRILLS.filter((d) => d.family === 'dom7-chord')).toHaveLength(12);
+    expect(DRILLS.filter((d) => d.family === 'min7-chord')).toHaveLength(12);
+  });
+
+  it('totals 132 entries', () => {
+    expect(DRILLS).toHaveLength(132);
   });
 
   it('uses distinct ids across the set', () => {
@@ -70,12 +83,34 @@ describe('DRILLS', () => {
     }
   });
 
-  it('chord ABCs render as a bracketed block ([...]) rather than a melodic line', () => {
-    const chords = DRILLS.filter((d) => d.family === 'major-chord' || d.family === 'minor-chord');
+  it('all chord ABCs render as a bracketed block ([...]) rather than a melodic line', () => {
+    const chordFams: TechniqueFamily[] = [
+      'major-chord', 'minor-chord', 'maj7-chord', 'dom7-chord', 'min7-chord',
+    ];
+    const chords = DRILLS.filter((d) => chordFams.includes(d.family));
     for (const d of chords) {
       const notes = d.abc.split('\n').pop() ?? '';
       expect(notes.trim()).toMatch(/^\[[A-Ga-g,'^_=]+\]\d* \|$/);
     }
+  });
+
+  it('seventh chords contain four chord tones in the bracket', () => {
+    const seventhFams: TechniqueFamily[] = ['maj7-chord', 'dom7-chord', 'min7-chord'];
+    const sevenths = DRILLS.filter((d) => seventhFams.includes(d.family));
+    expect(sevenths).toHaveLength(36);
+    for (const d of sevenths) {
+      const notes = d.abc.split('\n').pop() ?? '';
+      // Count letter notes inside the bracket — ignore accidental marks like ^ _ =
+      const inside = notes.match(/\[([^\]]+)\]/)?.[1] ?? '';
+      const letters = inside.replace(/[\^_=,'0-9 ]/g, '');
+      expect(letters.length).toBe(4);
+    }
+  });
+
+  it('seventh-chord names follow jazz convention (Maj7 / 7 / m7)', () => {
+    expect(DRILLS.find((d) => d.id === 'c-maj7-chord')?.name).toBe('Cmaj7');
+    expect(DRILLS.find((d) => d.id === 'c-dom7-chord')?.name).toBe('C7');
+    expect(DRILLS.find((d) => d.id === 'a-min7-chord')?.name).toBe('Am7');
   });
 
   it('keeps comfort, bpm, and reps within plausible bounds', () => {
@@ -91,6 +126,30 @@ describe('DRILLS', () => {
 
   it('DRILL_BY_ID maps every id back to its drill', () => {
     for (const d of DRILLS) expect(DRILL_BY_ID.get(d.id)?.id).toBe(d.id);
+  });
+});
+
+describe('chord-type taxonomy', () => {
+  it('every chord type maps to a real TechniqueFamily', () => {
+    const familiesPresent = new Set(DRILLS.map((d) => d.family));
+    for (const t of CHORD_TYPES) {
+      const meta = CHORD_TYPE_META[t];
+      expect(familiesPresent.has(meta.family)).toBe(true);
+    }
+  });
+
+  it('every chord type sits in a known category', () => {
+    const catIds = new Set(CHORD_CATEGORIES.map((c) => c.id));
+    for (const t of CHORD_TYPES) {
+      expect(catIds.has(CHORD_TYPE_META[t].category)).toBe(true);
+    }
+  });
+
+  it('triads category contains Major + Minor; sevenths contains Maj7 + Dom7 + Min7', () => {
+    const triads = CHORD_TYPES.filter((t) => CHORD_TYPE_META[t].category === 'triads');
+    const sevenths = CHORD_TYPES.filter((t) => CHORD_TYPE_META[t].category === 'sevenths');
+    expect(triads).toEqual(['major', 'minor']);
+    expect(sevenths).toEqual(['maj7', 'dom7', 'min7']);
   });
 });
 

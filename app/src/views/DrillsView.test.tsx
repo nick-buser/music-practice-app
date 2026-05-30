@@ -38,21 +38,48 @@ describe('DrillsView', () => {
     expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
   });
 
-  it('Chords tab shows 12 major chord cards by default', () => {
+  it('Chords tab shows 12 major triad cards by default', () => {
     render(<DrillsView onStartSession={() => {}} />);
     fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
-    expect(screen.getByRole('button', { name: /Major chords/i, pressed: true })).toBeInTheDocument();
+    // The Major pill inside the Triads row is pressed.
+    expect(screen.getByRole('button', { name: /^Major$/i, pressed: true })).toBeInTheDocument();
     expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
-    // Card subtitle reads as a chord (not a scale).
     expect(screen.getAllByText(/major triad/i).length).toBe(12);
   });
 
-  it('Chords → Minor chords swaps to 12 minor-triad cards', () => {
+  it('Chords → Minor swaps to 12 minor-triad cards', () => {
     render(<DrillsView onStartSession={() => {}} />);
     fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
-    fireEvent.click(screen.getByRole('button', { name: /Minor chords/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^Minor$/i }));
+    expect(screen.getByRole('button', { name: /^Minor$/i, pressed: true })).toBeInTheDocument();
     expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
     expect(screen.getAllByText(/minor triad/i).length).toBe(12);
+  });
+
+  it('Chords → Maj7 swaps to 12 major-7 chord cards', () => {
+    render(<DrillsView onStartSession={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^Maj7$/i }));
+    expect(screen.getByRole('button', { name: /^Maj7$/i, pressed: true })).toBeInTheDocument();
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getAllByText(/major 7/i).length).toBeGreaterThanOrEqual(12);
+  });
+
+  it('Chords → Dom7 swaps to 12 dominant-7 chord cards', () => {
+    render(<DrillsView onStartSession={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^Dom7$/i }));
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getAllByText(/dominant 7/i).length).toBeGreaterThanOrEqual(12);
+  });
+
+  it('Chord type picker shows a category label per row (Triads / 7ths)', () => {
+    const { container } = render(<DrillsView onStartSession={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
+    const labels = Array.from(container.querySelectorAll('.chord-type-row .cat-label')).map(
+      (e) => e.textContent,
+    );
+    expect(labels).toEqual(['Triads', '7ths']);
   });
 
   it('shows the daily-routine list on the rail', () => {

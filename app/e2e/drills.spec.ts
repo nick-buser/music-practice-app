@@ -46,22 +46,38 @@ test.describe('Drills view', () => {
     await expect(page.locator('.scale-card')).toHaveCount(12);
   });
 
-  test('Chords tab shows 12 major triads, sub-toggle swaps to minor triads', async ({ page }) => {
+  test('Chords tab opens to 12 major triads with Triads / 7ths category rows', async ({ page }) => {
     await page.goto('/');
     await page.locator('.side .nav a', { hasText: 'Drills' }).click();
     await page.getByRole('button', { name: /^Chords$/i }).click();
     await page.waitForSelector('.scale-card .engraving svg', { timeout: 30_000 });
 
     await expect(page.locator('.scale-card')).toHaveCount(12);
-    await expect(page.getByRole('button', { name: /Major chords/i })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByRole('button', { name: /^Major$/i })).toHaveAttribute('aria-pressed', 'true');
 
-    // Card subtitle calls it a triad block, not a scale.
+    const catLabels = await page.locator('.chord-type-row .cat-label').allTextContents();
+    expect(catLabels).toEqual(['Triads', '7ths']);
+
     await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/major triad/i);
+  });
 
-    await page.getByRole('button', { name: /Minor chords/i }).click();
-    await expect(page.getByRole('button', { name: /Minor chords/i })).toHaveAttribute('aria-pressed', 'true');
+  test('Chords sub-toggle: Maj7 / Dom7 / Min7 each swap to 12 cards', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+
+    await page.getByRole('button', { name: /^Maj7$/i }).click();
+    await expect(page.getByRole('button', { name: /^Maj7$/i })).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('.scale-card')).toHaveCount(12);
-    await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/minor triad/i);
+    await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/major 7/i);
+
+    await page.getByRole('button', { name: /^Dom7$/i }).click();
+    await expect(page.locator('.scale-card')).toHaveCount(12);
+    await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/dominant 7/i);
+
+    await page.getByRole('button', { name: /^Min7$/i }).click();
+    await expect(page.locator('.scale-card')).toHaveCount(12);
+    await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/minor 7/i);
   });
 });
 
@@ -93,6 +109,20 @@ test.describe('Drill-aware session', () => {
     await expect(page.locator('.session-piece h2')).toContainText('C major chord');
     await expect(page.locator('.session-piece h2 em')).toContainText('major chord');
     await expect(page.getByRole('button', { name: /End warmup/i })).toBeVisible();
+  });
+
+  test('Run it on a Cmaj7 card opens a session with the 7th-chord byline', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+    await page.getByRole('button', { name: /^Maj7$/i }).click();
+    await page.waitForSelector('.scale-card');
+
+    await page.locator('.scale-card').first().getByRole('button', { name: /Run it/i }).click();
+    await page.waitForSelector('.session-score svg', { timeout: 30_000 });
+
+    await expect(page.locator('.session-piece h2')).toContainText('Cmaj7');
+    await expect(page.locator('.session-piece h2 em')).toContainText('major 7 chord');
   });
 
   test('End warmup returns to the Drills view, not the Library', async ({ page }) => {
