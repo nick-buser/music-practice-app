@@ -128,8 +128,15 @@ export const TechniqueFamily = z.enum([
   'melodic-minor',
   'major-arpeggio',
   'minor-arpeggio',
+  // Triad block chords
   'major-chord',
   'minor-chord',
+  // 7th-chord blocks (root position).
+  // Future PRs will add 9ths / 11ths / 13ths and the altered family
+  // (♭5 / ♯5 / ♭9 / ♯9 / ♯11 / ♭13 …) on the same pattern.
+  'maj7-chord',
+  'dom7-chord',
+  'min7-chord',
 ]);
 export type TechniqueFamily = z.infer<typeof TechniqueFamily>;
 

@@ -240,7 +240,92 @@ const CHORDS: Spec[] = [
   })),
 ];
 
-export const DRILLS: Drill[] = [...MAJORS, ...MINORS, ...ARPEGGIOS, ...CHORDS].map(build);
+/* ─── 36 seventh chords (12 maj7 + 12 dom7 + 12 m7) ──────────────
+ * Each row is [idBase, tonic, K:sig, abc-notes]. The key signature is chosen
+ * so the four chord tones (root / 3 / 5 / 7) come out with no explicit
+ * accidentals — Verovio engraves the key sig and lets the letters be:
+ *
+ *   maj7  → key sig is the tonic major (e.g. Cmaj7 → K:C)
+ *   dom7  → key sig is the resolution-key major / flat-7's home
+ *           (e.g. C7 → K:F gives Bb, the b7 of C)
+ *   m7    → key sig is the parallel minor (e.g. Cm7 → K:Cm gives Eb + Bb)
+ */
+
+type ChordRow7 = [id: string, tonic: string, key: string, notes: string];
+
+const MAJ7_KEYS: ChordRow7[] = [
+  ['c',  'C',  'C',  '[CEGB]4 |'],
+  ['g',  'G',  'G',  '[GBdf]4 |'],
+  ['d',  'D',  'D',  '[DFAc]4 |'],
+  ['a',  'A',  'A',  '[ACEg]4 |'],
+  ['e',  'E',  'E',  '[EGBd]4 |'],
+  ['b',  'B',  'B',  '[Bdfa]4 |'],
+  ['fs', 'F♯', 'F#', '[FAce]4 |'],
+  ['f',  'F',  'F',  '[FACe]4 |'],
+  ['bb', 'B♭', 'Bb', '[Bdfa]4 |'],
+  ['eb', 'E♭', 'Eb', '[EGBd]4 |'],
+  ['ab', 'A♭', 'Ab', '[ACEg]4 |'],
+  ['db', 'D♭', 'Db', '[DFAc]4 |'],
+];
+
+const DOM7_KEYS: ChordRow7[] = [
+  ['c',  'C',  'F',  '[CEGB]4 |'],   // K:F → Bb
+  ['g',  'G',  'C',  '[GBdf]4 |'],   // K:C → F natural
+  ['d',  'D',  'G',  '[DFAc]4 |'],   // K:G → F#, C natural
+  ['a',  'A',  'D',  '[ACEg]4 |'],   // K:D → C#, G natural
+  ['e',  'E',  'A',  '[EGBd]4 |'],   // K:A → G#, D natural
+  ['b',  'B',  'E',  '[Bdfa]4 |'],   // K:E → D#, A natural
+  ['fs', 'F♯', 'B',  '[FAce]4 |'],   // K:B → A#, E natural
+  ['f',  'F',  'Bb', '[FACe]4 |'],   // K:Bb → Eb
+  ['bb', 'B♭', 'Eb', '[Bdfa]4 |'],   // K:Eb → Bb, Ab
+  ['eb', 'E♭', 'Ab', '[EGBd]4 |'],   // K:Ab → Eb, Db
+  ['ab', 'A♭', 'Db', '[ACEg]4 |'],   // K:Db → Ab, Gb
+  ['db', 'D♭', 'Gb', '[DFAc]4 |'],   // K:Gb (6 flats) → Db, Cb
+];
+
+const MIN7_KEYS: ChordRow7[] = [
+  ['a',  'A',  'Am',  '[ACEg]4 |'],
+  ['e',  'E',  'Em',  '[EGBd]4 |'],
+  ['b',  'B',  'Bm',  '[Bdfa]4 |'],
+  ['fs', 'F♯', 'F#m', '[FAce]4 |'],
+  ['cs', 'C♯', 'C#m', '[CEGb]4 |'],
+  ['d',  'D',  'Dm',  '[DFAc]4 |'],
+  ['g',  'G',  'Gm',  '[GBdf]4 |'],
+  ['c',  'C',  'Cm',  '[CEGB]4 |'],
+  ['f',  'F',  'Fm',  '[FACe]4 |'],
+  ['bb', 'B♭', 'Bbm', '[Bdfa]4 |'],
+  ['eb', 'E♭', 'Ebm', '[EGBd]4 |'],
+  ['ab', 'A♭', 'Abm', '[ACEg]4 |'],
+];
+
+const SEVENTHS: Spec[] = [
+  ...MAJ7_KEYS.map(([idBase, tonic, key, notes]) => ({
+    id: `${idBase}-maj7-chord`,
+    name: `${tonic}maj7`,
+    tonic,
+    family: 'maj7-chord' as TechniqueFamily,
+    abc: abc(`${tonic}maj7 chord`, key, notes),
+    difficulty: (KEY_DIFF[key] ?? 0.5) + 0.05,
+  })),
+  ...DOM7_KEYS.map(([idBase, tonic, key, notes]) => ({
+    id: `${idBase}-dom7-chord`,
+    name: `${tonic}7`,
+    tonic,
+    family: 'dom7-chord' as TechniqueFamily,
+    abc: abc(`${tonic}7 chord`, key, notes),
+    difficulty: (KEY_DIFF[key] ?? 0.5) + 0.05,
+  })),
+  ...MIN7_KEYS.map(([idBase, tonic, key, notes]) => ({
+    id: `${idBase}-min7-chord`,
+    name: `${tonic}m7`,
+    tonic,
+    family: 'min7-chord' as TechniqueFamily,
+    abc: abc(`${tonic}m7 chord`, key, notes),
+    difficulty: (KEY_DIFF[key] ?? 0.5) + 0.05,
+  })),
+];
+
+export const DRILLS: Drill[] = [...MAJORS, ...MINORS, ...ARPEGGIOS, ...CHORDS, ...SEVENTHS].map(build);
 
 /** Daily routine — the user's "warmup order". A mix across families. */
 export const DAILY_ROUTINE_IDS: string[] = [
@@ -282,6 +367,53 @@ export const CHORD_FAMILY_BY_QUALITY: Record<QualitySubTab, TechniqueFamily> = {
   major: 'major-chord',
   minor: 'minor-chord',
 };
+
+/* ─── Chord type taxonomy (grows as we add 9ths / 11ths / 13ths / altered) ─
+ *
+ * Each "chord type" is one selectable pill in the Chords sub-toggle.
+ * Types are grouped into "categories" rendered as their own labelled row, so
+ * the next layer of extensions slots in cleanly:
+ *
+ *   triads  → Major · Minor
+ *   7ths    → Maj7  · Dom7  · Min7
+ *   9ths    → (next)
+ *   11ths   → (next)
+ *   13ths   → (next)
+ *   altered → (next)
+ */
+
+export const CHORD_TYPES = [
+  'major',
+  'minor',
+  'maj7',
+  'dom7',
+  'min7',
+] as const;
+export type ChordType = (typeof CHORD_TYPES)[number];
+
+export interface ChordTypeMeta {
+  type: ChordType;
+  /** Pill label shown in the sub-toggle. */
+  label: string;
+  /** Group the pill is rendered in. */
+  category: 'triads' | 'sevenths';
+  /** The TechniqueFamily this type maps to. */
+  family: TechniqueFamily;
+}
+
+export const CHORD_TYPE_META: Record<ChordType, ChordTypeMeta> = {
+  major: { type: 'major', label: 'Major', category: 'triads',   family: 'major-chord' },
+  minor: { type: 'minor', label: 'Minor', category: 'triads',   family: 'minor-chord' },
+  maj7:  { type: 'maj7',  label: 'Maj7',  category: 'sevenths', family: 'maj7-chord' },
+  dom7:  { type: 'dom7',  label: 'Dom7',  category: 'sevenths', family: 'dom7-chord' },
+  min7:  { type: 'min7',  label: 'Min7',  category: 'sevenths', family: 'min7-chord' },
+};
+
+export const CHORD_CATEGORIES = [
+  { id: 'triads',   label: 'Triads' },
+  { id: 'sevenths', label: '7ths' },
+] as const;
+export type ChordCategory = (typeof CHORD_CATEGORIES)[number]['id'];
 
 /* ─── Back-compat re-exports (renamed in this PR; kept for any external refs) ─ */
 export const SCALES = DRILLS;

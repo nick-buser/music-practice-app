@@ -3,7 +3,10 @@ import { Topbar } from '../components/Topbar';
 import { Score } from '../verovio/Score';
 import {
   ARP_FAMILY_BY_QUALITY,
-  CHORD_FAMILY_BY_QUALITY,
+  CHORD_CATEGORIES,
+  CHORD_TYPE_META,
+  CHORD_TYPES,
+  ChordType,
   DAILY_ROUTINE_IDS,
   DRILLS,
   QualitySubTab,
@@ -64,13 +67,13 @@ export function DrillsView({ onStartSession }: Props) {
   const [topTab, setTopTab] = useState<TopTab>('scales');
   const [scaleSub, setScaleSub] = useState<ScaleSubTab>('major');
   const [arpSub, setArpSub] = useState<QualitySubTab>('major');
-  const [chordSub, setChordSub] = useState<QualitySubTab>('major');
+  const [chordType, setChordType] = useState<ChordType>('major');
 
   const activeFamily: TechniqueFamily = useMemo(() => {
     if (topTab === 'scales') return SCALE_FAMILY_BY_SUBTAB[scaleSub];
     if (topTab === 'arpeggios') return ARP_FAMILY_BY_QUALITY[arpSub];
-    return CHORD_FAMILY_BY_QUALITY[chordSub];
-  }, [topTab, scaleSub, arpSub, chordSub]);
+    return CHORD_TYPE_META[chordType].family;
+  }, [topTab, scaleSub, arpSub, chordType]);
 
   const visible = useMemo(
     () => DRILLS.filter((d) => d.family === activeFamily),
@@ -142,12 +145,7 @@ export function DrillsView({ onStartSession }: Props) {
         />
       )}
       {topTab === 'chords' && (
-        <SubToggle
-          options={QUALITY_SUBTABS}
-          value={chordSub}
-          onChange={setChordSub}
-          labelFor={(v) => `${QUALITY_LABEL[v]} chords`}
-        />
+        <ChordTypePicker value={chordType} onChange={setChordType} />
       )}
 
       <div className="tech-layout">
@@ -239,6 +237,45 @@ function SubToggle<T extends string>({ options, value, onChange, labelFor }: Sub
   );
 }
 
+interface ChordTypePickerProps {
+  value: ChordType;
+  onChange: (t: ChordType) => void;
+}
+
+/**
+ * Two-level layout for the Chords sub-toggle: each category (Triads / 7ths)
+ * is its own labelled row of pills, so new categories (9ths / 11ths / 13ths /
+ * altered) drop in by extending CHORD_CATEGORIES + CHORD_TYPE_META without
+ * touching the rendering.
+ */
+function ChordTypePicker({ value, onChange }: ChordTypePickerProps) {
+  return (
+    <div className="chord-type-picker">
+      {CHORD_CATEGORIES.map((cat) => {
+        const types = CHORD_TYPES.filter((t) => CHORD_TYPE_META[t].category === cat.id);
+        if (types.length === 0) return null;
+        return (
+          <div key={cat.id} className="chord-type-row">
+            <span className="cat-label">{cat.label}</span>
+            <div className="chord-pills">
+              {types.map((t) => (
+                <button
+                  key={t}
+                  className={`sub-chip ${t === value ? 'active' : ''}`}
+                  onClick={() => onChange(t)}
+                  aria-pressed={t === value}
+                >
+                  {CHORD_TYPE_META[t].label}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 interface CardProps {
   drill: Drill;
   onStartSession: (id: string) => void;
@@ -306,5 +343,11 @@ function subtitleFor(drill: Drill): string {
       return 'major triad · block · root position';
     case 'minor-chord':
       return 'minor triad · block · root position';
+    case 'maj7-chord':
+      return 'major 7 · block · 1 · 3 · 5 · 7';
+    case 'dom7-chord':
+      return 'dominant 7 · block · 1 · 3 · 5 · ♭7';
+    case 'min7-chord':
+      return 'minor 7 · block · 1 · ♭3 · 5 · ♭7';
   }
 }

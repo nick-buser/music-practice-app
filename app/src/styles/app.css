@@ -2146,3 +2146,31 @@ button { font-family: inherit; }
   color: var(--lumen-ink);
   border-color: var(--lumen);
 }
+
+/* Chord-type picker (Chords tab) — category-labelled rows of pills.
+ * Each row is one category (Triads / 7ths / 9ths / …); pills inside the row
+ * share the styling of the .sub-chip from the existing sub-toggle. */
+.chord-type-picker {
+  display: flex; flex-direction: column;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+.chord-type-row {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  align-items: center;
+  gap: 18px;
+}
+.chord-type-row .cat-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--shoal);
+  text-align: right;
+}
+.chord-type-row .chord-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
