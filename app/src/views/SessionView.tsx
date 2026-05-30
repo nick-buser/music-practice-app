@@ -24,6 +24,9 @@ const SESSION_SCORE_OPTS = {
   pageMarginRight: 50,
   pageMarginTop: 30,
   pageMarginBottom: 20,
+  // Pieces are engraved end-to-end for the piece view's heatmap, which would
+  // pile up too many systems in the session stage. Loop just the opening here.
+  measureRange: '1-8',
 };
 
 const GOAL_MINS = 35;
