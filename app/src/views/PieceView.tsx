@@ -5,6 +5,7 @@ import { Score } from '../verovio/Score';
 import { findMeasureNumber, paintHeatmap, paintSelection, type HeatSection } from '../verovio/heatmap';
 import { INSTRUMENTS, PIECES } from '../data/sounddata';
 import { ABC_BY_PIECE } from '../data/scores';
+import { emphasize } from '../lib/text';
 import type { Piece, Section } from '../data/schemas';
 
 interface Props {
@@ -254,7 +255,7 @@ export function PieceView({ pieceId, onBack, onStartSession }: Props) {
                   <div
                     className="body"
                     dangerouslySetInnerHTML={{
-                      __html: escapeHtml(n.body).replace(/\*(.+?)\*/g, '<em>$1</em>'),
+                      __html: emphasize(n.body),
                     }}
                   />
                 </div>
@@ -264,15 +265,6 @@ export function PieceView({ pieceId, onBack, onStartSession }: Props) {
         </aside>
       </div>
     </div>
-  );
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) =>
-    c === '&' ? '&amp;' :
-    c === '<' ? '&lt;' :
-    c === '>' ? '&gt;' :
-    c === '"' ? '&quot;' : '&#39;',
   );
 }
 

@@ -18,14 +18,14 @@ export interface HeatSection {
   active?: boolean;
 }
 
-function heatColor(heat: number): string {
+export function heatColor(heat: number): string {
   // Mirror the depth-strip gradient: red → amber → mint.
   if (heat > 0.65) return 'var(--lumen)';
   if (heat > 0.32) return 'var(--krill)';
   return 'var(--coral)';
 }
 
-function parseRange(range: string): [number, number] | null {
+export function parseRange(range: string): [number, number] | null {
   // Accepts "mm. 1–8", "mm. 1-8", "mm. 5", "1–8".
   const m = range.match(/(\d+)\s*[–-]\s*(\d+)/);
   if (m) return [Number(m[1]), Number(m[2])];

@@ -5,6 +5,7 @@ import { SessionScore } from '../verovio/SessionScore';
 import { useMetronome } from '../verovio/useMetronome';
 import { PIECES } from '../data/sounddata';
 import { ABC_BY_PIECE } from '../data/scores';
+import { beatsPerBar } from '../lib/time';
 import bioluminescence from '../assets/bioluminescence.svg';
 
 interface Props {
@@ -31,13 +32,6 @@ const SESSION_SCORE_OPTS = {
 
 const GOAL_MINS = 35;
 const LOG_TAGS = ['Deep work', 'Slow drill', 'Run-through', 'Sight-read', 'Memorize', 'Recording'];
-
-/** Pulses per bar — compound meters (x/8 divisible by 3) beat in dotted groupings. */
-function beatsPerBar(meter: string): number {
-  const [num, den] = meter.split('/').map(Number);
-  if (den === 8 && num % 3 === 0) return num / 3;
-  return num || 4;
-}
 
 export function SessionView({ pieceId, onEnd, onOpenPiece }: Props) {
   const piece = PIECES.find((p) => p.id === pieceId) ?? PIECES[0];

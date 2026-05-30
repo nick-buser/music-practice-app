@@ -9,6 +9,7 @@ import {
   VOICE_MEMOS,
 } from '../data/sketches';
 import type { Sketch } from '../data/schemas';
+import { emphasize } from '../lib/text';
 
 type Tab = 'lyric' | 'harmony' | 'plan' | 'audio';
 
@@ -24,14 +25,6 @@ const HARMONY_OPTS = {
   pageMarginTop: 20,
   pageMarginBottom: 10,
 };
-
-/** Render `*emphasis*` as lumen italics; escape the rest. */
-function emphasize(text: string): string {
-  const esc = text.replace(/[&<>"']/g, (c) =>
-    c === '&' ? '&amp;' : c === '<' ? '&lt;' : c === '>' ? '&gt;' : c === '"' ? '&quot;' : '&#39;',
-  );
-  return esc.replace(/\*(.+?)\*/g, '<em>$1</em>');
-}
 
 export function SketchbookView() {
   const [activeId, setActiveId] = useState(SKETCHES[0].id);
