@@ -349,5 +349,11 @@ function subtitleFor(drill: Drill): string {
       return 'dominant 7 · block · 1 · 3 · 5 · ♭7';
     case 'min7-chord':
       return 'minor 7 · block · 1 · ♭3 · 5 · ♭7';
+    case 'maj9-chord':
+      return 'major 9 · block · 1 · 3 · 5 · 7 · 9';
+    case 'dom9-chord':
+      return 'dominant 9 · block · 1 · 3 · 5 · ♭7 · 9';
+    case 'min9-chord':
+      return 'minor 9 · block · 1 · ♭3 · 5 · ♭7 · 9';
   }
 }
