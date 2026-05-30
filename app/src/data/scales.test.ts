@@ -1,11 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import { Scale } from './schemas';
-import { DAILY_ROUTINE_IDS, SCALES } from './scales';
+import { DAILY_ROUTINE_IDS, SCALES, SCALE_BY_ID } from './scales';
 
 describe('SCALES', () => {
-  it('has all 12 major scales', () => {
-    const majors = SCALES.filter((s) => s.family === 'major');
-    expect(majors).toHaveLength(12);
+  it('has 12 major scales', () => {
+    expect(SCALES.filter((s) => s.family === 'major')).toHaveLength(12);
+  });
+
+  it('has 36 minor scales (12 keys × 3 variants)', () => {
+    expect(SCALES.filter((s) => s.family === 'natural-minor')).toHaveLength(12);
+    expect(SCALES.filter((s) => s.family === 'harmonic-minor')).toHaveLength(12);
+    expect(SCALES.filter((s) => s.family === 'melodic-minor')).toHaveLength(12);
+  });
+
+  it('has 24 arpeggios (12 major + 12 minor)', () => {
+    expect(SCALES.filter((s) => s.family === 'major-arpeggio')).toHaveLength(12);
+    expect(SCALES.filter((s) => s.family === 'minor-arpeggio')).toHaveLength(12);
+  });
+
+  it('totals 72 entries', () => {
+    expect(SCALES).toHaveLength(72);
   });
 
   it('uses distinct ids across the set', () => {
@@ -17,13 +31,38 @@ describe('SCALES', () => {
     for (const s of SCALES) expect(() => Scale.parse(s)).not.toThrow();
   });
 
-  it('every scale carries an ABC engraving with the right key signature', () => {
+  it('every minor scale carries the matching variant tag', () => {
+    for (const s of SCALES) {
+      if (s.family === 'natural-minor') expect(s.variant).toBe('natural');
+      else if (s.family === 'harmonic-minor') expect(s.variant).toBe('harmonic');
+      else if (s.family === 'melodic-minor') expect(s.variant).toBe('melodic');
+      else expect(s.variant).toBeUndefined();
+    }
+  });
+
+  it('every scale carries an ABC engraving with a K: line', () => {
     for (const s of SCALES) {
       expect(s.abc).toContain('X:1');
-      // The K: header must match the ASCII key of the scale; pull the tonic
-      // letter and accidental and verify the K: line uses the ABC equivalent.
       const kLine = s.abc.split('\n').find((line) => line.startsWith('K:'));
       expect(kLine).toBeDefined();
+    }
+  });
+
+  it('harmonic-minor ABCs raise their 7th degree (carry a ^ or = accidental)', () => {
+    const harm = SCALES.filter((s) => s.family === 'harmonic-minor');
+    for (const s of harm) {
+      const notes = s.abc.split('\n').pop() ?? '';
+      // Either an explicit sharp (`^`) or a key-sig override (`=`) appears.
+      expect(notes).toMatch(/[\^=]/);
+    }
+  });
+
+  it('melodic-minor ABCs raise both 6th and 7th (at least two accidentals)', () => {
+    const mel = SCALES.filter((s) => s.family === 'melodic-minor');
+    for (const s of mel) {
+      const notes = s.abc.split('\n').pop() ?? '';
+      const matches = notes.match(/[\^=]/g);
+      expect(matches?.length ?? 0).toBeGreaterThanOrEqual(2);
     }
   });
 
@@ -37,6 +76,10 @@ describe('SCALES', () => {
       expect(s.reps).toBeGreaterThanOrEqual(0);
     }
   });
+
+  it('SCALE_BY_ID maps every id back to its scale', () => {
+    for (const s of SCALES) expect(SCALE_BY_ID.get(s.id)?.id).toBe(s.id);
+  });
 });
 
 describe('DAILY_ROUTINE_IDS', () => {
@@ -47,5 +90,11 @@ describe('DAILY_ROUTINE_IDS', () => {
 
   it('has at least 3 entries (a meaningful warmup)', () => {
     expect(DAILY_ROUTINE_IDS.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('includes a mix of majors, minors, and arpeggios', () => {
+    const byId = new Map(SCALES.map((s) => [s.id, s]));
+    const families = new Set(DAILY_ROUTINE_IDS.map((id) => byId.get(id)?.family));
+    expect(families.size).toBeGreaterThanOrEqual(3);
   });
 });

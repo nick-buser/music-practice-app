@@ -3,18 +3,17 @@ import { Topbar } from '../components/Topbar';
 import { Icon } from '../components/Icon';
 import { SessionScore } from '../verovio/SessionScore';
 import { useMetronome } from '../verovio/useMetronome';
-import { PIECES } from '../data/sounddata';
-import { ABC_BY_PIECE } from '../data/scores';
+import { resolveSubject } from '../data/subject';
 import { beatsPerBar } from '../lib/time';
 import bioluminescence from '../assets/bioluminescence.svg';
 
 interface Props {
-  pieceId: string;
+  subjectId: string;
   onEnd: () => void;
   onOpenPiece: (id: string) => void;
 }
 
-const SESSION_SCORE_OPTS = {
+const SESSION_SCORE_OPTS_FULL = {
   inputFrom: 'abc' as const,
   scale: 36,
   adjustPageHeight: true,
@@ -25,30 +24,43 @@ const SESSION_SCORE_OPTS = {
   pageMarginRight: 50,
   pageMarginTop: 30,
   pageMarginBottom: 20,
-  // Pieces are engraved end-to-end for the piece view's heatmap, which would
-  // pile up too many systems in the session stage. Loop just the opening here.
-  measureRange: '1-8',
 };
+
+/** Pieces render end-to-end for the piece-detail heatmap, which is too tall
+ *  here — clip to the opening 8 bars. Scales are already 1–2 bars so they get
+ *  the unclipped options. */
+const PIECE_SCORE_OPTS = { ...SESSION_SCORE_OPTS_FULL, measureRange: '1-8' };
 
 const GOAL_MINS = 35;
 const LOG_TAGS = ['Deep work', 'Slow drill', 'Run-through', 'Sight-read', 'Memorize', 'Recording'];
 
-export function SessionView({ pieceId, onEnd, onOpenPiece }: Props) {
-  const piece = PIECES.find((p) => p.id === pieceId) ?? PIECES[0];
-  const abc = ABC_BY_PIECE[piece.id];
-  const meterBeats = useMemo(() => beatsPerBar(piece.meter), [piece.meter]);
+export function SessionView({ subjectId, onEnd, onOpenPiece }: Props) {
+  const subject = useMemo(() => resolveSubject(subjectId), [subjectId]);
+  const isScale = subject.kind === 'scale';
+
+  const meterBeats = useMemo(() => beatsPerBar(subject.meter), [subject.meter]);
 
   const [playing, setPlaying] = useState(true);
-  const [bpm, setBpm] = useState(piece.tempo.bpm);
+  const [bpm, setBpm] = useState(subject.bpmCurrent);
   const [elapsed, setElapsed] = useState(0); // seconds
   const [scoreFraction, setScoreFraction] = useState(0);
   const [notes, setNotes] = useState('');
-  const [logTag, setLogTag] = useState('Slow drill');
+  const [logTag, setLogTag] = useState(isScale ? 'Slow drill' : 'Slow drill');
 
-  const initialLoop = piece.sections.findIndex((s) => s.active);
+  // Loop list applies only to subjects that have sections (pieces).
+  const initialLoop = subject.sections.findIndex((s) => s.active);
   const [loopIdx, setLoopIdx] = useState(initialLoop >= 0 ? initialLoop : 0);
 
   const { currentBeat } = useMetronome(bpm, meterBeats, playing);
+
+  // Reset working bpm + tempo when the subject changes.
+  useEffect(() => {
+    setBpm(subject.bpmCurrent);
+    setElapsed(0);
+    setScoreFraction(0);
+    setLoopIdx(initialLoop >= 0 ? initialLoop : 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subject.id]);
 
   // Practice-time clock — wall-clock seconds while playing.
   const rafRef = useRef<number | null>(null);
@@ -77,17 +89,43 @@ export function SessionView({ pieceId, onEnd, onOpenPiece }: Props) {
   const mm = Math.floor(elapsed / 60);
   const ss = String(elapsed % 60).padStart(2, '0');
   const goalProgress = Math.min(1, elapsed / (GOAL_MINS * 60));
-  const focusSection = piece.sections[loopIdx] ?? piece.sections[0];
+  const focusSection = subject.sections[loopIdx] ?? subject.sections[0];
 
   const R = 78;
   const CIRC = 2 * Math.PI * R;
 
+  const crumb = isScale ? 'Technique · scale drill' : 'Session · active';
+  const heroEyebrow = isScale
+    ? 'Warmup · in progress · technique'
+    : `Session · in progress · ${subject.byline.split(' ').slice(-1)[0]}`;
+  const heroTitle = isScale ? (
+    <>Warming · <em>{subject.title.toLowerCase()}</em></>
+  ) : (
+    <>Sounding · <em>session {subject.sessionsLogged + 1}</em></>
+  );
+  const heroLede = isScale ? (
+    <>
+      A slow rotation through <span className="lumen">{subject.title.toLowerCase()}</span>.
+      Metronome on; fingers warming; eyes off the staff once it's in the hand.
+    </>
+  ) : (
+    <>
+      A focused session on the{' '}
+      <span className="lumen">{focusSection?.label.toLowerCase() ?? 'opening'}</span>.
+      Slow tempo. Hands separate. The room is quiet.
+    </>
+  );
+
+  const scoreOpts = isScale ? SESSION_SCORE_OPTS_FULL : PIECE_SCORE_OPTS;
+
   return (
     <div>
-      <Topbar crumbs={['Soundings', 'Session · active']} />
+      <Topbar crumbs={['Soundings', crumb]} />
       <div style={{ marginTop: -20, marginBottom: 10, display: 'flex', justifyContent: 'flex-end', gap: 14, alignItems: 'center' }}>
         <span className="recording-badge"><span className="dot deep" /> recording</span>
-        <button className="btn btn-ghost" onClick={onEnd} style={{ padding: '6px 14px' }}>End session</button>
+        <button className="btn btn-ghost" onClick={onEnd} style={{ padding: '6px 14px' }}>
+          {isScale ? 'End warmup' : 'End session'}
+        </button>
       </div>
 
       <div className="session-page">
@@ -99,20 +137,16 @@ export function SessionView({ pieceId, onEnd, onOpenPiece }: Props) {
           <div className="page-hero" style={{ marginBottom: 16 }}>
             <div style={{ position: 'relative', zIndex: 1 }}>
               <div className="eyebrow" style={{ marginBottom: 14 }}>
-                <span className="rule" /> Session · in progress · {piece.composer.split(' ').slice(-1)[0]}
+                <span className="rule" /> {heroEyebrow}
               </div>
-              <h1>Sounding · <em>session {piece.sessions + 1}</em></h1>
-              <div className="lede" style={{ marginTop: 14 }}>
-                A focused session on the{' '}
-                <span className="lumen">{focusSection?.label.toLowerCase() ?? 'opening'}</span>.
-                Slow tempo. Hands separate. The room is quiet.
-              </div>
+              <h1>{heroTitle}</h1>
+              <div className="lede" style={{ marginTop: 14 }}>{heroLede}</div>
             </div>
             <div className="meta-col">
               <div>Goal <span className="v">{GOAL_MINS}m</span></div>
               <div>Elapsed <span className="v">{mm}m {ss}s</span></div>
-              <div>Target tempo <span className="v">♩ = {piece.tempo.bpm}</span></div>
-              <div>Working <span className="v" style={{ color: bpm < piece.tempo.bpm ? 'var(--krill)' : 'var(--lumen)' }}>♩ = {bpm}</span></div>
+              <div>Target tempo <span className="v">♩ = {subject.bpmTarget}</span></div>
+              <div>Working <span className="v" style={{ color: bpm < subject.bpmTarget ? 'var(--krill)' : 'var(--lumen)' }}>♩ = {bpm}</span></div>
             </div>
           </div>
 
@@ -120,15 +154,15 @@ export function SessionView({ pieceId, onEnd, onOpenPiece }: Props) {
             <div className="session-stage">
               <div className="session-piece">
                 <div>
-                  <div className="eyebrow">— now sounding</div>
+                  <div className="eyebrow">— {isScale ? 'now warming' : 'now sounding'}</div>
                   <h2>
-                    {piece.title}
-                    <em>{piece.composer} · {piece.subtitle || piece.key}</em>
+                    {subject.title}
+                    <em>{subject.byline} · {subject.subtitle}</em>
                   </h2>
                 </div>
                 <div className="right">
-                  <div>target tempo <span className="v">♩ = {piece.tempo.bpm}</span></div>
-                  <div>current <span className="v" style={{ color: bpm < piece.tempo.bpm ? 'var(--krill)' : 'var(--foam)' }}>♩ = {bpm}</span></div>
+                  <div>target tempo <span className="v">♩ = {subject.bpmTarget}</span></div>
+                  <div>current <span className="v" style={{ color: bpm < subject.bpmTarget ? 'var(--krill)' : 'var(--foam)' }}>♩ = {bpm}</span></div>
                 </div>
               </div>
 
@@ -139,7 +173,7 @@ export function SessionView({ pieceId, onEnd, onOpenPiece }: Props) {
                   <div className="meas">
                     <span style={{ color: 'var(--mist)' }}>{focusSection.subtitle}</span>
                     <span style={{ margin: '0 12px', color: 'var(--shoal)' }}>·</span>
-                    <span>target ♩ = <b style={{ color: 'var(--foam)', fontWeight: 400 }}>{piece.tempo.bpm}</b></span>
+                    <span>target ♩ = <b style={{ color: 'var(--foam)', fontWeight: 400 }}>{subject.bpmTarget}</b></span>
                     <span style={{ margin: '0 12px', color: 'var(--shoal)' }}>·</span>
                     <span>working at <b style={{ color: 'var(--lumen)' }}>♩ = {bpm}</b></span>
                   </div>
@@ -189,14 +223,18 @@ export function SessionView({ pieceId, onEnd, onOpenPiece }: Props) {
               <div className="session-score-block">
                 <div className="score-head">
                   <span>— score · playback cursor follows the metronome</span>
-                  <span className="open-full" onClick={() => onOpenPiece(piece.id)}>open full score →</span>
+                  {subject.hasPieceDetail && (
+                    <span className="open-full" onClick={() => onOpenPiece(subject.id)}>
+                      open full score →
+                    </span>
+                  )}
                 </div>
-                {abc ? (
+                {subject.abc ? (
                   <SessionScore
                     className="session-score"
-                    data={abc}
-                    options={SESSION_SCORE_OPTS}
-                    encodedBpm={piece.tempo.bpm}
+                    data={subject.abc}
+                    options={scoreOpts}
+                    encodedBpm={subject.bpmTarget}
                     bpm={bpm}
                     playing={playing}
                     onProgress={setScoreFraction}
@@ -232,13 +270,18 @@ export function SessionView({ pieceId, onEnd, onOpenPiece }: Props) {
                 </div>
                 <div className="sub-row"><span>elapsed</span><span className="v">{mm}m {ss}s</span></div>
                 <div className="sub-row"><span>remaining</span><span className="v">{Math.max(0, GOAL_MINS - mm)}m</span></div>
-                <div className="sub-row"><span>working tempo</span><span className="v" style={{ color: 'var(--lumen)' }}>{bpm - piece.tempo.bpm >= 0 ? '+' : ''}{bpm - piece.tempo.bpm} bpm</span></div>
+                <div className="sub-row">
+                  <span>working tempo</span>
+                  <span className="v" style={{ color: 'var(--lumen)' }}>
+                    {bpm - subject.bpmTarget >= 0 ? '+' : ''}{bpm - subject.bpmTarget} bpm
+                  </span>
+                </div>
               </div>
 
-              {piece.sections.length > 0 && (
+              {subject.sections.length > 0 && (
                 <div className="loop-card">
                   <div className="eyebrow">— loop</div>
-                  {piece.sections.map((s, i) => (
+                  {subject.sections.map((s, i) => (
                     <div key={s.id} className={`loop-row ${loopIdx === i ? 'active' : ''}`}>
                       <div>
                         <div className="name">{s.label}</div>
@@ -252,12 +295,29 @@ export function SessionView({ pieceId, onEnd, onOpenPiece }: Props) {
                 </div>
               )}
 
+              {isScale && (
+                <div className="loop-card">
+                  <div className="eyebrow">— scale drill · reps</div>
+                  <div style={{
+                    fontFamily: 'var(--font-body)',
+                    color: 'var(--mist)',
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                  }}>
+                    Slow at <b style={{ color: 'var(--foam)', fontWeight: 400 }}>♩ = {subject.bpmCurrent}</b>{' '}
+                    until it's effortless; nudge the metronome up
+                    by 4 only when the line is even. Target{' '}
+                    <span className="lumen">♩ = {subject.bpmTarget}</span>.
+                  </div>
+                </div>
+              )}
+
               <div className="quick-notes">
                 <div className="eyebrow">— quick notes</div>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="What did you notice? Where did it click? Where did it resist?"
+                  placeholder={isScale ? 'Notice anything? Even fingers? Steady wrist?' : 'What did you notice? Where did it click? Where did it resist?'}
                 />
                 {notes.trim().length > 0 && (
                   <div className="saved"><span className="pulse" /> auto-saved</div>

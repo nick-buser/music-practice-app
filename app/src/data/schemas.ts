@@ -121,16 +121,28 @@ export const Sketch = z.object({
 });
 export type Sketch = z.infer<typeof Sketch>;
 
-export const TechniqueFamily = z.enum(['major', 'minor', 'arpeggio']);
+export const TechniqueFamily = z.enum([
+  'major',
+  'natural-minor',
+  'harmonic-minor',
+  'melodic-minor',
+  'major-arpeggio',
+  'minor-arpeggio',
+]);
 export type TechniqueFamily = z.infer<typeof TechniqueFamily>;
+
+export const ScaleVariant = z.enum(['natural', 'harmonic', 'melodic']);
+export type ScaleVariant = z.infer<typeof ScaleVariant>;
 
 export const Scale = z.object({
   id: z.string(),
-  /** Display name, e.g. "C major", "F♯ major". */
+  /** Display name, e.g. "C major", "A harmonic minor". */
   name: z.string(),
   /** Tonic letter (with accidental), e.g. "C", "F♯". */
   tonic: z.string(),
   family: TechniqueFamily,
+  /** Only set on the three minor families; identifies the minor variant. */
+  variant: ScaleVariant.optional(),
   /** ABC engraving of one octave ascending. */
   abc: z.string(),
   /** 0–1, mirrors piece-depth color bands. */

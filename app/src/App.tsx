@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Sidebar, type View } from './components/Sidebar';
 import { LibraryView } from './views/LibraryView';
 import { PieceView } from './views/PieceView';
@@ -6,13 +6,33 @@ import { SessionView } from './views/SessionView';
 import { StatsView } from './views/StatsView';
 import { SketchbookView } from './views/SketchbookView';
 import { TechniqueView } from './views/TechniqueView';
+import { SCALE_BY_ID } from './data/scales';
 
 export default function App() {
   const [view, setView] = useState<View>('library');
   const [pieceId, setPieceId] = useState<string>('chopin-9-2');
+  const [subjectId, setSubjectId] = useState<string>('chopin-9-2');
+
+  // Track the view the user was on before they started a session, so we can
+  // send them back there when they end it (Library for pieces, Technique for
+  // scales). Defaulted by subject kind so an externally-initiated session
+  // (deep link, hot reload) still lands somewhere sensible.
+  const returnViewRef = useRef<View>('library');
 
   const openPiece = (id: string) => { setPieceId(id); setView('piece'); };
-  const startSession = (id: string) => { setPieceId(id); setView('session'); };
+
+  const startSession = (id: string) => {
+    setSubjectId(id);
+    if (SCALE_BY_ID.has(id)) {
+      returnViewRef.current = 'technique';
+    } else {
+      returnViewRef.current = 'library';
+      setPieceId(id);
+    }
+    setView('session');
+  };
+
+  const endSession = () => setView(returnViewRef.current);
 
   let body;
   if (view === 'library') {
@@ -20,7 +40,7 @@ export default function App() {
   } else if (view === 'piece') {
     body = <PieceView pieceId={pieceId} onBack={() => setView('library')} onStartSession={startSession} />;
   } else if (view === 'session') {
-    body = <SessionView pieceId={pieceId} onEnd={() => setView('library')} onOpenPiece={openPiece} />;
+    body = <SessionView subjectId={subjectId} onEnd={endSession} onOpenPiece={openPiece} />;
   } else if (view === 'stats') {
     body = <StatsView />;
   } else if (view === 'technique') {
