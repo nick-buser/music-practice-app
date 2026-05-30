@@ -131,12 +131,16 @@ export const TechniqueFamily = z.enum([
   // Triad block chords
   'major-chord',
   'minor-chord',
-  // 7th-chord blocks (root position).
-  // Future PRs will add 9ths / 11ths / 13ths and the altered family
-  // (♭5 / ♯5 / ♭9 / ♯9 / ♯11 / ♭13 …) on the same pattern.
+  // 7th chord blocks (root position)
   'maj7-chord',
   'dom7-chord',
   'min7-chord',
+  // 9th chord blocks (root position).
+  // Future PRs will continue up: 11ths, 13ths, and the altered family
+  // (♭5 / ♯5 / ♭9 / ♯9 / ♯11 / ♭13 …).
+  'maj9-chord',
+  'dom9-chord',
+  'min9-chord',
 ]);
 export type TechniqueFamily = z.infer<typeof TechniqueFamily>;
 
