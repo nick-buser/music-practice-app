@@ -5,8 +5,8 @@ import { PieceView } from './views/PieceView';
 import { SessionView } from './views/SessionView';
 import { StatsView } from './views/StatsView';
 import { SketchbookView } from './views/SketchbookView';
-import { TechniqueView } from './views/TechniqueView';
-import { SCALE_BY_ID } from './data/scales';
+import { DrillsView } from './views/DrillsView';
+import { DRILL_BY_ID } from './data/drills';
 
 export default function App() {
   const [view, setView] = useState<View>('library');
@@ -23,8 +23,8 @@ export default function App() {
 
   const startSession = (id: string) => {
     setSubjectId(id);
-    if (SCALE_BY_ID.has(id)) {
-      returnViewRef.current = 'technique';
+    if (DRILL_BY_ID.has(id)) {
+      returnViewRef.current = 'drills';
     } else {
       returnViewRef.current = 'library';
       setPieceId(id);
@@ -43,8 +43,8 @@ export default function App() {
     body = <SessionView subjectId={subjectId} onEnd={endSession} onOpenPiece={openPiece} />;
   } else if (view === 'stats') {
     body = <StatsView />;
-  } else if (view === 'technique') {
-    body = <TechniqueView onStartSession={startSession} />;
+  } else if (view === 'drills') {
+    body = <DrillsView onStartSession={startSession} />;
   } else {
     body = <SketchbookView />;
   }

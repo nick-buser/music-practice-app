@@ -6,7 +6,7 @@
 
 import { PIECES } from './sounddata';
 import { ABC_BY_PIECE } from './scores';
-import { SCALE_BY_ID } from './scales';
+import { DRILL_BY_ID } from './drills';
 import type { Section } from './schemas';
 
 export type SubjectKind = 'piece' | 'scale';
@@ -60,19 +60,19 @@ export function resolveSubject(id: string): Subject {
     };
   }
 
-  const scale = SCALE_BY_ID.get(id);
-  if (scale) {
+  const drill = DRILL_BY_ID.get(id);
+  if (drill) {
     return {
-      id: scale.id,
+      id: drill.id,
       kind: 'scale',
-      title: scale.name,
-      byline: subjectBylineForScale(scale.family),
-      subtitle: `tonic ${scale.tonic}`,
-      abc: scale.abc,
+      title: drill.name,
+      byline: subjectBylineForScale(drill.family),
+      subtitle: `tonic ${drill.tonic}`,
+      abc: drill.abc,
       meter: '4/4',
-      bpmTarget: scale.bpmTarget,
-      bpmCurrent: scale.bpmCurrent,
-      sessionsLogged: scale.reps,
+      bpmTarget: drill.bpmTarget,
+      bpmCurrent: drill.bpmCurrent,
+      sessionsLogged: drill.reps,
       sections: [],
       hasPieceDetail: false,
     };
@@ -110,7 +110,11 @@ function subjectBylineForScale(family: string): string {
       return 'major arpeggio';
     case 'minor-arpeggio':
       return 'minor arpeggio';
+    case 'major-chord':
+      return 'major chord (block)';
+    case 'minor-chord':
+      return 'minor chord (block)';
     default:
-      return 'technique';
+      return 'drill';
   }
 }

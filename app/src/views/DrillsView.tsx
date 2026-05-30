@@ -3,31 +3,44 @@ import { Topbar } from '../components/Topbar';
 import { Score } from '../verovio/Score';
 import {
   ARP_FAMILY_BY_QUALITY,
-  ArpeggioQuality,
-  ARPEGGIO_QUALITIES,
+  CHORD_FAMILY_BY_QUALITY,
   DAILY_ROUTINE_IDS,
-  MINOR_FAMILY_BY_VARIANT,
-  MINOR_VARIANTS,
-  MinorVariant,
-  SCALES,
-} from '../data/scales';
+  DRILLS,
+  QualitySubTab,
+  QUALITY_SUBTABS,
+  SCALE_FAMILY_BY_SUBTAB,
+  SCALE_SUBTABS,
+  ScaleSubTab,
+} from '../data/drills';
 import { relTime } from '../lib/time';
-import type { Scale } from '../data/schemas';
+import type { Drill, TechniqueFamily } from '../data/schemas';
 
 interface Props {
   onStartSession: (id: string) => void;
 }
 
-/** Top-level category — these are the visible tabs. */
-type Category = 'major' | 'minor' | 'arpeggio';
+/** Top-level category — what the visible tabs are. */
+type TopTab = 'scales' | 'arpeggios' | 'chords';
 
-const TABS: Array<{ id: Category; label: string }> = [
-  { id: 'major',    label: 'Major scales' },
-  { id: 'minor',    label: 'Minor scales' },
-  { id: 'arpeggio', label: 'Arpeggios' },
+const TOP_TABS: Array<{ id: TopTab; label: string }> = [
+  { id: 'scales',    label: 'Scales' },
+  { id: 'arpeggios', label: 'Arpeggios' },
+  { id: 'chords',    label: 'Chords' },
 ];
 
-const SCALE_THUMB_OPTS = {
+const SCALE_SUBTAB_LABEL: Record<ScaleSubTab, string> = {
+  major:    'Major',
+  natural:  'Natural minor',
+  harmonic: 'Harmonic minor',
+  melodic:  'Melodic minor',
+};
+
+const QUALITY_LABEL: Record<QualitySubTab, string> = {
+  major: 'Major',
+  minor: 'Minor',
+};
+
+const DRILL_THUMB_OPTS = {
   inputFrom: 'abc' as const,
   scale: 32,
   adjustPageHeight: true,
@@ -47,44 +60,46 @@ function comfortClass(c: number): string {
   return 'struggle';
 }
 
-export function TechniqueView({ onStartSession }: Props) {
-  const [category, setCategory] = useState<Category>('major');
-  const [minorVariant, setMinorVariant] = useState<MinorVariant>('natural');
-  const [arpQuality, setArpQuality] = useState<ArpeggioQuality>('major');
+export function DrillsView({ onStartSession }: Props) {
+  const [topTab, setTopTab] = useState<TopTab>('scales');
+  const [scaleSub, setScaleSub] = useState<ScaleSubTab>('major');
+  const [arpSub, setArpSub] = useState<QualitySubTab>('major');
+  const [chordSub, setChordSub] = useState<QualitySubTab>('major');
 
-  const visible = useMemo(() => {
-    if (category === 'major') return SCALES.filter((s) => s.family === 'major');
-    if (category === 'minor') {
-      const fam = MINOR_FAMILY_BY_VARIANT[minorVariant];
-      return SCALES.filter((s) => s.family === fam);
-    }
-    const fam = ARP_FAMILY_BY_QUALITY[arpQuality];
-    return SCALES.filter((s) => s.family === fam);
-  }, [category, minorVariant, arpQuality]);
+  const activeFamily: TechniqueFamily = useMemo(() => {
+    if (topTab === 'scales') return SCALE_FAMILY_BY_SUBTAB[scaleSub];
+    if (topTab === 'arpeggios') return ARP_FAMILY_BY_QUALITY[arpSub];
+    return CHORD_FAMILY_BY_QUALITY[chordSub];
+  }, [topTab, scaleSub, arpSub, chordSub]);
+
+  const visible = useMemo(
+    () => DRILLS.filter((d) => d.family === activeFamily),
+    [activeFamily],
+  );
 
   const routine = useMemo(() => {
-    const byId = new Map(SCALES.map((s) => [s.id, s]));
-    return DAILY_ROUTINE_IDS.map((id) => byId.get(id)).filter((s): s is Scale => Boolean(s));
+    const byId = new Map(DRILLS.map((d) => [d.id, d]));
+    return DAILY_ROUTINE_IDS.map((id) => byId.get(id)).filter((d): d is Drill => Boolean(d));
   }, []);
 
   const stats = useMemo(() => {
-    const total = SCALES.length;
-    const fluent = SCALES.filter((s) => s.comfort > 0.8).length;
-    const avg = SCALES.reduce((a, s) => a + s.comfort, 0) / Math.max(1, total);
-    const reps = SCALES.reduce((a, s) => a + s.reps, 0);
+    const total = DRILLS.length;
+    const fluent = DRILLS.filter((d) => d.comfort > 0.8).length;
+    const avg = DRILLS.reduce((a, d) => a + d.comfort, 0) / Math.max(1, total);
+    const reps = DRILLS.reduce((a, d) => a + d.reps, 0);
     return { total, fluent, avg, reps };
   }, []);
 
   return (
     <div>
-      <Topbar crumbs={['Soundings', 'Technique']} />
+      <Topbar crumbs={['Soundings', 'Drills']} />
 
       <div className="page-hero">
         <div>
-          <div className="eyebrow"><span className="rule" /> Technique · daily warmup</div>
+          <div className="eyebrow"><span className="rule" /> Drills · daily warmup</div>
           <h1>Sound every key, <em>every day</em>.</h1>
           <div className="lede">
-            Scales and arpeggios — the slow rotation of all twelve keys.
+            Scales, arpeggios, and chords — the slow rotation of all twelve keys.
             What you hold steady at <span className="lumen">target tempo</span>,
             and where the fingers still need to find the path.
           </div>
@@ -98,40 +113,48 @@ export function TechniqueView({ onStartSession }: Props) {
       </div>
 
       <div className="tech-tabs">
-        {TABS.map((t) => (
+        {TOP_TABS.map((t) => (
           <button
             key={t.id}
-            className={`tech-tab ${category === t.id ? 'active' : ''}`}
-            onClick={() => setCategory(t.id)}
-            aria-current={category === t.id ? 'page' : undefined}
+            className={`tech-tab ${topTab === t.id ? 'active' : ''}`}
+            onClick={() => setTopTab(t.id)}
+            aria-current={topTab === t.id ? 'page' : undefined}
           >
             {t.label}
           </button>
         ))}
       </div>
 
-      {category === 'minor' && (
+      {topTab === 'scales' && (
         <SubToggle
-          options={MINOR_VARIANTS}
-          value={minorVariant}
-          onChange={setMinorVariant}
-          labelFor={(v) => `${v[0].toUpperCase()}${v.slice(1)} minor`}
+          options={SCALE_SUBTABS}
+          value={scaleSub}
+          onChange={setScaleSub}
+          labelFor={(v) => SCALE_SUBTAB_LABEL[v]}
         />
       )}
-      {category === 'arpeggio' && (
+      {topTab === 'arpeggios' && (
         <SubToggle
-          options={ARPEGGIO_QUALITIES}
-          value={arpQuality}
-          onChange={setArpQuality}
-          labelFor={(q) => `${q[0].toUpperCase()}${q.slice(1)} arpeggios`}
+          options={QUALITY_SUBTABS}
+          value={arpSub}
+          onChange={setArpSub}
+          labelFor={(v) => `${QUALITY_LABEL[v]} arpeggios`}
+        />
+      )}
+      {topTab === 'chords' && (
+        <SubToggle
+          options={QUALITY_SUBTABS}
+          value={chordSub}
+          onChange={setChordSub}
+          labelFor={(v) => `${QUALITY_LABEL[v]} chords`}
         />
       )}
 
       <div className="tech-layout">
         <div>
           <div className="tech-grid">
-            {visible.map((s) => (
-              <ScaleCard key={s.id} scale={s} onStartSession={onStartSession} />
+            {visible.map((d) => (
+              <DrillCard key={d.id} drill={d} onStartSession={onStartSession} />
             ))}
           </div>
         </div>
@@ -143,16 +166,16 @@ export function TechniqueView({ onStartSession }: Props) {
               <span className="date">{routine.length} items · ~{Math.round(routine.length * 2.5)} min</span>
             </div>
             <div className="routine-list">
-              {routine.map((s, i) => (
-                <div key={s.id} className="routine-item" onClick={() => onStartSession(s.id)}>
+              {routine.map((d, i) => (
+                <div key={d.id} className="routine-item" onClick={() => onStartSession(d.id)}>
                   <div className="ord">{String(i + 1).padStart(2, '0')}</div>
                   <div className="what">
-                    <div className="t">{s.name}</div>
+                    <div className="t">{d.name}</div>
                     <div className="s">
-                      target ♩ = {s.bpmTarget} · working ♩ = {s.bpmCurrent}
+                      target ♩ = {d.bpmTarget} · working ♩ = {d.bpmCurrent}
                     </div>
                   </div>
-                  <span className={`dot ${comfortClass(s.comfort)}`} />
+                  <span className={`dot ${comfortClass(d.comfort)}`} />
                 </div>
               ))}
             </div>
@@ -170,13 +193,13 @@ export function TechniqueView({ onStartSession }: Props) {
               <span className="eyebrow">— mastery</span>
             </div>
             <div className="depth-strip">
-              {visible.map((s) => (
-                <div key={s.id} className="row">
-                  <div className="name">{s.tonic}</div>
+              {visible.map((d) => (
+                <div key={d.id} className="row">
+                  <div className="name">{d.tonic}</div>
                   <div className="bar">
-                    <span className="pin" style={{ left: `${Math.round(s.comfort * 100)}%` }} />
+                    <span className="pin" style={{ left: `${Math.round(d.comfort * 100)}%` }} />
                   </div>
-                  <div className="num">{Math.round(s.comfort * 100)}%</div>
+                  <div className="num">{Math.round(d.comfort * 100)}%</div>
                 </div>
               ))}
             </div>
@@ -217,47 +240,47 @@ function SubToggle<T extends string>({ options, value, onChange, labelFor }: Sub
 }
 
 interface CardProps {
-  scale: Scale;
+  drill: Drill;
   onStartSession: (id: string) => void;
 }
 
-function ScaleCard({ scale, onStartSession }: CardProps) {
-  const last = scale.lastTouched ? relTime(scale.lastTouched) : 'never';
-  const atTarget = scale.bpmCurrent >= scale.bpmTarget;
-  const subtitle = subtitleFor(scale);
+function DrillCard({ drill, onStartSession }: CardProps) {
+  const last = drill.lastTouched ? relTime(drill.lastTouched) : 'never';
+  const atTarget = drill.bpmCurrent >= drill.bpmTarget;
+  const subtitle = subtitleFor(drill);
   return (
-    <article className="scale-card" data-comfort={comfortClass(scale.comfort)}>
+    <article className="scale-card" data-comfort={comfortClass(drill.comfort)}>
       <header>
-        <div className="tonic">{scale.tonic}</div>
+        <div className="tonic">{drill.tonic}</div>
         <div className="name">
-          <div className="n">{scale.name}</div>
+          <div className="n">{drill.name}</div>
           <div className="s">{subtitle}</div>
         </div>
-        <span className={`dot ${comfortClass(scale.comfort)}`} />
+        <span className={`dot ${comfortClass(drill.comfort)}`} />
       </header>
 
       <div className="engraving">
         <Score
-          data={scale.abc}
-          options={SCALE_THUMB_OPTS}
-          ariaLabel={`${scale.name}, one octave`}
+          data={drill.abc}
+          options={DRILL_THUMB_OPTS}
+          ariaLabel={drill.name}
         />
       </div>
 
       <div className="meta">
-        <span>target <b>♩ = {scale.bpmTarget}</b></span>
+        <span>target <b>♩ = {drill.bpmTarget}</b></span>
         <span>
           working{' '}
           <b style={{ color: atTarget ? 'var(--lumen)' : 'var(--krill)' }}>
-            ♩ = {scale.bpmCurrent}
+            ♩ = {drill.bpmCurrent}
           </b>
         </span>
-        <span>{scale.reps} reps</span>
+        <span>{drill.reps} reps</span>
         <span>last <span style={{ color: 'var(--foam)' }}>{last}</span></span>
       </div>
 
       <footer>
-        <button className="btn btn-ghost" onClick={() => onStartSession(scale.id)}>
+        <button className="btn btn-ghost" onClick={() => onStartSession(drill.id)}>
           Run it →
         </button>
       </footer>
@@ -265,8 +288,8 @@ function ScaleCard({ scale, onStartSession }: CardProps) {
   );
 }
 
-function subtitleFor(scale: Scale): string {
-  switch (scale.family) {
+function subtitleFor(drill: Drill): string {
+  switch (drill.family) {
     case 'major':
       return 'major scale · one octave';
     case 'natural-minor':
@@ -279,5 +302,9 @@ function subtitleFor(scale: Scale): string {
       return 'major arpeggio · 1 · 3 · 5 · 8';
     case 'minor-arpeggio':
       return 'minor arpeggio · 1 · ♭3 · 5 · 8';
+    case 'major-chord':
+      return 'major triad · block · root position';
+    case 'minor-chord':
+      return 'minor triad · block · root position';
   }
 }
