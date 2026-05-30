@@ -128,32 +128,44 @@ export const TechniqueFamily = z.enum([
   'melodic-minor',
   'major-arpeggio',
   'minor-arpeggio',
+  'major-chord',
+  'minor-chord',
 ]);
 export type TechniqueFamily = z.infer<typeof TechniqueFamily>;
 
 export const ScaleVariant = z.enum(['natural', 'harmonic', 'melodic']);
 export type ScaleVariant = z.infer<typeof ScaleVariant>;
 
-export const Scale = z.object({
+/**
+ * A practice "drill" — a scale, arpeggio, or chord exercise. Scales/arpeggios
+ * are engraved as a melodic line; chords as a vertical block. They share the
+ * same tracking shape (comfort / lastTouched / tempo / reps) so the technique
+ * view can list them in one grid.
+ */
+export const Drill = z.object({
   id: z.string(),
-  /** Display name, e.g. "C major", "A harmonic minor". */
+  /** Display name, e.g. "C major", "A harmonic minor", "C major chord". */
   name: z.string(),
   /** Tonic letter (with accidental), e.g. "C", "F♯". */
   tonic: z.string(),
   family: TechniqueFamily,
-  /** Only set on the three minor families; identifies the minor variant. */
+  /** Only set on the three minor scale families. */
   variant: ScaleVariant.optional(),
-  /** ABC engraving of one octave ascending. */
+  /** ABC engraving. */
   abc: z.string(),
   /** 0–1, mirrors piece-depth color bands. */
   comfort: z.number().min(0).max(1),
   /** ISO date of the last time this was practised. Null if never. */
   lastTouched: z.string().nullable(),
-  /** The student's "aim for" tempo on this scale, in bpm of the unit note. */
+  /** Aim-for tempo, in bpm of the unit note. */
   bpmTarget: z.number().int().positive(),
   /** Where they're working today. */
   bpmCurrent: z.number().int().positive(),
   /** Practice reps logged across all sessions. */
   reps: z.number().int().nonnegative(),
 });
-export type Scale = z.infer<typeof Scale>;
+export type Drill = z.infer<typeof Drill>;
+
+/** Back-compat alias — the type was called `Scale` before chords joined. */
+export const Scale = Drill;
+export type Scale = Drill;

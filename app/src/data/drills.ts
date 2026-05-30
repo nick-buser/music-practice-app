@@ -1,27 +1,25 @@
-import type { Scale, TechniqueFamily } from './schemas';
+import type { Drill, TechniqueFamily } from './schemas';
 
 /**
- * The technique library: 12 major scales, 36 minor scales (12 keys × natural /
- * harmonic / melodic-ascending), and 24 arpeggios (12 major + 12 minor).
+ * The drills library: 12 major scales, 36 minor scales (12 keys × natural /
+ * harmonic / melodic-ascending), 24 arpeggios (12 major + 12 minor), and 24
+ * block chords (12 major triads + 12 minor triads).
  *
- * All engravings are minimal Verovio-ready ABC. The notes follow the key
- * signature for accidentals, so we only write `^` or `=` when a variant
- * deliberately raises or naturals a scale degree (harmonic minor's #7,
- * melodic-ascending's #6 / #7).
+ * Engravings are minimal Verovio-ready ABC. For scales/arpeggios the notes
+ * follow the key signature for accidentals; we only write `^` or `=` when a
+ * variant deliberately raises or naturals a degree (harmonic minor's #7,
+ * melodic-ascending's #6/#7). Chords are vertical `[...]` blocks held as whole
+ * notes — a single bar that reads as a struck chord rather than a melodic line.
  *
  * Tracking state (comfort / lastTouched / bpmCurrent / reps) is deterministic
- * mock data seeded off each scale's id, so the cards have plausible variation
- * without anyone having to maintain a 72-row table.
+ * mock data seeded off each drill's id, so the cards have plausible variation
+ * without anyone having to maintain a 96-row hand-tuned table.
  */
 
 const abc = (title: string, key: string, notes: string): string =>
   `X:1\nT:${title}\nM:4/4\nL:1/4\nK:${key}\n${notes}`;
 
-/* ─── Tracking-state seed ─────────────────────────────────
- * A small deterministic RNG keyed off the scale id gives each card a
- * plausible comfort / tempo / last-touched without us hand-tuning 72 rows.
- * Comfort is biased by difficulty band (how far a key is from C).
- */
+/* ─── Tracking-state seed ───────────────────────────────── */
 function hash(str: string): number {
   let h = 2166136261;
   for (let i = 0; i < str.length; i++) {
@@ -44,8 +42,6 @@ function trackingFor(id: string, difficulty: number): {
   bpmCurrent: number;
   reps: number;
 } {
-  // difficulty: 0 = easiest (C/G/F/Am), 1 = hardest (F#/Db/Abm). Comfort range
-  // tightens with difficulty so a glance reads the right colour.
   const r = rng(hash(id));
   const base = 0.95 - difficulty * 0.7;
   const comfort = Math.max(0.05, Math.min(0.98, base + (r() - 0.5) * 0.3));
@@ -54,7 +50,6 @@ function trackingFor(id: string, difficulty: number): {
     bpmTarget * Math.min(1, comfort + 0.05 + r() * 0.05),
   );
   const reps = Math.round(60 + comfort * 280 + r() * 40);
-  // Last touched within the past month, never in the future.
   const daysAgo = Math.floor(r() * 30);
   const d = new Date('2026-05-29');
   d.setDate(d.getDate() - daysAgo);
@@ -74,21 +69,18 @@ interface Spec {
   family: TechniqueFamily;
   variant?: 'natural' | 'harmonic' | 'melodic';
   abc: string;
-  difficulty: number; // 0–1, drives tracking-state band
+  difficulty: number;
 }
 
-function build(s: Spec): Scale {
+function build(s: Spec): Drill {
   return { ...s, ...trackingFor(s.id, s.difficulty) };
 }
 
-/* ─── Difficulty bands ────────────────────────────────────
- * Sequenced across the circle of fifths, closest-to-no-accidentals first.
- */
+/* ─── Difficulty bands (circle of fifths distance from C/Am) ───── */
 const KEY_DIFF: Record<string, number> = {
   C: 0.0, G: 0.05, D: 0.1, A: 0.2, E: 0.35, B: 0.55, 'F#': 0.85,
   F: 0.1, Bb: 0.2, Eb: 0.3, Ab: 0.55, Db: 0.8,
-  // Minor tonics use the same scale (difficulty by signature count, not parallel major)
-  Am: 0.0, Em: 0.1, Bm: 0.2, 'F#m': 0.35, 'C#m': 0.55, 'G#m': 0.85,
+  Am: 0.0, Em: 0.1, Bm: 0.2, 'F#m': 0.35, 'C#m': 0.55,
   Dm: 0.05, Gm: 0.15, Cm: 0.3, Fm: 0.5, Bbm: 0.7, Ebm: 0.85, Abm: 0.95,
 };
 
@@ -115,15 +107,7 @@ const MAJORS: Spec[] = [
   difficulty: KEY_DIFF[key] ?? 0.5,
 }));
 
-/* ─── 12 minor tonics × 3 variants = 36 minor scales ─────
- * Each tuple: [tonic letter for ids, display tonic, K:<sig>, natural-notes,
- * harmonic-notes (#7), melodic-ascending-notes (#6 #7)].
- *
- * The variant note strings use `^` to raise a degree above its natural-minor
- * value (e.g. A harm = ABcdef^ga) and `=` when the natural-minor value is
- * already flatted by the key sig and we need it natural (e.g. C harm:
- * CDEFGA=Bc — `=B` overrides the Bb from K:Cm).
- */
+/* ─── 12 minor tonics × 3 variants = 36 minor scales ───── */
 const MINOR_KEYS: Array<[id: string, tonic: string, key: string, nat: string, harm: string, mel: string]> = [
   ['a',  'A',  'Am',  'ABcd | efga |', 'ABcd | ef^ga |', 'ABcd | e^f^ga |'],
   ['e',  'E',  'Em',  'EFGA | Bcde |', 'EFGA | Bc^de |', 'EFGA | B^c^de |'],
@@ -142,38 +126,16 @@ const MINOR_KEYS: Array<[id: string, tonic: string, key: string, nat: string, ha
 const MINORS: Spec[] = MINOR_KEYS.flatMap(([idBase, tonic, key, nat, harm, mel]) => {
   const diff = KEY_DIFF[key] ?? 0.5;
   return [
-    {
-      id: `${idBase}-natural-minor`,
-      name: `${tonic} natural minor`,
-      tonic,
-      family: 'natural-minor' as TechniqueFamily,
-      variant: 'natural' as const,
-      abc: abc(`${tonic} natural minor`, key, nat),
-      difficulty: diff,
-    },
-    {
-      id: `${idBase}-harmonic-minor`,
-      name: `${tonic} harmonic minor`,
-      tonic,
-      family: 'harmonic-minor' as TechniqueFamily,
-      variant: 'harmonic' as const,
-      abc: abc(`${tonic} harmonic minor`, key, harm),
-      difficulty: diff,
-    },
-    {
-      id: `${idBase}-melodic-minor`,
-      name: `${tonic} melodic minor`,
-      tonic,
-      family: 'melodic-minor' as TechniqueFamily,
-      variant: 'melodic' as const,
-      abc: abc(`${tonic} melodic minor (asc.)`, key, mel),
-      difficulty: diff,
-    },
+    { id: `${idBase}-natural-minor`,  name: `${tonic} natural minor`,        tonic, family: 'natural-minor'  as TechniqueFamily, variant: 'natural'  as const, abc: abc(`${tonic} natural minor`,        key, nat),  difficulty: diff },
+    { id: `${idBase}-harmonic-minor`, name: `${tonic} harmonic minor`,       tonic, family: 'harmonic-minor' as TechniqueFamily, variant: 'harmonic' as const, abc: abc(`${tonic} harmonic minor`,       key, harm), difficulty: diff },
+    { id: `${idBase}-melodic-minor`,  name: `${tonic} melodic minor`,        tonic, family: 'melodic-minor'  as TechniqueFamily, variant: 'melodic'  as const, abc: abc(`${tonic} melodic minor (asc.)`, key, mel),  difficulty: diff },
   ];
 });
 
-/* ─── 24 arpeggios (12 major + 12 minor, one octave ascending + descending) ─ */
-const MAJOR_ARP_KEYS: Array<[id: string, tonic: string, key: string, notes: string]> = [
+/* ─── 24 arpeggios (12 major + 12 minor, one octave asc/desc) ─── */
+type ArpRow = [id: string, tonic: string, key: string, notes: string];
+
+const MAJOR_ARP_KEYS: ArpRow[] = [
   ['c',  'C',  'C',  'CEGc | cGEC |'],
   ['g',  'G',  'G',  'GBdg | gdBG |'],
   ['d',  'D',  'D',  'DFAd | dAFD |'],
@@ -188,7 +150,7 @@ const MAJOR_ARP_KEYS: Array<[id: string, tonic: string, key: string, notes: stri
   ['db', 'D♭', 'Db', 'DFAd | dAFD |'],
 ];
 
-const MINOR_ARP_KEYS: Array<[id: string, tonic: string, key: string, notes: string]> = [
+const MINOR_ARP_KEYS: ArpRow[] = [
   ['a',  'A',  'Am',  'ACEa | aECA |'],
   ['e',  'E',  'Em',  'EGBe | eBGE |'],
   ['b',  'B',  'Bm',  'Bdfb | bfdB |'],
@@ -222,36 +184,105 @@ const ARPEGGIOS: Spec[] = [
   })),
 ];
 
-export const SCALES: Scale[] = [...MAJORS, ...MINORS, ...ARPEGGIOS].map(build);
+/* ─── 24 block chords (12 major triads + 12 minor triads) ──────
+ * Chord blocks `[notes]4` render as a whole-note vertical stack — a single
+ * struck chord per bar. Notes are the same letter sequence as the matching
+ * arpeggio, just bracketed; key signature handles accidentals.
+ */
+type ChordRow = [id: string, tonic: string, key: string, notes: string];
 
-/** Daily routine — the user's "warmup order". */
+const MAJOR_CHORD_KEYS: ChordRow[] = [
+  ['c',  'C',  'C',  '[CEGc]4 |'],
+  ['g',  'G',  'G',  '[GBdg]4 |'],
+  ['d',  'D',  'D',  '[DFAd]4 |'],
+  ['a',  'A',  'A',  '[ACEa]4 |'],
+  ['e',  'E',  'E',  '[EGBe]4 |'],
+  ['b',  'B',  'B',  '[Bdfb]4 |'],
+  ['fs', 'F♯', 'F#', '[FAcf]4 |'],
+  ['f',  'F',  'F',  '[FAcf]4 |'],
+  ['bb', 'B♭', 'Bb', '[Bdfb]4 |'],
+  ['eb', 'E♭', 'Eb', '[EGBe]4 |'],
+  ['ab', 'A♭', 'Ab', '[ACEa]4 |'],
+  ['db', 'D♭', 'Db', '[DFAd]4 |'],
+];
+
+const MINOR_CHORD_KEYS: ChordRow[] = [
+  ['a',  'A',  'Am',  '[ACEa]4 |'],
+  ['e',  'E',  'Em',  '[EGBe]4 |'],
+  ['b',  'B',  'Bm',  '[Bdfb]4 |'],
+  ['fs', 'F♯', 'F#m', '[FAcf]4 |'],
+  ['cs', 'C♯', 'C#m', '[CEGc]4 |'],
+  ['d',  'D',  'Dm',  '[DFAd]4 |'],
+  ['g',  'G',  'Gm',  '[GBdg]4 |'],
+  ['c',  'C',  'Cm',  '[CEGc]4 |'],
+  ['f',  'F',  'Fm',  '[FAcf]4 |'],
+  ['bb', 'B♭', 'Bbm', '[Bdfb]4 |'],
+  ['eb', 'E♭', 'Ebm', '[EGBe]4 |'],
+  ['ab', 'A♭', 'Abm', '[ACEa]4 |'],
+];
+
+const CHORDS: Spec[] = [
+  ...MAJOR_CHORD_KEYS.map(([idBase, tonic, key, notes]) => ({
+    id: `${idBase}-major-chord`,
+    name: `${tonic} major chord`,
+    tonic,
+    family: 'major-chord' as TechniqueFamily,
+    abc: abc(`${tonic} major chord`, key, notes),
+    difficulty: KEY_DIFF[key] ?? 0.5,
+  })),
+  ...MINOR_CHORD_KEYS.map(([idBase, tonic, key, notes]) => ({
+    id: `${idBase}-minor-chord`,
+    name: `${tonic} minor chord`,
+    tonic,
+    family: 'minor-chord' as TechniqueFamily,
+    abc: abc(`${tonic} minor chord`, key, notes),
+    difficulty: KEY_DIFF[key] ?? 0.5,
+  })),
+];
+
+export const DRILLS: Drill[] = [...MAJORS, ...MINORS, ...ARPEGGIOS, ...CHORDS].map(build);
+
+/** Daily routine — the user's "warmup order". A mix across families. */
 export const DAILY_ROUTINE_IDS: string[] = [
   'c-major',
   'g-major',
-  'd-major',
   'a-natural-minor',
   'e-natural-minor',
   'c-major-arp',
   'a-minor-arp',
+  'c-major-chord',
+  'a-minor-chord',
 ];
 
-/** Lookups for the session view and other consumers. */
-export const SCALE_BY_ID: Map<string, Scale> = new Map(SCALES.map((s) => [s.id, s]));
+/** Lookup by id. */
+export const DRILL_BY_ID: Map<string, Drill> = new Map(DRILLS.map((d) => [d.id, d]));
 
-/** Buckets in display order for the technique view. */
-export const MINOR_VARIANTS = ['natural', 'harmonic', 'melodic'] as const;
-export type MinorVariant = (typeof MINOR_VARIANTS)[number];
+/* ─── Filter helpers consumed by DrillsView ───────────────────── */
 
-export const ARPEGGIO_QUALITIES = ['major', 'minor'] as const;
-export type ArpeggioQuality = (typeof ARPEGGIO_QUALITIES)[number];
+/** Sub-toggle values within each top tab. */
+export const SCALE_SUBTABS = ['major', 'natural', 'harmonic', 'melodic'] as const;
+export type ScaleSubTab = (typeof SCALE_SUBTABS)[number];
 
-export const MINOR_FAMILY_BY_VARIANT: Record<MinorVariant, TechniqueFamily> = {
-  natural: 'natural-minor',
+export const QUALITY_SUBTABS = ['major', 'minor'] as const;
+export type QualitySubTab = (typeof QUALITY_SUBTABS)[number];
+
+export const SCALE_FAMILY_BY_SUBTAB: Record<ScaleSubTab, TechniqueFamily> = {
+  major:    'major',
+  natural:  'natural-minor',
   harmonic: 'harmonic-minor',
-  melodic: 'melodic-minor',
+  melodic:  'melodic-minor',
 };
 
-export const ARP_FAMILY_BY_QUALITY: Record<ArpeggioQuality, TechniqueFamily> = {
+export const ARP_FAMILY_BY_QUALITY: Record<QualitySubTab, TechniqueFamily> = {
   major: 'major-arpeggio',
   minor: 'minor-arpeggio',
 };
+
+export const CHORD_FAMILY_BY_QUALITY: Record<QualitySubTab, TechniqueFamily> = {
+  major: 'major-chord',
+  minor: 'minor-chord',
+};
+
+/* ─── Back-compat re-exports (renamed in this PR; kept for any external refs) ─ */
+export const SCALES = DRILLS;
+export const SCALE_BY_ID = DRILL_BY_ID;
