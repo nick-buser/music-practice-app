@@ -3,3 +3,8 @@ dist
 .tsbuildinfo*
 *.tsbuildinfo
 .vite
+
+# Playwright artifacts
+test-results
+playwright-report
+blob-report

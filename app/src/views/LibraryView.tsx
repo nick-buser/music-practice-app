@@ -5,6 +5,7 @@ import { Score } from '../verovio/Score';
 import { INSTRUMENTS, PIECES, TODAY_QUEUE, QUOTES } from '../data/sounddata';
 import { ABC_BY_PIECE } from '../data/scores';
 import type { InstrumentId, Piece } from '../data/schemas';
+import { relTime } from '../lib/time';
 import sonarRings from '../assets/sonar-rings.svg';
 
 type Filter = InstrumentId | 'all';
@@ -23,17 +24,6 @@ const THUMB_OPTS = {
   footer: 'none' as const,
   breaks: 'none' as const,
 };
-
-function relTime(dateStr: string): string {
-  const today = new Date('2026-05-19');
-  const d = new Date(dateStr);
-  const diff = Math.round((today.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-  if (diff === 0) return 'today';
-  if (diff === 1) return 'yesterday';
-  if (diff < 7) return `${diff} days ago`;
-  if (diff < 30) return `${Math.floor(diff / 7)} wk ago`;
-  return `${Math.floor(diff / 30)} mo ago`;
-}
 
 export function LibraryView({ onOpenPiece, onStartSession }: Props) {
   const [filter, setFilter] = useState<Filter>('all');

@@ -16,7 +16,8 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "noEmit": true,
-    "tsBuildInfoFile": "./.tsbuildinfo.app"
+    "tsBuildInfoFile": "./.tsbuildinfo.app",
+    "types": ["vitest/globals", "@testing-library/jest-dom"]
   },
   "include": ["src"]
 }
