@@ -5,6 +5,7 @@ import { PieceView } from './views/PieceView';
 import { SessionView } from './views/SessionView';
 import { StatsView } from './views/StatsView';
 import { SketchbookView } from './views/SketchbookView';
+import { TechniqueView } from './views/TechniqueView';
 
 export default function App() {
   const [view, setView] = useState<View>('library');
@@ -22,6 +23,8 @@ export default function App() {
     body = <SessionView pieceId={pieceId} onEnd={() => setView('library')} onOpenPiece={openPiece} />;
   } else if (view === 'stats') {
     body = <StatsView />;
+  } else if (view === 'technique') {
+    body = <TechniqueView onStartSession={startSession} />;
   } else {
     body = <SketchbookView />;
   }

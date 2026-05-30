@@ -1,8 +1,9 @@
 import { Icon } from './Icon';
 import { INSTRUMENTS, PIECES, TODAY_TOTAL_MIN, WEEK_TOTAL_MIN } from '../data/sounddata';
+import { SCALES } from '../data/scales';
 import markUrl from '../assets/mark.svg';
 
-export type View = 'library' | 'piece' | 'session' | 'stats' | 'sketchbook';
+export type View = 'library' | 'piece' | 'session' | 'stats' | 'sketchbook' | 'technique';
 
 interface Props {
   view: View;
@@ -11,6 +12,7 @@ interface Props {
 
 const NAV: Array<{ id: View; icon: string; label: string; count: number | null }> = [
   { id: 'library',    icon: 'book',      label: 'Library',    count: PIECES.length },
+  { id: 'technique',  icon: 'scales',    label: 'Technique',  count: SCALES.length },
   { id: 'session',    icon: 'metronome', label: 'Session',    count: null },
   { id: 'stats',      icon: 'chart',     label: 'Stats',      count: null },
   { id: 'sketchbook', icon: 'pen',       label: 'Sketchbook', count: 3 },

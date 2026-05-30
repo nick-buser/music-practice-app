@@ -1924,3 +1924,195 @@ button { font-family: inherit; }
   border-radius: 999px;
   border: 1px solid var(--line);
 }
+
+/* ============================================================
+   TECHNIQUE view — scales & arpeggios
+   ============================================================ */
+.tech-tabs {
+  display: flex; gap: 0;
+  border-bottom: 1px solid var(--line);
+  margin: 32px 0 28px;
+}
+.tech-tab {
+  background: transparent;
+  border: none;
+  color: var(--mist);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 12px 22px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  display: inline-flex; align-items: center; gap: 10px;
+  transition: color var(--dur-quick) var(--ease-glide);
+}
+.tech-tab:hover:not([disabled]) { color: var(--foam); }
+.tech-tab.active {
+  color: var(--lumen);
+  border-color: var(--lumen);
+}
+.tech-tab[disabled] { color: var(--shoal); cursor: not-allowed; }
+.tech-tab .soon {
+  font-family: var(--font-mono);
+  font-size: 9px; letter-spacing: 0.12em;
+  color: var(--shoal);
+  text-transform: lowercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+}
+
+.tech-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 48px;
+}
+.tech-rail { display: flex; flex-direction: column; gap: 28px; }
+
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.scale-card {
+  background: var(--abyss);
+  border: 1px solid var(--line);
+  border-top: 1px solid color-mix(in oklch, var(--lumen) 25%, transparent);
+  border-radius: 6px;
+  padding: 18px 20px 14px;
+  display: flex; flex-direction: column; gap: 12px;
+  transition: border-color var(--dur-quick) var(--ease-glide), transform var(--dur-quick) var(--ease-glide);
+}
+.scale-card:hover {
+  border-color: color-mix(in oklch, var(--lumen) 55%, transparent);
+  transform: translateY(-1px);
+}
+.scale-card[data-comfort="struggle"] {
+  border-top-color: color-mix(in oklch, var(--coral) 60%, transparent);
+}
+.scale-card[data-comfort="warm"] {
+  border-top-color: color-mix(in oklch, var(--krill) 60%, transparent);
+}
+
+.scale-card header {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+.scale-card header .tonic {
+  font-family: var(--font-display);
+  font-size: 38px;
+  line-height: 1;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  color: var(--foam);
+}
+.scale-card header .name .n {
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: -0.014em;
+  color: var(--foam);
+}
+.scale-card header .name .s {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--shoal);
+  margin-top: 2px;
+}
+.scale-card header .dot {
+  width: 10px; height: 10px;
+  margin-right: 0;
+}
+
+.scale-card .engraving {
+  height: 64px;
+  display: flex; align-items: center; justify-content: center;
+  background: color-mix(in oklch, var(--abyss-deep) 60%, transparent);
+  border-radius: 4px;
+  padding: 4px 8px;
+  overflow: hidden;
+}
+.scale-card .engraving svg { max-width: 100%; max-height: 100%; display: block; }
+.scale-card .engraving svg * {
+  fill: var(--mist) !important;
+  stroke: var(--mist) !important;
+}
+.scale-card:hover .engraving svg * {
+  fill: var(--lumen-bright) !important;
+  stroke: var(--lumen-bright) !important;
+}
+.scale-card .engraving .loading {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--shoal); letter-spacing: 0.12em;
+}
+
+.scale-card .meta {
+  display: flex; gap: 14px; flex-wrap: wrap;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--shoal); letter-spacing: 0.04em;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+.scale-card .meta b { color: var(--foam); font-weight: 400; }
+
+.scale-card footer {
+  display: flex; justify-content: flex-end;
+}
+.scale-card footer .btn { padding: 7px 14px; font-size: 10px; }
+
+/* Routine list on the rail — reuses queue-item visual language */
+.routine-list { display: flex; flex-direction: column; gap: 8px; }
+.routine-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--abyss-soft);
+  cursor: pointer;
+  transition: all var(--dur-quick) var(--ease-glide);
+}
+.routine-item:hover { border-color: color-mix(in oklch, var(--lumen) 30%, transparent); }
+.routine-item .ord {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--shoal); letter-spacing: 0.04em;
+  width: 22px;
+}
+.routine-item .what { flex: 1; min-width: 0; }
+.routine-item .what .t {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--foam);
+  letter-spacing: -0.012em;
+}
+.routine-item .what .s {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--mist);
+  margin-top: 2px;
+  letter-spacing: 0.04em;
+}
+.routine-item .dot { margin-right: 0; }
+
+/* "Coming soon" stub for the inactive tabs */
+.tech-soon {
+  padding: 80px 0;
+  display: flex; flex-direction: column; gap: 18px;
+  color: var(--shoal);
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 18px;
+  max-width: 52ch;
+}
+.tech-soon .label {
+  font-family: var(--font-sans);
+  font-size: 11px; letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--lumen);
+  font-style: normal;
+}
