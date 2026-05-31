@@ -126,6 +126,12 @@ function subjectBylineForScale(family: string): string {
       return 'dominant 9 chord (block)';
     case 'min9-chord':
       return 'minor 9 chord (block)';
+    case 'maj11-chord':
+      return 'major 11 chord (block)';
+    case 'dom11-chord':
+      return 'dominant 11 chord (block)';
+    case 'min11-chord':
+      return 'minor 11 chord (block)';
     default:
       return 'drill';
   }

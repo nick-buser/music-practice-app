@@ -56,7 +56,7 @@ test.describe('Drills view', () => {
     await expect(page.getByRole('button', { name: /^Major$/i })).toHaveAttribute('aria-pressed', 'true');
 
     const catLabels = await page.locator('.chord-type-row .cat-label').allTextContents();
-    expect(catLabels).toEqual(['Triads', '7ths', '9ths']);
+    expect(catLabels).toEqual(['Triads', '7ths', '9ths', '11ths']);
 
     await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/major triad/i);
   });
@@ -97,6 +97,25 @@ test.describe('Drills view', () => {
     await page.getByRole('button', { name: /^Min9$/i }).click();
     await expect(page.locator('.scale-card')).toHaveCount(12);
     await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/minor 9/i);
+  });
+
+  test('Chords sub-toggle: Maj11 / Dom11 / Min11 each swap to 12 cards', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+
+    await page.getByRole('button', { name: /^Maj11$/i }).click();
+    await expect(page.getByRole('button', { name: /^Maj11$/i })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.scale-card')).toHaveCount(12);
+    await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/major 11/i);
+
+    await page.getByRole('button', { name: /^Dom11$/i }).click();
+    await expect(page.locator('.scale-card')).toHaveCount(12);
+    await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/dominant 11/i);
+
+    await page.getByRole('button', { name: /^Min11$/i }).click();
+    await expect(page.locator('.scale-card')).toHaveCount(12);
+    await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/minor 11/i);
   });
 });
 
@@ -151,14 +170,27 @@ test.describe('Drill-aware session', () => {
     await page.getByRole('button', { name: /^Min9$/i }).click();
     await page.waitForSelector('.scale-card');
 
-    // Min9 cards are listed in tonic order; Dm9 is the 6th (A E B F# C# D...).
-    // Use a more specific selector to find the D minor 9 card.
     const dm9 = page.locator('.scale-card', { hasText: 'Dm9' });
     await dm9.getByRole('button', { name: /Run it/i }).click();
     await page.waitForSelector('.session-score svg', { timeout: 30_000 });
 
     await expect(page.locator('.session-piece h2')).toContainText('Dm9');
     await expect(page.locator('.session-piece h2 em')).toContainText('minor 9 chord');
+  });
+
+  test('Run it on a Gm11 card opens a session with the 11th-chord byline', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+    await page.getByRole('button', { name: /^Min11$/i }).click();
+    await page.waitForSelector('.scale-card');
+
+    const gm11 = page.locator('.scale-card', { hasText: 'Gm11' });
+    await gm11.getByRole('button', { name: /Run it/i }).click();
+    await page.waitForSelector('.session-score svg', { timeout: 30_000 });
+
+    await expect(page.locator('.session-piece h2')).toContainText('Gm11');
+    await expect(page.locator('.session-piece h2 em')).toContainText('minor 11 chord');
   });
 
   test('End warmup returns to the Drills view, not the Library', async ({ page }) => {

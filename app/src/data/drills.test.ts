@@ -42,8 +42,14 @@ describe('DRILLS', () => {
     expect(DRILLS.filter((d) => d.family === 'min9-chord')).toHaveLength(12);
   });
 
-  it('totals 168 entries', () => {
-    expect(DRILLS).toHaveLength(168);
+  it('has 36 eleventh chords (12 maj11 + 12 dom11 + 12 m11)', () => {
+    expect(DRILLS.filter((d) => d.family === 'maj11-chord')).toHaveLength(12);
+    expect(DRILLS.filter((d) => d.family === 'dom11-chord')).toHaveLength(12);
+    expect(DRILLS.filter((d) => d.family === 'min11-chord')).toHaveLength(12);
+  });
+
+  it('totals 204 entries', () => {
+    expect(DRILLS).toHaveLength(204);
   });
 
   it('uses distinct ids across the set', () => {
@@ -94,6 +100,7 @@ describe('DRILLS', () => {
       'major-chord', 'minor-chord',
       'maj7-chord', 'dom7-chord', 'min7-chord',
       'maj9-chord', 'dom9-chord', 'min9-chord',
+      'maj11-chord', 'dom11-chord', 'min11-chord',
     ];
     const chords = DRILLS.filter((d) => chordFams.includes(d.family));
     for (const d of chords) {
@@ -124,13 +131,27 @@ describe('DRILLS', () => {
     }
   });
 
-  it('7th- and 9th-chord names follow jazz convention (Maj7 / 7 / m7, Maj9 / 9 / m9)', () => {
+  it('eleventh chords contain six chord tones in the bracket', () => {
+    const eleventhFams: TechniqueFamily[] = ['maj11-chord', 'dom11-chord', 'min11-chord'];
+    const elevenths = DRILLS.filter((d) => eleventhFams.includes(d.family));
+    expect(elevenths).toHaveLength(36);
+    for (const d of elevenths) {
+      const inside = d.abc.match(/\[([^\]]+)\]/)?.[1] ?? '';
+      const letters = inside.replace(/[\^_=,'0-9 ]/g, '');
+      expect(letters.length).toBe(6);
+    }
+  });
+
+  it('extended-chord names follow jazz convention (Maj7/7/m7, Maj9/9/m9, Maj11/11/m11)', () => {
     expect(DRILLS.find((d) => d.id === 'c-maj7-chord')?.name).toBe('Cmaj7');
     expect(DRILLS.find((d) => d.id === 'c-dom7-chord')?.name).toBe('C7');
     expect(DRILLS.find((d) => d.id === 'a-min7-chord')?.name).toBe('Am7');
     expect(DRILLS.find((d) => d.id === 'c-maj9-chord')?.name).toBe('Cmaj9');
     expect(DRILLS.find((d) => d.id === 'c-dom9-chord')?.name).toBe('C9');
     expect(DRILLS.find((d) => d.id === 'd-min9-chord')?.name).toBe('Dm9');
+    expect(DRILLS.find((d) => d.id === 'c-maj11-chord')?.name).toBe('Cmaj11');
+    expect(DRILLS.find((d) => d.id === 'c-dom11-chord')?.name).toBe('C11');
+    expect(DRILLS.find((d) => d.id === 'g-min11-chord')?.name).toBe('Gm11');
   });
 
   it('C#m7 voices the 7th in the same octave as the rest of the chord (regression)', () => {
@@ -176,9 +197,11 @@ describe('chord-type taxonomy', () => {
     const triads = CHORD_TYPES.filter((t) => CHORD_TYPE_META[t].category === 'triads');
     const sevenths = CHORD_TYPES.filter((t) => CHORD_TYPE_META[t].category === 'sevenths');
     const ninths = CHORD_TYPES.filter((t) => CHORD_TYPE_META[t].category === 'ninths');
+    const elevenths = CHORD_TYPES.filter((t) => CHORD_TYPE_META[t].category === 'elevenths');
     expect(triads).toEqual(['major', 'minor']);
     expect(sevenths).toEqual(['maj7', 'dom7', 'min7']);
     expect(ninths).toEqual(['maj9', 'dom9', 'min9']);
+    expect(elevenths).toEqual(['maj11', 'dom11', 'min11']);
   });
 });
 
