@@ -155,10 +155,12 @@ export const TechniqueFamily = z.enum([
   '7s11-chord',
   '13b9-chord',
   // Half/fully diminished + lydian major.
-  // Next: 7alt, maj7♯5.
   'm7b5-chord',
   'dim7-chord',
   'maj7s11-chord',
+  // The full altered dominant + augmented major 7.
+  '7alt-chord',
+  'maj7s5-chord',
 ]);
 export type TechniqueFamily = z.infer<typeof TechniqueFamily>;
 

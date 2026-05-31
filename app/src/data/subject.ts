@@ -156,6 +156,10 @@ function subjectBylineForScale(family: string): string {
       return 'fully diminished 7';
     case 'maj7s11-chord':
       return 'lydian major (maj7♯11)';
+    case '7alt-chord':
+      return 'fully altered dominant';
+    case 'maj7s5-chord':
+      return 'augmented major 7';
     default:
       return 'drill';
   }
