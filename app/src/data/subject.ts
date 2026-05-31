@@ -138,6 +138,18 @@ function subjectBylineForScale(family: string): string {
       return 'dominant 13 chord (block)';
     case 'min13-chord':
       return 'minor 13 chord (block)';
+    case '7b5-chord':
+      return 'altered dom · ♭5';
+    case '7s5-chord':
+      return 'altered dom · ♯5';
+    case '7b9-chord':
+      return 'altered dom · ♭9';
+    case '7s9-chord':
+      return 'altered dom · ♯9';
+    case '7s11-chord':
+      return 'lydian dom · ♯11';
+    case '13b9-chord':
+      return 'dom 13 · ♭9';
     default:
       return 'drill';
   }

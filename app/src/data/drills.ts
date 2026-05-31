@@ -580,8 +580,180 @@ const THIRTEENTHS: Spec[] = [
   })),
 ];
 
+/* ─── 72 altered dominants (6 types × 12 keys) ─────────────────────
+ *
+ * Each altered family takes a dom7/9/11/13 letter sequence and applies one
+ * explicit accidental on the altered chord tone. The K: signature is the
+ * dom-parent's K (resolution-key major) so the unaltered tones still land
+ * without explicit accidentals — only the alteration is marked on the chord.
+ *
+ * Some flat-key chords (e.g. Eb7♭5 = Eb G Bbb Db, Ab7♭5 = Ab C Ebb Gb,
+ * Db7♭5 = Db F Abb Cb) end up with double-flat spellings because the
+ * theoretically-correct b5 of a chord whose 5 is already flat is a double
+ * flat. We use ABC's `__` prefix for these and accept the busier engraving
+ * rather than slipping to enharmonic spellings — the chord theory stays
+ * consistent across all 12 keys.
+ *
+ *   7♭5    1 · 3 · ♭5 · ♭7              (4 tones)
+ *   7♯5    1 · 3 · ♯5 · ♭7              (4 tones)
+ *   7♭9    1 · 3 · 5 · ♭7 · ♭9          (5 tones)
+ *   7♯9    1 · 3 · 5 · ♭7 · ♯9          (5 tones)
+ *   7♯11   1 · 3 · 5 · ♭7 · ♯11         (5 tones; the 9 is not implied)
+ *   13♭9   1 · 3 · 5 · ♭7 · ♭9 · 11 · 13 (7 tones — dom13 with the 9 altered)
+ */
+
+// 7♭5: dom7 with the 5 flatted.
+const ALT_7b5_KEYS: ChordRow7[] = [
+  ['c',  'C',  'F',  '[CE_GB]4 |'],
+  ['g',  'G',  'C',  '[GB_df]4 |'],
+  ['d',  'D',  'G',  '[DF_Ac]4 |'],
+  ['a',  'A',  'D',  '[AC_Eg]4 |'],
+  ['e',  'E',  'A',  '[EG_Bd]4 |'],
+  ['b',  'B',  'E',  '[Bd=fa]4 |'],
+  ['fs', 'F♯', 'B',  '[FA=ce]4 |'],
+  ['f',  'F',  'Bb', '[FA_Ce]4 |'],
+  ['bb', 'B♭', 'Eb', '[Bd_fa]4 |'],
+  ['eb', 'E♭', 'Ab', '[EG__Bd]4 |'],
+  ['ab', 'A♭', 'Db', '[AC__Eg]4 |'],
+  ['db', 'D♭', 'Gb', '[DF__Ac]4 |'],
+];
+
+// 7♯5: dom7 with the 5 sharpened. The ♯5 of a sharp-key 5 needs a
+// double-sharp (Bmaj's 5 is F# → ♯5 is Fx). Flat keys come out clean.
+const ALT_7s5_KEYS: ChordRow7[] = [
+  ['c',  'C',  'F',  '[CE^GB]4 |'],
+  ['g',  'G',  'C',  '[GB^df]4 |'],
+  ['d',  'D',  'G',  '[DF^Ac]4 |'],
+  ['a',  'A',  'D',  '[AC^Eg]4 |'],
+  ['e',  'E',  'A',  '[EG^Bd]4 |'],
+  ['b',  'B',  'E',  '[Bd^^fa]4 |'],
+  ['fs', 'F♯', 'B',  '[FA^^ce]4 |'],
+  ['f',  'F',  'Bb', '[FA^Ce]4 |'],
+  ['bb', 'B♭', 'Eb', '[Bd^fa]4 |'],
+  ['eb', 'E♭', 'Ab', '[EG=Bd]4 |'],
+  ['ab', 'A♭', 'Db', '[AC=Eg]4 |'],
+  ['db', 'D♭', 'Gb', '[DF=Ac]4 |'],
+];
+
+// 7♭9: dom7 stack + b9 (no natural 9 implied).
+const ALT_7b9_KEYS: ChordRow7[] = [
+  ['c',  'C',  'F',  '[CEGB_d]4 |'],
+  ['g',  'G',  'C',  '[GBdf_a]4 |'],
+  ['d',  'D',  'G',  '[DFAc_e]4 |'],
+  ['a',  'A',  'D',  '[ACEg_b]4 |'],
+  ['e',  'E',  'A',  "[EGBd=f]4 |"],
+  ['b',  'B',  'E',  "[Bdfa=c']4 |"],
+  ['fs', 'F♯', 'B',  '[FAce=g]4 |'],
+  ['f',  'F',  'Bb', '[FACe_g]4 |'],
+  ['bb', 'B♭', 'Eb', "[Bdfa_c']4 |"],
+  ['eb', 'E♭', 'Ab', '[EGBd_f]4 |'],
+  ['ab', 'A♭', 'Db', '[ACEg__b]4 |'],
+  ['db', 'D♭', 'Gb', '[DFAc__e]4 |'],
+];
+
+// 7♯9: dom7 stack + #9 (the "Hendrix chord").
+const ALT_7s9_KEYS: ChordRow7[] = [
+  ['c',  'C',  'F',  '[CEGB^d]4 |'],
+  ['g',  'G',  'C',  '[GBdf^a]4 |'],
+  ['d',  'D',  'G',  '[DFAc^e]4 |'],
+  ['a',  'A',  'D',  '[ACEg^b]4 |'],
+  ['e',  'E',  'A',  '[EGBd^f]4 |'],
+  ['b',  'B',  'E',  "[Bdfa^c']4 |"],
+  ['fs', 'F♯', 'B',  '[FAce^g]4 |'],
+  ['f',  'F',  'Bb', '[FACe^g]4 |'],
+  ['bb', 'B♭', 'Eb', "[Bdfa=c']4 |"],
+  ['eb', 'E♭', 'Ab', '[EGBd=f]4 |'],
+  ['ab', 'A♭', 'Db', '[ACEg=b]4 |'],
+  ['db', 'D♭', 'Gb', '[DFAc=e]4 |'],
+];
+
+// 7♯11: dom7 stack + #11 (Lydian dominant; we omit the 9 to keep the
+// chord at five clean tones — adding the 9 is fine but not implied here).
+const ALT_7s11_KEYS: ChordRow7[] = [
+  ['c',  'C',  'F',  '[CEGB^f]4 |'],
+  ['g',  'G',  'C',  "[GBdf^c']4 |"],
+  ['d',  'D',  'G',  '[DFAc^g]4 |'],
+  ['a',  'A',  'D',  "[ACEg^d']4 |"],
+  ['e',  'E',  'A',  '[EGBd^a]4 |'],
+  ['b',  'B',  'E',  "[Bdfa^e']4 |"],
+  ['fs', 'F♯', 'B',  '[FAce^b]4 |'],
+  ['f',  'F',  'Bb', '[FACe=b]4 |'],
+  ['bb', 'B♭', 'Eb', "[Bdfa=e']4 |"],
+  ['eb', 'E♭', 'Ab', '[EGBd=a]4 |'],
+  ['ab', 'A♭', 'Db', "[ACEg=d']4 |"],
+  ['db', 'D♭', 'Gb', '[DFAc=g]4 |'],
+];
+
+// 13♭9: dom13 stack with the 9 flatted (preserves the 11 and 13).
+const ALT_13b9_KEYS: ChordRow7[] = [
+  ['c',  'C',  'F',  '[CEGB_dfa]4 |'],
+  ['g',  'G',  'C',  "[GBdf_ac'e']4 |"],
+  ['d',  'D',  'G',  '[DFAc_egb]4 |'],
+  ['a',  'A',  'D',  "[ACEg_bd'f']4 |"],
+  ['e',  'E',  'A',  "[EGBd=fac']4 |"],
+  ['b',  'B',  'E',  "[Bdfa=c'e'g']4 |"],
+  ['fs', 'F♯', 'B',  "[FAce=gbd']4 |"],
+  ['f',  'F',  'Bb', "[FACe_gbd']4 |"],
+  ['bb', 'B♭', 'Eb', "[Bdfa_c'e'g']4 |"],
+  ['eb', 'E♭', 'Ab', "[EGBd_fac']4 |"],
+  ['ab', 'A♭', 'Db', "[ACEg__bd'f']4 |"],
+  ['db', 'D♭', 'Gb', '[DFAc__egb]4 |'],
+];
+
+const ALTERED: Spec[] = [
+  ...ALT_7b5_KEYS.map(([idBase, tonic, key, notes]) => ({
+    id: `${idBase}-7b5-chord`,
+    name: `${tonic}7♭5`,
+    tonic,
+    family: '7b5-chord' as TechniqueFamily,
+    abc: abc(`${tonic}7♭5 chord`, key, notes),
+    difficulty: (KEY_DIFF[key] ?? 0.5) + 0.25,
+  })),
+  ...ALT_7s5_KEYS.map(([idBase, tonic, key, notes]) => ({
+    id: `${idBase}-7s5-chord`,
+    name: `${tonic}7♯5`,
+    tonic,
+    family: '7s5-chord' as TechniqueFamily,
+    abc: abc(`${tonic}7♯5 chord`, key, notes),
+    difficulty: (KEY_DIFF[key] ?? 0.5) + 0.25,
+  })),
+  ...ALT_7b9_KEYS.map(([idBase, tonic, key, notes]) => ({
+    id: `${idBase}-7b9-chord`,
+    name: `${tonic}7♭9`,
+    tonic,
+    family: '7b9-chord' as TechniqueFamily,
+    abc: abc(`${tonic}7♭9 chord`, key, notes),
+    difficulty: (KEY_DIFF[key] ?? 0.5) + 0.25,
+  })),
+  ...ALT_7s9_KEYS.map(([idBase, tonic, key, notes]) => ({
+    id: `${idBase}-7s9-chord`,
+    name: `${tonic}7♯9`,
+    tonic,
+    family: '7s9-chord' as TechniqueFamily,
+    abc: abc(`${tonic}7♯9 chord`, key, notes),
+    difficulty: (KEY_DIFF[key] ?? 0.5) + 0.25,
+  })),
+  ...ALT_7s11_KEYS.map(([idBase, tonic, key, notes]) => ({
+    id: `${idBase}-7s11-chord`,
+    name: `${tonic}7♯11`,
+    tonic,
+    family: '7s11-chord' as TechniqueFamily,
+    abc: abc(`${tonic}7♯11 chord`, key, notes),
+    difficulty: (KEY_DIFF[key] ?? 0.5) + 0.25,
+  })),
+  ...ALT_13b9_KEYS.map(([idBase, tonic, key, notes]) => ({
+    id: `${idBase}-13b9-chord`,
+    name: `${tonic}13♭9`,
+    tonic,
+    family: '13b9-chord' as TechniqueFamily,
+    abc: abc(`${tonic}13♭9 chord`, key, notes),
+    difficulty: (KEY_DIFF[key] ?? 0.5) + 0.3,
+  })),
+];
+
 export const DRILLS: Drill[] = [
-  ...MAJORS, ...MINORS, ...ARPEGGIOS, ...CHORDS, ...SEVENTHS, ...NINTHS, ...ELEVENTHS, ...THIRTEENTHS,
+  ...MAJORS, ...MINORS, ...ARPEGGIOS, ...CHORDS, ...SEVENTHS, ...NINTHS,
+  ...ELEVENTHS, ...THIRTEENTHS, ...ALTERED,
 ].map(build);
 
 /** Daily routine — the user's "warmup order". A mix across families. */
@@ -598,6 +770,7 @@ export const DAILY_ROUTINE_IDS: string[] = [
   'd-min9-chord',
   'g-min11-chord',
   'f-maj13-chord',
+  'e-7s9-chord',
 ];
 
 /** Lookup by id. */
@@ -658,6 +831,12 @@ export const CHORD_TYPES = [
   'maj13',
   'dom13',
   'min13',
+  '7b5',
+  '7s5',
+  '7b9',
+  '7s9',
+  '7s11',
+  '13b9',
 ] as const;
 export type ChordType = (typeof CHORD_TYPES)[number];
 
@@ -666,7 +845,7 @@ export interface ChordTypeMeta {
   /** Pill label shown in the sub-toggle. */
   label: string;
   /** Group the pill is rendered in. */
-  category: 'triads' | 'sevenths' | 'ninths' | 'elevenths' | 'thirteenths';
+  category: 'triads' | 'sevenths' | 'ninths' | 'elevenths' | 'thirteenths' | 'altered';
   /** The TechniqueFamily this type maps to. */
   family: TechniqueFamily;
 }
@@ -686,6 +865,12 @@ export const CHORD_TYPE_META: Record<ChordType, ChordTypeMeta> = {
   maj13: { type: 'maj13', label: 'Maj13', category: 'thirteenths', family: 'maj13-chord' },
   dom13: { type: 'dom13', label: 'Dom13', category: 'thirteenths', family: 'dom13-chord' },
   min13: { type: 'min13', label: 'Min13', category: 'thirteenths', family: 'min13-chord' },
+  '7b5':  { type: '7b5',  label: '7♭5',   category: 'altered',     family: '7b5-chord' },
+  '7s5':  { type: '7s5',  label: '7♯5',   category: 'altered',     family: '7s5-chord' },
+  '7b9':  { type: '7b9',  label: '7♭9',   category: 'altered',     family: '7b9-chord' },
+  '7s9':  { type: '7s9',  label: '7♯9',   category: 'altered',     family: '7s9-chord' },
+  '7s11': { type: '7s11', label: '7♯11',  category: 'altered',     family: '7s11-chord' },
+  '13b9': { type: '13b9', label: '13♭9',  category: 'altered',     family: '13b9-chord' },
 };
 
 export const CHORD_CATEGORIES = [
@@ -694,6 +879,7 @@ export const CHORD_CATEGORIES = [
   { id: 'ninths',      label: '9ths' },
   { id: 'elevenths',   label: '11ths' },
   { id: 'thirteenths', label: '13ths' },
+  { id: 'altered',     label: 'Altered' },
 ] as const;
 export type ChordCategory = (typeof CHORD_CATEGORIES)[number]['id'];
 
