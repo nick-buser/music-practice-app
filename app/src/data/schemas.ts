@@ -148,13 +148,17 @@ export const TechniqueFamily = z.enum([
   'dom13-chord',
   'min13-chord',
   // Altered dominants (and friends).
-  // Future PRs will add more (m7♭5 / dim7 / 7alt / maj7♯11 / etc.).
   '7b5-chord',
   '7s5-chord',
   '7b9-chord',
   '7s9-chord',
   '7s11-chord',
   '13b9-chord',
+  // Half/fully diminished + lydian major.
+  // Next: 7alt, maj7♯5.
+  'm7b5-chord',
+  'dim7-chord',
+  'maj7s11-chord',
 ]);
 export type TechniqueFamily = z.infer<typeof TechniqueFamily>;
 

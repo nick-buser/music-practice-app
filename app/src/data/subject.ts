@@ -150,6 +150,12 @@ function subjectBylineForScale(family: string): string {
       return 'lydian dom · ♯11';
     case '13b9-chord':
       return 'dom 13 · ♭9';
+    case 'm7b5-chord':
+      return 'half-diminished 7';
+    case 'dim7-chord':
+      return 'fully diminished 7';
+    case 'maj7s11-chord':
+      return 'lydian major (maj7♯11)';
     default:
       return 'drill';
   }

@@ -100,6 +100,24 @@ describe('DrillsView', () => {
     expect(screen.getAllByText(/dominant 13 ♭9/i).length).toBeGreaterThanOrEqual(12);
   });
 
+  it('Chords → m7♭5 / °7 / maj7♯11 each swap to 12 cards', () => {
+    render(<DrillsView onStartSession={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'm7♭5' }));
+    expect(screen.getByRole('button', { name: 'm7♭5', pressed: true })).toBeInTheDocument();
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getAllByText(/half-diminished 7/i).length).toBeGreaterThanOrEqual(12);
+
+    fireEvent.click(screen.getByRole('button', { name: '°7' }));
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getAllByText(/fully diminished 7/i).length).toBeGreaterThanOrEqual(12);
+
+    fireEvent.click(screen.getByRole('button', { name: 'maj7♯11' }));
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getAllByText(/lydian major/i).length).toBeGreaterThanOrEqual(12);
+  });
+
   it('Chords → Maj13 / Dom13 / Min13 each swap to 12 cards with the right subtitle', () => {
     render(<DrillsView onStartSession={() => {}} />);
     fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
