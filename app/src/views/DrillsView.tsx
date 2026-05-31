@@ -385,5 +385,9 @@ function subtitleFor(drill: Drill): string {
       return 'fully diminished 7 · 1 · ♭3 · ♭5 · ♭♭7';
     case 'maj7s11-chord':
       return 'lydian major · 1 · 3 · 5 · 7 · ♯11';
+    case '7alt-chord':
+      return 'fully altered dom · 1 · 3 · ♯5 · ♭7 · ♭9 · ♯9';
+    case 'maj7s5-chord':
+      return 'augmented major 7 · 1 · 3 · ♯5 · 7';
   }
 }

@@ -156,6 +156,22 @@ test.describe('Drills view', () => {
     }
   });
 
+  test('Chords sub-toggle: 7alt and maj7♯5 each swap to 12 cards', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+
+    for (const [label, subtitleMatch] of [
+      ['7alt',    /fully altered dom/i],
+      ['maj7♯5',  /augmented major 7/i],
+    ] as const) {
+      await page.getByRole('button', { name: label }).click();
+      await expect(page.getByRole('button', { name: label })).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.locator('.scale-card')).toHaveCount(12);
+      await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(subtitleMatch);
+    }
+  });
+
   test('Chords sub-toggle: Maj13 / Dom13 / Min13 each swap to 12 cards', async ({ page }) => {
     await page.goto('/');
     await page.locator('.side .nav a', { hasText: 'Drills' }).click();
@@ -308,6 +324,36 @@ test.describe('Drill-aware session', () => {
 
     await expect(page.locator('.session-piece h2')).toContainText('C°7');
     await expect(page.locator('.session-piece h2 em')).toContainText('fully diminished');
+  });
+
+  test('Run it on a G7alt card opens a session with the altered-dominant byline', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+    await page.getByRole('button', { name: '7alt' }).click();
+    await page.waitForSelector('.scale-card');
+
+    const g7alt = page.locator('.scale-card', { hasText: 'G7alt' });
+    await g7alt.getByRole('button', { name: /Run it/i }).click();
+    await page.waitForSelector('.session-score svg', { timeout: 30_000 });
+
+    await expect(page.locator('.session-piece h2')).toContainText('G7alt');
+    await expect(page.locator('.session-piece h2 em')).toContainText('fully altered dominant');
+  });
+
+  test('Run it on a Cmaj7♯5 card opens a session with the augmented-major byline', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+    await page.getByRole('button', { name: 'maj7♯5' }).click();
+    await page.waitForSelector('.scale-card');
+
+    const cmaj = page.locator('.scale-card', { hasText: 'Cmaj7♯5' });
+    await cmaj.getByRole('button', { name: /Run it/i }).click();
+    await page.waitForSelector('.session-score svg', { timeout: 30_000 });
+
+    await expect(page.locator('.session-piece h2')).toContainText('Cmaj7♯5');
+    await expect(page.locator('.session-piece h2 em')).toContainText('augmented major 7');
   });
 
   test('End warmup returns to the Drills view, not the Library', async ({ page }) => {

@@ -118,6 +118,21 @@ describe('DrillsView', () => {
     expect(screen.getAllByText(/lydian major/i).length).toBeGreaterThanOrEqual(12);
   });
 
+  it('Chords → 7alt and maj7♯5 each swap to 12 cards', () => {
+    render(<DrillsView onStartSession={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
+
+    fireEvent.click(screen.getByRole('button', { name: '7alt' }));
+    expect(screen.getByRole('button', { name: '7alt', pressed: true })).toBeInTheDocument();
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getAllByText(/fully altered dom/i).length).toBeGreaterThanOrEqual(12);
+
+    fireEvent.click(screen.getByRole('button', { name: 'maj7♯5' }));
+    expect(screen.getByRole('button', { name: 'maj7♯5', pressed: true })).toBeInTheDocument();
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getAllByText(/augmented major 7/i).length).toBeGreaterThanOrEqual(12);
+  });
+
   it('Chords → Maj13 / Dom13 / Min13 each swap to 12 cards with the right subtitle', () => {
     render(<DrillsView onStartSession={() => {}} />);
     fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));

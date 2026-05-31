@@ -69,8 +69,13 @@ describe('DRILLS', () => {
     expect(DRILLS.filter((d) => d.family === 'maj7s11-chord')).toHaveLength(12);
   });
 
-  it('totals 348 entries', () => {
-    expect(DRILLS).toHaveLength(348);
+  it('has 24 more altered: 7alt + maj7♯5 (12 each)', () => {
+    expect(DRILLS.filter((d) => d.family === '7alt-chord')).toHaveLength(12);
+    expect(DRILLS.filter((d) => d.family === 'maj7s5-chord')).toHaveLength(12);
+  });
+
+  it('totals 372 entries', () => {
+    expect(DRILLS).toHaveLength(372);
   });
 
   it('uses distinct ids across the set', () => {
@@ -125,6 +130,7 @@ describe('DRILLS', () => {
       'maj13-chord', 'dom13-chord', 'min13-chord',
       '7b5-chord', '7s5-chord', '7b9-chord', '7s9-chord', '7s11-chord', '13b9-chord',
       'm7b5-chord', 'dim7-chord', 'maj7s11-chord',
+      '7alt-chord', 'maj7s5-chord',
     ];
     const chords = DRILLS.filter((d) => chordFams.includes(d.family));
     for (const d of chords) {
@@ -222,6 +228,43 @@ describe('DRILLS', () => {
     // Lydian major.
     expect(DRILLS.find((d) => d.id === 'c-maj7s11-chord')?.name).toBe('Cmaj7♯11');
     expect(DRILLS.find((d) => d.id === 'f-maj7s11-chord')?.name).toBe('Fmaj7♯11');
+  });
+
+  it('7alt and maj7♯5 names follow jazz convention', () => {
+    expect(DRILLS.find((d) => d.id === 'c-7alt-chord')?.name).toBe('C7alt');
+    expect(DRILLS.find((d) => d.id === 'g-7alt-chord')?.name).toBe('G7alt');
+    expect(DRILLS.find((d) => d.id === 'bb-7alt-chord')?.name).toBe('B♭7alt');
+    expect(DRILLS.find((d) => d.id === 'c-maj7s5-chord')?.name).toBe('Cmaj7♯5');
+    expect(DRILLS.find((d) => d.id === 'fs-maj7s5-chord')?.name).toBe('F♯maj7♯5');
+  });
+
+  it('7alt is a 6-tone voicing (1, 3, ♯5, ♭7, ♭9, ♯9)', () => {
+    const alts = DRILLS.filter((d) => d.family === '7alt-chord');
+    expect(alts).toHaveLength(12);
+    for (const d of alts) {
+      const inside = d.abc.match(/\[([^\]]+)\]/)?.[1] ?? '';
+      const letters = inside.replace(/[\^_=,'0-9 ]/g, '');
+      expect(letters.length).toBe(6);
+    }
+  });
+
+  it('maj7♯5 is a 4-tone voicing (1, 3, ♯5, 7)', () => {
+    const aug = DRILLS.filter((d) => d.family === 'maj7s5-chord');
+    expect(aug).toHaveLength(12);
+    for (const d of aug) {
+      const inside = d.abc.match(/\[([^\]]+)\]/)?.[1] ?? '';
+      const letters = inside.replace(/[\^_=,'0-9 ]/g, '');
+      expect(letters.length).toBe(4);
+    }
+  });
+
+  it('Bmaj7♯5 and F♯maj7♯5 preserve the theoretically correct double-sharp ♯5', () => {
+    // B's ♯5 is Fx (= G natural enharmonic); F♯'s ♯5 is Cx (= D natural).
+    // We pin the theoretical spelling so a future refactor can't drift.
+    const bmaj = DRILLS.find((d) => d.id === 'b-maj7s5-chord');
+    const fsmaj = DRILLS.find((d) => d.id === 'fs-maj7s5-chord');
+    expect(bmaj?.abc).toContain('^^');
+    expect(fsmaj?.abc).toContain('^^');
   });
 
   it('m7♭5 and dim7 have 4 chord tones; maj7♯11 has 5', () => {
@@ -330,6 +373,7 @@ describe('chord-type taxonomy', () => {
     expect(altered).toEqual([
       '7b5', '7s5', '7b9', '7s9', '7s11', '13b9',
       'm7b5', 'dim7', 'maj7s11',
+      '7alt', 'maj7s5',
     ]);
   });
 });
