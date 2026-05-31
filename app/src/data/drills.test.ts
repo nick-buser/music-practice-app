@@ -63,8 +63,14 @@ describe('DRILLS', () => {
     expect(DRILLS.filter((d) => d.family === '13b9-chord')).toHaveLength(12);
   });
 
-  it('totals 312 entries', () => {
-    expect(DRILLS).toHaveLength(312);
+  it('has 36 half-/fully-diminished + lydian-major (3 types × 12 keys)', () => {
+    expect(DRILLS.filter((d) => d.family === 'm7b5-chord')).toHaveLength(12);
+    expect(DRILLS.filter((d) => d.family === 'dim7-chord')).toHaveLength(12);
+    expect(DRILLS.filter((d) => d.family === 'maj7s11-chord')).toHaveLength(12);
+  });
+
+  it('totals 348 entries', () => {
+    expect(DRILLS).toHaveLength(348);
   });
 
   it('uses distinct ids across the set', () => {
@@ -118,6 +124,7 @@ describe('DRILLS', () => {
       'maj11-chord', 'dom11-chord', 'min11-chord',
       'maj13-chord', 'dom13-chord', 'min13-chord',
       '7b5-chord', '7s5-chord', '7b9-chord', '7s9-chord', '7s11-chord', '13b9-chord',
+      'm7b5-chord', 'dim7-chord', 'maj7s11-chord',
     ];
     const chords = DRILLS.filter((d) => chordFams.includes(d.family));
     for (const d of chords) {
@@ -205,6 +212,49 @@ describe('DRILLS', () => {
     expect(DRILLS.find((d) => d.id === 'bb-13b9-chord')?.name).toBe('B♭13♭9');
   });
 
+  it('half-/fully-dim and lydian-major names follow jazz convention', () => {
+    // Half-diminished is "m7♭5" (the more common notation than ø7).
+    expect(DRILLS.find((d) => d.id === 'b-m7b5-chord')?.name).toBe('Bm7♭5');
+    expect(DRILLS.find((d) => d.id === 'c-m7b5-chord')?.name).toBe('Cm7♭5');
+    // dim7 uses the ° glyph in the chord name.
+    expect(DRILLS.find((d) => d.id === 'c-dim7-chord')?.name).toBe('C°7');
+    expect(DRILLS.find((d) => d.id === 'fs-dim7-chord')?.name).toBe('F♯°7');
+    // Lydian major.
+    expect(DRILLS.find((d) => d.id === 'c-maj7s11-chord')?.name).toBe('Cmaj7♯11');
+    expect(DRILLS.find((d) => d.id === 'f-maj7s11-chord')?.name).toBe('Fmaj7♯11');
+  });
+
+  it('m7♭5 and dim7 have 4 chord tones; maj7♯11 has 5', () => {
+    const m7b5 = DRILLS.filter((d) => d.family === 'm7b5-chord');
+    const dim7 = DRILLS.filter((d) => d.family === 'dim7-chord');
+    const maj7s11 = DRILLS.filter((d) => d.family === 'maj7s11-chord');
+    for (const d of m7b5) {
+      const inside = d.abc.match(/\[([^\]]+)\]/)?.[1] ?? '';
+      expect(inside.replace(/[\^_=,'0-9 ]/g, '').length).toBe(4);
+    }
+    for (const d of dim7) {
+      const inside = d.abc.match(/\[([^\]]+)\]/)?.[1] ?? '';
+      expect(inside.replace(/[\^_=,'0-9 ]/g, '').length).toBe(4);
+    }
+    for (const d of maj7s11) {
+      const inside = d.abc.match(/\[([^\]]+)\]/)?.[1] ?? '';
+      expect(inside.replace(/[\^_=,'0-9 ]/g, '').length).toBe(5);
+    }
+  });
+
+  it('dim7 preserves the bb7 spelling (each dim7 contains "__" or has 4 single-flats)', () => {
+    // Theoretically-correct diminished spelling cycles by minor thirds; the
+    // bb7 of any root is two letter-steps + double-flat. We verify the chord
+    // bracket has either a double-accidental marker (__) or, for sharp/clean
+    // roots, at least one accidental per altered tone.
+    const dim7 = DRILLS.filter((d) => d.family === 'dim7-chord');
+    expect(dim7).toHaveLength(12);
+    // The flat-tonic spellings (eb, ab, db) require double-flats.
+    expect(DRILLS.find((d) => d.id === 'eb-dim7-chord')?.abc).toContain('__');
+    expect(DRILLS.find((d) => d.id === 'ab-dim7-chord')?.abc).toContain('__');
+    expect(DRILLS.find((d) => d.id === 'db-dim7-chord')?.abc).toContain('__');
+  });
+
   it('altered dominants land on the right chord-tone counts', () => {
     const fourTone: TechniqueFamily[] = ['7b5-chord', '7s5-chord'];
     const fiveTone: TechniqueFamily[] = ['7b9-chord', '7s9-chord', '7s11-chord'];
@@ -277,7 +327,10 @@ describe('chord-type taxonomy', () => {
     expect(ninths).toEqual(['maj9', 'dom9', 'min9']);
     expect(elevenths).toEqual(['maj11', 'dom11', 'min11']);
     expect(thirteenths).toEqual(['maj13', 'dom13', 'min13']);
-    expect(altered).toEqual(['7b5', '7s5', '7b9', '7s9', '7s11', '13b9']);
+    expect(altered).toEqual([
+      '7b5', '7s5', '7b9', '7s9', '7s11', '13b9',
+      'm7b5', 'dim7', 'maj7s11',
+    ]);
   });
 });
 

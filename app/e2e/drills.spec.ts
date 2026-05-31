@@ -131,6 +131,24 @@ test.describe('Drills view', () => {
       ['7♯11', /lydian dominant.*♯11/i],
       ['13♭9', /dominant 13 ♭9/i],
     ] as const) {
+      // `exact: true` so "7♭5" doesn't also match the new "m7♭5" pill.
+      await page.getByRole('button', { name: label, exact: true }).click();
+      await expect(page.getByRole('button', { name: label, exact: true })).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.locator('.scale-card')).toHaveCount(12);
+      await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(subtitleMatch);
+    }
+  });
+
+  test('Chords sub-toggle: m7♭5 / °7 / maj7♯11 each swap to 12 cards', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+
+    for (const [label, subtitleMatch] of [
+      ['m7♭5',    /half-diminished 7/i],
+      ['°7',      /fully diminished 7/i],
+      ['maj7♯11', /lydian major/i],
+    ] as const) {
       await page.getByRole('button', { name: label }).click();
       await expect(page.getByRole('button', { name: label })).toHaveAttribute('aria-pressed', 'true');
       await expect(page.locator('.scale-card')).toHaveCount(12);
@@ -260,6 +278,36 @@ test.describe('Drill-aware session', () => {
 
     await expect(page.locator('.session-piece h2')).toContainText('E7♯9');
     await expect(page.locator('.session-piece h2 em')).toContainText('altered dom');
+  });
+
+  test('Run it on a Bm7♭5 card opens a session with the half-diminished byline', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+    await page.getByRole('button', { name: 'm7♭5' }).click();
+    await page.waitForSelector('.scale-card');
+
+    const bm7b5 = page.locator('.scale-card', { hasText: 'Bm7♭5' });
+    await bm7b5.getByRole('button', { name: /Run it/i }).click();
+    await page.waitForSelector('.session-score svg', { timeout: 30_000 });
+
+    await expect(page.locator('.session-piece h2')).toContainText('Bm7♭5');
+    await expect(page.locator('.session-piece h2 em')).toContainText('half-diminished');
+  });
+
+  test('Run it on a C°7 card opens a session with the fully-diminished byline', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+    await page.getByRole('button', { name: '°7' }).click();
+    await page.waitForSelector('.scale-card');
+
+    const cdim7 = page.locator('.scale-card', { hasText: 'C°7' });
+    await cdim7.getByRole('button', { name: /Run it/i }).click();
+    await page.waitForSelector('.session-score svg', { timeout: 30_000 });
+
+    await expect(page.locator('.session-piece h2')).toContainText('C°7');
+    await expect(page.locator('.session-piece h2 em')).toContainText('fully diminished');
   });
 
   test('End warmup returns to the Drills view, not the Library', async ({ page }) => {

@@ -379,5 +379,11 @@ function subtitleFor(drill: Drill): string {
       return 'lydian dominant · 1 · 3 · 5 · ♭7 · ♯11';
     case '13b9-chord':
       return 'dominant 13 ♭9 · 1 · 3 · 5 · ♭7 · ♭9 · 11 · 13';
+    case 'm7b5-chord':
+      return 'half-diminished 7 · 1 · ♭3 · ♭5 · ♭7';
+    case 'dim7-chord':
+      return 'fully diminished 7 · 1 · ♭3 · ♭5 · ♭♭7';
+    case 'maj7s11-chord':
+      return 'lydian major · 1 · 3 · 5 · 7 · ♯11';
   }
 }
