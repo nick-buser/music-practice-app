@@ -2174,3 +2174,18 @@ button { font-family: inherit; }
   flex-wrap: wrap;
   gap: 8px;
 }
+
+/* Voicing toggle (Chords tab) — inversions / drop voicings for the visible
+ * chords; sits just under the chord-type picker. */
+.voicing-toggle {
+  align-items: center;
+  margin-top: -10px;
+}
+.voicing-toggle .cat-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--shoal);
+  margin-right: 10px;
+}

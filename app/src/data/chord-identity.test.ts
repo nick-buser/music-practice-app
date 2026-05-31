@@ -6,10 +6,16 @@ import {
   buildChordIdentity,
   CHORD_TYPE_IDS,
   MAJOR_ROOTS,
+  applyVoicing,
+  decodeVoicedId,
+  encodeVoicedId,
+  VOICINGS,
+  type VoicingKey,
 } from './chord-catalog';
 import {
   chordKey,
   chordTones,
+  coreToneCount,
   displayName,
   subtitleLine,
   toAbcMeasure,
@@ -179,6 +185,77 @@ describe('subtitleLine', () => {
   ];
   it.each(cases)('%s → %s', (id, line) => {
     expect(subtitleLine(identityFor(id))).toBe(line);
+  });
+});
+
+describe('voicings — inversions & drops', () => {
+  const measure = (id: string, key: VoicingKey) => toAbcMeasure(applyVoicing(identityFor(id), key));
+  const nameOf = (id: string, key: VoicingKey) => displayName(applyVoicing(identityFor(id), key));
+
+  it('inverts a C major triad (root → 1st → 2nd)', () => {
+    expect(measure('c-major-chord', 'root')).toBe('[CEGc]4 |');
+    expect(measure('c-major-chord', 'inv1')).toBe('[EGc]4 |');
+    expect(measure('c-major-chord', 'inv2')).toBe('[Gce]4 |');
+    expect(nameOf('c-major-chord', 'inv1')).toBe('C/E');
+    expect(nameOf('c-major-chord', 'inv2')).toBe('C/G');
+  });
+
+  it('inverts Cmaj7 through to the 3rd inversion', () => {
+    expect(measure('c-maj7-chord', 'inv1')).toBe('[EGBc]4 |');
+    expect(measure('c-maj7-chord', 'inv2')).toBe('[GBce]4 |');
+    expect(measure('c-maj7-chord', 'inv3')).toBe('[Bceg]4 |');
+    expect(nameOf('c-maj7-chord', 'inv3')).toBe('Cmaj7/B');
+  });
+
+  it('spreads Cmaj7 into drop-2 and drop-3 voicings', () => {
+    expect(measure('c-maj7-chord', 'drop2')).toBe('[G,CEB]4 |');
+    expect(measure('c-maj7-chord', 'drop3')).toBe('[E,CGB]4 |');
+    expect(nameOf('c-maj7-chord', 'drop2')).toBe('Cmaj7/G');
+    expect(nameOf('c-maj7-chord', 'drop3')).toBe('Cmaj7/E');
+  });
+
+  it('inverts a chord whose tones already sit above the root (Am7/C)', () => {
+    expect(measure('a-min7-chord', 'inv1')).toBe('[cega]4 |');
+    expect(nameOf('a-min7-chord', 'inv1')).toBe('Am7/C');
+  });
+
+  it('toMidi reflects the revoicing', () => {
+    expect(toMidi(applyVoicing(identityFor('c-maj7-chord'), 'root'))).toEqual([60, 64, 67, 71]);
+    // drop-2 sinks the 2nd-from-top (G4) an octave → G3 C4 E4 B4.
+    expect(toMidi(applyVoicing(identityFor('c-maj7-chord'), 'drop2'))).toEqual([55, 60, 64, 71]);
+  });
+
+  it('notes the voicing in the subtitle', () => {
+    expect(subtitleLine(applyVoicing(identityFor('c-maj7-chord'), 'inv1')))
+      .toBe('major 7 · 1st inversion · 1 · 3 · 5 · 7');
+    expect(subtitleLine(applyVoicing(identityFor('c-maj7-chord'), 'drop2')))
+      .toBe('major 7 · drop 2 · 1 · 3 · 5 · 7');
+  });
+
+  it('coreToneCount gates which voicings apply', () => {
+    expect(coreToneCount(identityFor('c-major-chord'))).toBe(3);
+    expect(coreToneCount(identityFor('c-maj7-chord'))).toBe(4);
+    expect(coreToneCount(identityFor('c-maj13-chord'))).toBe(7);
+  });
+
+  it('round-trips voiced drill ids', () => {
+    expect(encodeVoicedId('c-maj7-chord', 'root')).toBe('c-maj7-chord');
+    expect(encodeVoicedId('c-maj7-chord', 'inv1')).toBe('c-maj7-chord~inv1');
+    expect(decodeVoicedId('c-maj7-chord')).toEqual({ id: 'c-maj7-chord', voicing: 'root' });
+    expect(decodeVoicedId('c-maj7-chord~drop2')).toEqual({ id: 'c-maj7-chord', voicing: 'drop2' });
+    // An unrecognised suffix falls back to the bare id (defensive).
+    expect(decodeVoicedId('chopin-9-2')).toEqual({ id: 'chopin-9-2', voicing: 'root' });
+  });
+
+  it('every voicing renders valid ABC for every chord type (smoke)', () => {
+    for (const e of CATALOG) {
+      const tones = coreToneCount(e.identity);
+      for (const v of VOICINGS) {
+        if (v.minTones > tones) continue;
+        const m = toAbcMeasure(applyVoicing(e.identity, v.key));
+        expect(m).toMatch(/^\[[A-Ga-g,'^_=]+\]4 \|$/);
+      }
+    }
   });
 });
 

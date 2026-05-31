@@ -190,6 +190,24 @@ test.describe('Drills view', () => {
     await expect(page.locator('.scale-card')).toHaveCount(12);
     await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/minor 13/i);
   });
+
+  test('Voicing toggle re-voices the chord cards (inversions + drops)', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+    await page.getByRole('button', { name: /^Maj7$/i }).click();
+    await page.waitForSelector('.scale-card .engraving svg', { timeout: 30_000 });
+
+    const first = page.locator('.scale-card').first();
+
+    await page.getByRole('button', { name: /1st inv/i }).click();
+    await expect(first.locator('.name .n')).toContainText('Cmaj7/E');
+    await expect(first.locator('.name .s')).toContainText(/1st inversion/i);
+
+    await page.getByRole('button', { name: /Drop 2/i }).click();
+    await expect(first.locator('.name .n')).toContainText('Cmaj7/G');
+    await expect(first.locator('.name .s')).toContainText(/drop 2/i);
+  });
 });
 
 test.describe('Drill-aware session', () => {
@@ -354,6 +372,21 @@ test.describe('Drill-aware session', () => {
 
     await expect(page.locator('.session-piece h2')).toContainText('Cmaj7♯5');
     await expect(page.locator('.session-piece h2 em')).toContainText('augmented major 7');
+  });
+
+  test('Run it on a voiced chord opens a session for that voicing', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+    await page.getByRole('button', { name: /^Maj7$/i }).click();
+    await page.getByRole('button', { name: /1st inv/i }).click();
+    await page.waitForSelector('.scale-card');
+
+    await page.locator('.scale-card').first().getByRole('button', { name: /Run it/i }).click();
+    await page.waitForSelector('.session-score svg', { timeout: 30_000 });
+
+    await expect(page.locator('.session-piece h2')).toContainText('Cmaj7/E');
+    await expect(page.locator('.session-piece h2 em')).toContainText('1st inversion');
   });
 
   test('End warmup returns to the Drills view, not the Library', async ({ page }) => {

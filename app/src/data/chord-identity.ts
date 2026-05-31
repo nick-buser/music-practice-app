@@ -185,15 +185,10 @@ export function chordTones(c: ChordIdentity): Pitch[] {
     rawTones.push({ step: 12, semitones: semi, degree: 13 });
   }
 
-  // 8. Octave-doubled root (block triads → 1·3·5·8).
-  if (c.voicing.doubleRoot) {
-    rawTones.push({ step: 7, semitones: 12, degree: 8 });
-  }
-
-  // Spell + place each tone.
+  // 8. Spell + place each core tone (close root-position stack, ascending).
   const rootIdx = LETTERS.indexOf(c.root.letter);
   const rootMidi = 12 * (c.voicing.rootOctave + 1) + rootPc(c.root);
-  return rawTones.map(({ step, semitones, degree }) => {
+  const core: Pitch[] = rawTones.map(({ step, semitones, degree }) => {
     const letter = LETTERS[(rootIdx + step) % 7];
     const targetMidi = rootMidi + semitones;
     const alter = normalizeAlter((rootPc(c.root) + semitones) - NATURAL_PC[letter]);
@@ -201,6 +196,55 @@ export function chordTones(c: ChordIdentity): Pitch[] {
     const octave = Math.round((targetMidi - NATURAL_PC[letter] - alter) / 12) - 1;
     return { letter, alter, octave, midi: targetMidi, degree, semitones };
   });
+
+  return voiceChord(core, c.voicing);
+}
+
+const shiftOctave = (p: Pitch, delta: number): Pitch => ({
+  ...p,
+  octave: p.octave + delta,
+  midi: p.midi + 12 * delta,
+});
+
+const byMidi = (a: Pitch, b: Pitch): number => a.midi - b.midi;
+
+/**
+ * Re-voice the close root-position `core` tones:
+ *  - block + root position optionally doubles the root an octave up (1·3·5·8);
+ *  - inversion k lifts the lowest k tones up an octave (the k-th tone to the bass);
+ *  - drop2 / drop3 lower the 2nd / 3rd voice from the top by an octave.
+ * Returns the result sorted low → high.
+ */
+function voiceChord(core: Pitch[], voicing: Voicing): Pitch[] {
+  if (voicing.inversion === 0 && voicing.type === 'block') {
+    return voicing.doubleRoot
+      ? [...core, { ...shiftOctave(core[0], 1), degree: 8, semitones: 12 }]
+      : core;
+  }
+
+  const tones = core.map((p) => ({ ...p })).sort(byMidi);
+
+  // Inversion: lift the lowest `inversion` tones up an octave.
+  const inv = Math.min(voicing.inversion, tones.length - 1);
+  for (let i = 0; i < inv; i++) tones[i] = shiftOctave(tones[i], 1);
+  tones.sort(byMidi);
+
+  // Drop voicing: lower the n-th voice from the top by an octave.
+  const fromTop = voicing.type === 'drop2' ? 2 : voicing.type === 'drop3' ? 3 : 0;
+  if (fromTop && tones.length >= fromTop) {
+    const idx = tones.length - fromTop;
+    tones[idx] = shiftOctave(tones[idx], -1);
+    tones.sort(byMidi);
+  }
+  return tones;
+}
+
+/** The number of distinct chord tones (no octave double) — what inversions act on. */
+export function coreToneCount(c: ChordIdentity): number {
+  return chordTones({
+    ...c,
+    voicing: { ...c.voicing, type: 'block', inversion: 0, doubleRoot: false },
+  }).length;
 }
 
 /** MIDI note numbers for playback (C4 = 60). */
@@ -384,9 +428,12 @@ export function displayName(c: ChordIdentity): string {
     symbol = root + family + headlineExtension(c) + suffix;
   }
 
-  if (c.voicing.inversion > 0) {
-    const bass = chordTones(c)[c.voicing.inversion];
-    if (bass) symbol += '/' + bass.letter + (bass.alter > 0 ? '♯'.repeat(bass.alter) : bass.alter < 0 ? '♭'.repeat(-bass.alter) : '');
+  // A slash bass whenever the lowest sounding tone isn't the root — covers
+  // both inversions and drop voicings (which sink an upper voice below the root).
+  const bass = chordTones(c)[0];
+  if (bass && bass.degree !== 1) {
+    const glyph = bass.alter > 0 ? '♯'.repeat(bass.alter) : bass.alter < 0 ? '♭'.repeat(-bass.alter) : '';
+    symbol += '/' + bass.letter + glyph;
   }
   return symbol;
 }
@@ -438,15 +485,32 @@ function qualityPhrase(c: ChordIdentity): string {
   return `dominant ${headlineExtension(c)}`;
 }
 
+/** The voicing descriptor appended to a subtitle: "1st inversion", "drop 2"… */
+function voicingLabel(v: Voicing): string {
+  if (v.type === 'drop2') return 'drop 2';
+  if (v.type === 'drop3') return 'drop 3';
+  if (v.inversion === 1) return '1st inversion';
+  if (v.inversion === 2) return '2nd inversion';
+  if (v.inversion === 3) return '3rd inversion';
+  return '';
+}
+
 /**
  * The italic descriptor beneath a drill: "major 7 · 1 · 3 · 5 · 7",
- * "altered dominant · 1 · 3 · ♭5 · ♭7". One derivation in place of the chord
- * arms of both DrillsView's `subtitleFor` and subject.ts's byline switch.
+ * "altered dominant · 1 · 3 · ♭5 · ♭7", "major 7 · 1st inversion · 1 · 3 · 5 · 7".
+ * One derivation in place of the chord arms of both DrillsView's `subtitleFor`
+ * and subject.ts's byline switch.
  */
 export function subtitleLine(c: ChordIdentity): string {
-  const formula = chordTones(c)
-    .filter((t) => t.degree !== 8) // skip the octave double
+  // The degree formula always reads in canonical 1·3·5·7 order — it describes
+  // the chord, not the voicing — so derive it from the close root-position
+  // tones, and note the actual voicing separately.
+  const formula = chordTones({
+    ...c,
+    voicing: { ...c.voicing, type: 'block', inversion: 0, doubleRoot: false },
+  })
     .map(degreeLabel)
     .join(' · ');
-  return `${qualityPhrase(c)} · ${formula}`;
+  const voicing = voicingLabel(c.voicing);
+  return `${qualityPhrase(c)}${voicing ? ' · ' + voicing : ''} · ${formula}`;
 }

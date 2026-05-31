@@ -211,4 +211,52 @@ describe('DrillsView', () => {
     fireEvent.click(runButtons[0]);
     expect(onStartSession).toHaveBeenCalledWith('c-major-chord');
   });
+
+  it('Chords tab offers a voicing toggle that re-voices the cards', () => {
+    render(<DrillsView onStartSession={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
+
+    // Triads expose Root / 1st inv / 2nd inv (no 3rd inversion or drops).
+    expect(screen.getByRole('button', { name: /^Root$/i, pressed: true })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Drop 2/i })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /1st inv/i }));
+    expect(screen.getByRole('button', { name: /1st inv/i, pressed: true })).toBeInTheDocument();
+    // C major in 1st inversion is C/E, with an "inversion" subtitle on all 12.
+    expect(screen.getByText('C/E')).toBeInTheDocument();
+    expect(screen.getAllByText(/1st inversion/i)).toHaveLength(12);
+  });
+
+  it('Maj7 chords expose drop voicings; Drop 2 yields slash names', () => {
+    render(<DrillsView onStartSession={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^Maj7$/i }));
+
+    fireEvent.click(screen.getByRole('button', { name: /Drop 2/i }));
+    expect(screen.getByText('Cmaj7/G')).toBeInTheDocument();
+    // "drop 2 ·" matches the card subtitles only (not the "Drop 2" toggle chip).
+    expect(screen.getAllByText(/drop 2 ·/i)).toHaveLength(12);
+  });
+
+  it('switching to a chord type that lacks the current voicing falls back to Root', () => {
+    render(<DrillsView onStartSession={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^Maj7$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Drop 2/i }));
+    // Back to a triad, which has no Drop 2 — the effective voicing resets to Root.
+    fireEvent.click(screen.getByRole('button', { name: /^Major$/i }));
+    expect(screen.getByRole('button', { name: /^Root$/i, pressed: true })).toBeInTheDocument();
+    expect(screen.getAllByText(/major triad/i)).toHaveLength(12);
+  });
+
+  it('"Run it →" on a voiced card starts the session with the voiced id', () => {
+    const onStartSession = vi.fn();
+    render(<DrillsView onStartSession={onStartSession} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /1st inv/i }));
+
+    const runButtons = screen.getAllByRole('button', { name: /Run it/i });
+    fireEvent.click(runButtons[0]);
+    expect(onStartSession).toHaveBeenCalledWith('c-major-chord~inv1');
+  });
 });

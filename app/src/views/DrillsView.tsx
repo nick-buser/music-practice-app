@@ -16,8 +16,15 @@ import {
   ScaleSubTab,
 } from '../data/drills';
 import { relTime } from '../lib/time';
-import { CHORD_IDENTITY_BY_ID } from '../data/chord-catalog';
-import { subtitleLine } from '../data/chord-identity';
+import {
+  applyVoicing,
+  CHORD_IDENTITY_BY_ID,
+  encodeVoicedId,
+  VOICINGS,
+  type VoicingKey,
+  type VoicingOption,
+} from '../data/chord-catalog';
+import { coreToneCount, displayName, subtitleLine, toAbc } from '../data/chord-identity';
 import type { Drill, TechniqueFamily } from '../data/schemas';
 
 interface Props {
@@ -70,6 +77,7 @@ export function DrillsView({ onStartSession }: Props) {
   const [scaleSub, setScaleSub] = useState<ScaleSubTab>('major');
   const [arpSub, setArpSub] = useState<QualitySubTab>('major');
   const [chordType, setChordType] = useState<ChordType>('major');
+  const [voicing, setVoicing] = useState<VoicingKey>('root');
 
   const activeFamily: TechniqueFamily = useMemo(() => {
     if (topTab === 'scales') return SCALE_FAMILY_BY_SUBTAB[scaleSub];
@@ -81,6 +89,20 @@ export function DrillsView({ onStartSession }: Props) {
     () => DRILLS.filter((d) => d.family === activeFamily),
     [activeFamily],
   );
+
+  // Which voicings apply to the current chord type (a triad has no 3rd inversion
+  // / drops), and the one actually in effect (fall back to Root if the selected
+  // voicing isn't available for this type).
+  const availableVoicings = useMemo<VoicingOption[]>(() => {
+    if (topTab !== 'chords') return [];
+    const identity = visible[0] && CHORD_IDENTITY_BY_ID.get(visible[0].id);
+    if (!identity) return [];
+    const tones = coreToneCount(identity);
+    return VOICINGS.filter((v) => v.minTones <= tones);
+  }, [topTab, visible]);
+
+  const effectiveVoicing: VoicingKey =
+    availableVoicings.some((v) => v.key === voicing) ? voicing : 'root';
 
   const routine = useMemo(() => {
     const byId = new Map(DRILLS.map((d) => [d.id, d]));
@@ -147,14 +169,22 @@ export function DrillsView({ onStartSession }: Props) {
         />
       )}
       {topTab === 'chords' && (
-        <ChordTypePicker value={chordType} onChange={setChordType} />
+        <>
+          <ChordTypePicker value={chordType} onChange={setChordType} />
+          <VoicingToggle options={availableVoicings} value={effectiveVoicing} onChange={setVoicing} />
+        </>
       )}
 
       <div className="tech-layout">
         <div>
           <div className="tech-grid">
             {visible.map((d) => (
-              <DrillCard key={d.id} drill={d} onStartSession={onStartSession} />
+              <DrillCard
+                key={d.id}
+                drill={d}
+                voicing={effectiveVoicing}
+                onStartSession={onStartSession}
+              />
             ))}
           </div>
         </div>
@@ -278,21 +308,63 @@ function ChordTypePicker({ value, onChange }: ChordTypePickerProps) {
   );
 }
 
+/**
+ * Voicing toggle for the Chords tab — re-voices the visible chords (inversions
+ * and drop voicings). Only shown when the current chord type supports more than
+ * the root voicing. Hidden for scales/arpeggios (which have no identity).
+ */
+function VoicingToggle({
+  options,
+  value,
+  onChange,
+}: {
+  options: VoicingOption[];
+  value: VoicingKey;
+  onChange: (v: VoicingKey) => void;
+}) {
+  if (options.length <= 1) return null;
+  return (
+    <div className="tech-sub-toggle voicing-toggle">
+      <span className="cat-label">Voicing</span>
+      {options.map((o) => (
+        <button
+          key={o.key}
+          className={`sub-chip ${o.key === value ? 'active' : ''}`}
+          onClick={() => onChange(o.key)}
+          aria-pressed={o.key === value}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 interface CardProps {
   drill: Drill;
+  voicing: VoicingKey;
   onStartSession: (id: string) => void;
 }
 
-function DrillCard({ drill, onStartSession }: CardProps) {
+function DrillCard({ drill, voicing, onStartSession }: CardProps) {
   const last = drill.lastTouched ? relTime(drill.lastTouched) : 'never';
   const atTarget = drill.bpmCurrent >= drill.bpmTarget;
-  const subtitle = subtitleFor(drill);
+
+  // Chords can be re-voiced live; scales/arpeggios have no identity and render
+  // their hand-written engraving unchanged.
+  const identity = CHORD_IDENTITY_BY_ID.get(drill.id);
+  const voiced = identity && voicing !== 'root' ? applyVoicing(identity, voicing) : null;
+  const name = voiced ? displayName(voiced) : drill.name;
+  const subtitle = voiced ? subtitleLine(voiced) : subtitleFor(drill);
+  const abc = voiced ? toAbc(voiced, name) : drill.abc;
+  const runId = voiced ? encodeVoicedId(drill.id, voicing) : drill.id;
+
   return (
     <article className="scale-card" data-comfort={comfortClass(drill.comfort)}>
       <header>
         <div className="tonic">{drill.tonic}</div>
         <div className="name">
-          <div className="n">{drill.name}</div>
+          <div className="n">{name}</div>
           <div className="s">{subtitle}</div>
         </div>
         <span className={`dot ${comfortClass(drill.comfort)}`} />
@@ -300,9 +372,9 @@ function DrillCard({ drill, onStartSession }: CardProps) {
 
       <div className="engraving">
         <Score
-          data={drill.abc}
+          data={abc}
           options={DRILL_THUMB_OPTS}
-          ariaLabel={drill.name}
+          ariaLabel={name}
         />
       </div>
 
@@ -319,7 +391,7 @@ function DrillCard({ drill, onStartSession }: CardProps) {
       </div>
 
       <footer>
-        <button className="btn btn-ghost" onClick={() => onStartSession(drill.id)}>
+        <button className="btn btn-ghost" onClick={() => onStartSession(runId)}>
           Run it →
         </button>
       </footer>

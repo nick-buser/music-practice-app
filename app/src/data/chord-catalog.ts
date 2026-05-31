@@ -146,3 +146,55 @@ export function chordDrillCatalog(): ChordDrillEntry[] {
 export const CHORD_IDENTITY_BY_ID: Map<string, ChordIdentity> = new Map(
   chordDrillCatalog().map((e) => [e.id, e.identity]),
 );
+
+/* ─── Voicing presets (inversions + drop voicings) ─────────────────── */
+
+export type VoicingKey = 'root' | 'inv1' | 'inv2' | 'inv3' | 'drop2' | 'drop3';
+
+export interface VoicingOption {
+  key: VoicingKey;
+  label: string;
+  /** Smallest core-tone count for which this voicing is meaningful. */
+  minTones: number;
+}
+
+export const VOICINGS: VoicingOption[] = [
+  { key: 'root', label: 'Root', minTones: 1 },
+  { key: 'inv1', label: '1st inv', minTones: 2 },
+  { key: 'inv2', label: '2nd inv', minTones: 3 },
+  { key: 'inv3', label: '3rd inv', minTones: 4 },
+  { key: 'drop2', label: 'Drop 2', minTones: 4 },
+  { key: 'drop3', label: 'Drop 3', minTones: 4 },
+];
+
+/** Apply a voicing preset to a chord identity (returns a fresh identity). */
+export function applyVoicing(identity: ChordIdentity, key: VoicingKey): ChordIdentity {
+  const v = identity.voicing;
+  switch (key) {
+    case 'inv1': return { ...identity, voicing: { ...v, type: 'block', inversion: 1, doubleRoot: false } };
+    case 'inv2': return { ...identity, voicing: { ...v, type: 'block', inversion: 2, doubleRoot: false } };
+    case 'inv3': return { ...identity, voicing: { ...v, type: 'block', inversion: 3, doubleRoot: false } };
+    case 'drop2': return { ...identity, voicing: { ...v, type: 'drop2', inversion: 0, doubleRoot: false } };
+    case 'drop3': return { ...identity, voicing: { ...v, type: 'drop3', inversion: 0, doubleRoot: false } };
+    default: return identity;
+  }
+}
+
+/* ─── Voiced drill ids ─────────────────────────────────────────────────
+ * A voiced drill is addressed as "<drill-id>~<voicingKey>" (root position is
+ * the bare id). This threads a specific voicing through the single-string
+ * subject channel (App → SessionView → resolveSubject) without new props.
+ */
+const VOICED_ID_SEP = '~';
+
+export function encodeVoicedId(id: string, key: VoicingKey): string {
+  return key === 'root' ? id : `${id}${VOICED_ID_SEP}${key}`;
+}
+
+export function decodeVoicedId(voicedId: string): { id: string; voicing: VoicingKey } {
+  const i = voicedId.indexOf(VOICED_ID_SEP);
+  if (i === -1) return { id: voicedId, voicing: 'root' };
+  const key = voicedId.slice(i + 1) as VoicingKey;
+  const known = VOICINGS.some((v) => v.key === key);
+  return known ? { id: voicedId.slice(0, i), voicing: key } : { id: voicedId, voicing: 'root' };
+}
