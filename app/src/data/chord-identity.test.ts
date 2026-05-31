@@ -16,68 +16,64 @@ import {
   toMidi,
 } from './chord-identity';
 
-/* ─── Pull the existing chord engravings out of drills.ts ──────────── */
-
-/** Every chord drill, by id, with its hand-typed K signature + block measure. */
-const HAND_TYPED = new Map<string, { key: string; measure: string }>();
-for (const d of DRILLS as Drill[]) {
-  if (!d.family.endsWith('-chord')) continue;
-  const lines = d.abc.split('\n');
-  const key = lines.find((l) => l.startsWith('K:'))!.slice(2);
-  const measure = lines[lines.length - 1].trim();
-  HAND_TYPED.set(d.id, { key, measure });
-}
+/* ─── drills.ts is now generated from the model ─────────────────────
+ *
+ * As of this PR the chord engravings in drills.ts are produced by `toAbc`,
+ * not hand-typed. These tests verify the wiring (every chord drill renders
+ * from its identity) and pin the engraving changes this migration adopted —
+ * the "Canonical + document the 58" decision made in the model PR.
+ */
 
 const CATALOG = chordDrillCatalog();
 
-/* ─── The documented divergences (the user's "Canonical + document the 58") ─
- *
- * The principled generator emits clean, root-position, theory-correct
- * engravings. These 58 chords differ from the hand-typed strings shipping in
- * drills.ts today — not because the model is wrong, but because the hand data
- * made non-systematic choices. Each will become a deliberate, reviewed
- * engraving change when PR 2 flips drills.ts onto the model. Categories:
- *
- *   low-root-voicing    — A/A♭/F roots whose 3rd & 5th were written *below* the
- *                         root (e.g. A major as C♯4-E4-A4). The model voices
- *                         root-position (A4-C♯5-E5). No single octave rule
- *                         reproduces the hand data: B-rooted chords beside them
- *                         are already root-position, so the choice is irregular.
- *   enharmonic-9        — 7♯9 in e/b/f♯ used a plain ♯ where the ♯9 is really a
- *                         double-sharp; in b♭/e♭ it was spelled as a natural 9.
- *                         The model spells the theory-correct ♯9.
- *   courtesy-accidental — 7alt within-chord natural handling. The hand data is
- *                         self-contradictory (adds the courtesy natural for some
- *                         keys, omits it for others); the model is consistent.
- *   enharmonic-respell  — 7alt in A♭/D♭ respelled B♭♭→A, C♭→B to dodge stacked
- *                         double-flats. The model keeps the theory spelling.
- *   octave-double-flat  — D♭°7's double-flat tones placed an octave higher by
- *                         hand; the model voices them ascending from the root.
- */
-const KNOWN_DIVERGENCES: Record<string, string> = {};
-const mark = (cat: string, ids: string[]) => ids.forEach((id) => (KNOWN_DIVERGENCES[id] = cat));
+/** Chord drills as drills.ts ships them now: id → { key, measure }. */
+const DRILL_CHORDS = new Map<string, { key: string; measure: string }>();
+for (const d of DRILLS as Drill[]) {
+  if (!d.family.endsWith('-chord')) continue;
+  const lines = d.abc.split('\n');
+  DRILL_CHORDS.set(d.id, {
+    key: lines.find((l) => l.startsWith('K:'))!.slice(2),
+    measure: lines[lines.length - 1].trim(),
+  });
+}
 
-mark('low-root-voicing', [
-  'a-major-chord', 'ab-major-chord', 'a-minor-chord', 'ab-minor-chord',
-  'a-maj7-chord', 'f-maj7-chord', 'ab-maj7-chord',
-  'a-dom7-chord', 'f-dom7-chord', 'ab-dom7-chord',
-  'a-min7-chord', 'f-min7-chord', 'ab-min7-chord',
-  'a-maj9-chord', 'ab-maj9-chord', 'a-dom9-chord', 'ab-dom9-chord', 'a-min9-chord', 'ab-min9-chord',
-  'a-7b5-chord', 'f-7b5-chord', 'ab-7b5-chord',
-  'a-7s5-chord', 'f-7s5-chord', 'ab-7s5-chord',
-  'a-7b9-chord', 'f-7b9-chord', 'ab-7b9-chord',
-  'a-7s9-chord', 'f-7s9-chord', 'ab-7s9-chord',
-  'a-7s11-chord', 'f-7s11-chord', 'ab-7s11-chord',
-  'a-13b9-chord', 'f-13b9-chord', 'ab-13b9-chord',
-  'a-m7b5-chord', 'f-m7b5-chord', 'ab-m7b5-chord',
-  'a-dim7-chord',
-  'a-maj7s11-chord', 'f-maj7s11-chord', 'ab-maj7s11-chord',
-  'a-maj7s5-chord', 'f-maj7s5-chord', 'ab-maj7s5-chord',
-]);
-mark('enharmonic-9', ['e-7s9-chord', 'b-7s9-chord', 'fs-7s9-chord', 'bb-7s9-chord', 'eb-7s9-chord']);
-mark('courtesy-accidental', ['a-7alt-chord', 'b-7alt-chord', 'eb-7alt-chord']);
-mark('enharmonic-respell', ['ab-7alt-chord', 'db-7alt-chord']);
-mark('octave-double-flat', ['db-dim7-chord']);
+/**
+ * The 58 engravings this migration changed from the original hand-typed
+ * strings, pinned to the model's canonical output. Categories (see the model
+ * PR): A/A♭/F low voicings → root position; 7♯9 → theory-correct ♯9; 7alt
+ * courtesy accidentals made consistent; 7alt A♭/D♭ theory spelling kept; D♭°7
+ * voiced ascending from the root.
+ */
+const ADOPTED_ENGRAVINGS: Record<string, string> = {
+  // low-root-voicing: 3rd & 5th now sit above the root (root position)
+  'a-major-chord': '[Acea]4 |', 'ab-major-chord': '[Acea]4 |',
+  'a-minor-chord': '[Acea]4 |', 'ab-minor-chord': '[Acea]4 |',
+  'a-maj7-chord': '[Aceg]4 |', 'f-maj7-chord': '[FAce]4 |', 'ab-maj7-chord': '[Aceg]4 |',
+  'a-dom7-chord': '[Aceg]4 |', 'f-dom7-chord': '[FAce]4 |', 'ab-dom7-chord': '[Aceg]4 |',
+  'a-min7-chord': '[Aceg]4 |', 'f-min7-chord': '[FAce]4 |', 'ab-min7-chord': '[Aceg]4 |',
+  'a-maj9-chord': '[Acegb]4 |', 'ab-maj9-chord': '[Acegb]4 |',
+  'a-dom9-chord': '[Acegb]4 |', 'ab-dom9-chord': '[Acegb]4 |',
+  'a-min9-chord': '[Acegb]4 |', 'ab-min9-chord': '[Acegb]4 |',
+  'a-7b5-chord': '[Ac_eg]4 |', 'f-7b5-chord': '[FA_ce]4 |', 'ab-7b5-chord': '[Ac__eg]4 |',
+  'a-7s5-chord': '[Ac^eg]4 |', 'f-7s5-chord': '[FA^ce]4 |', 'ab-7s5-chord': '[Ac=eg]4 |',
+  'a-7b9-chord': '[Aceg_b]4 |', 'f-7b9-chord': '[FAce_g]4 |', 'ab-7b9-chord': '[Aceg__b]4 |',
+  'a-7s9-chord': '[Aceg^b]4 |', 'f-7s9-chord': '[FAce^g]4 |', 'ab-7s9-chord': '[Aceg=b]4 |',
+  'a-7s11-chord': "[Aceg^d']4 |", 'f-7s11-chord': '[FAce=b]4 |', 'ab-7s11-chord': "[Aceg=d']4 |",
+  'a-13b9-chord': "[Aceg_bd'f']4 |", 'f-13b9-chord': "[FAce_gbd']4 |", 'ab-13b9-chord': "[Aceg__bd'f']4 |",
+  'a-m7b5-chord': '[Ac_eg]4 |', 'f-m7b5-chord': '[FA_ce]4 |', 'ab-m7b5-chord': '[Ac__eg]4 |',
+  'a-dim7-chord': '[Ac_e_g]4 |',
+  'a-maj7s11-chord': "[Aceg^d']4 |", 'f-maj7s11-chord': '[FAce=b]4 |', 'ab-maj7s11-chord': "[Aceg=d']4 |",
+  'a-maj7s5-chord': '[Ac^eg]4 |', 'f-maj7s5-chord': '[FA^ce]4 |', 'ab-maj7s5-chord': '[Ac=eg]4 |',
+  // enharmonic-9: the ♯9 spelled theory-correct (double-sharp / true ♯9)
+  'e-7s9-chord': '[EGBd^^f]4 |', 'b-7s9-chord': "[Bdfa^^c']4 |", 'fs-7s9-chord': '[FAce^^g]4 |',
+  'bb-7s9-chord': "[Bdfa^c']4 |", 'eb-7s9-chord': '[EGBd^f]4 |',
+  // courtesy-accidental: consistent within-chord naturals
+  'a-7alt-chord': "[A^c^eg_b=c']4 |", 'b-7alt-chord': "[B^d^^fac'=d']4 |", 'eb-7alt-chord': '[_EGB_d_f_g]4 |',
+  // enharmonic-respell: theory spelling kept (no enharmonic dodge)
+  'ab-7alt-chord': "[_Ace_g__b_c']4 |", 'db-7alt-chord': '[_DFA_c__e_f]4 |',
+  // octave-double-flat: voiced ascending from the root
+  'db-dim7-chord': '[_D_F__A__c]4 |',
+};
 
 /* ─── Catalog ↔ drills coverage ───────────────────────────────────── */
 
@@ -87,61 +83,37 @@ describe('chord catalog', () => {
   });
 
   it('covers exactly the chord drills in drills.ts (300, same ids)', () => {
-    const catalogIds = new Set(CATALOG.map((e) => e.id));
-    const drillIds = new Set(HAND_TYPED.keys());
-    expect(catalogIds).toEqual(drillIds);
+    expect(new Set(CATALOG.map((e) => e.id))).toEqual(new Set(DRILL_CHORDS.keys()));
     expect(CATALOG).toHaveLength(300);
   });
 });
 
-/* ─── Key-signature parity (all 300) ──────────────────────────────── */
+/* ─── drills.ts is wired to the model ─────────────────────────────── */
 
-describe('chordKey', () => {
-  it('picks the exact key signature drills.ts uses, for all 300 chords', () => {
-    const mismatches = CATALOG.filter(
-      (e) => chordKey(e.identity) !== HAND_TYPED.get(e.id)!.key,
-    ).map((e) => `${e.id}: got ${chordKey(e.identity)} want ${HAND_TYPED.get(e.id)!.key}`);
-    expect(mismatches).toEqual([]);
-  });
-});
-
-/* ─── ABC engraving parity ────────────────────────────────────────── */
-
-describe('toAbc parity with hand-typed drills.ts', () => {
-  const matches: string[] = [];
-  const diverges: string[] = [];
-  for (const e of CATALOG) {
-    (toAbcMeasure(e.identity) === HAND_TYPED.get(e.id)!.measure ? matches : diverges).push(e.id);
-  }
-
-  it('reproduces every non-divergent chord engraving exactly (242)', () => {
-    const unexpected = matches
-      .filter((id) => id in KNOWN_DIVERGENCES); // a "match" we'd flagged as divergent
-    expect(unexpected).toEqual([]);
-
+describe('drills.ts chord engravings come from the model', () => {
+  it('renders every chord drill from its identity (measure + key)', () => {
     const broken = CATALOG
-      .filter((e) => !(e.id in KNOWN_DIVERGENCES))
-      .filter((e) => toAbcMeasure(e.identity) !== HAND_TYPED.get(e.id)!.measure)
-      .map((e) => `${e.id}: got ${toAbcMeasure(e.identity)} want ${HAND_TYPED.get(e.id)!.measure}`);
+      .filter((e) => {
+        const d = DRILL_CHORDS.get(e.id)!;
+        return d.measure !== toAbcMeasure(e.identity) || d.key !== chordKey(e.identity);
+      })
+      .map((e) => e.id);
     expect(broken).toEqual([]);
-
-    expect(matches).toHaveLength(242);
   });
 
-  it('every documented divergence really does differ (the list cannot go stale)', () => {
-    // If the model or data changes so a "divergence" now matches, force the
-    // maintainer to update KNOWN_DIVERGENCES rather than silently passing.
-    const nowMatching = Object.keys(KNOWN_DIVERGENCES).filter(
-      (id) => toAbcMeasure(CATALOG.find((e) => e.id === id)!.identity)
-        === HAND_TYPED.get(id)!.measure,
-    );
-    expect(nowMatching).toEqual([]);
-    expect(diverges.sort()).toEqual(Object.keys(KNOWN_DIVERGENCES).sort());
+  it('adopted the canonical engraving for the 58 formerly hand-tuned chords', () => {
+    expect(Object.keys(ADOPTED_ENGRAVINGS)).toHaveLength(58);
+    const wrong = Object.entries(ADOPTED_ENGRAVINGS)
+      .filter(([id, measure]) => DRILL_CHORDS.get(id)!.measure !== measure)
+      .map(([id, measure]) => `${id}: got ${DRILL_CHORDS.get(id)!.measure} want ${measure}`);
+    expect(wrong).toEqual([]);
   });
 
-  it('accounts for all 300 chords (242 exact + 58 documented)', () => {
-    expect(matches.length + diverges.length).toBe(300);
-    expect(Object.keys(KNOWN_DIVERGENCES)).toHaveLength(58);
+  it('leaves the well-behaved engravings unchanged (spot checks)', () => {
+    expect(DRILL_CHORDS.get('c-major-chord')!.measure).toBe('[CEGc]4 |');
+    expect(DRILL_CHORDS.get('c-maj7-chord')!.measure).toBe('[CEGB]4 |');
+    expect(DRILL_CHORDS.get('cs-min7-chord')!.measure).toBe('[CEGB]4 |');
+    expect(DRILL_CHORDS.get('g-major-chord')!.measure).toBe('[GBdg]4 |');
   });
 });
 
@@ -189,14 +161,21 @@ describe('displayName', () => {
 
 describe('subtitleLine', () => {
   const cases: Array<[string, string]> = [
+    ['c-major-chord', 'major triad · 1 · 3 · 5'],
+    ['a-minor-chord', 'minor triad · 1 · ♭3 · 5'],
     ['c-maj7-chord', 'major 7 · 1 · 3 · 5 · 7'],
     ['c-dom7-chord', 'dominant 7 · 1 · 3 · 5 · ♭7'],
     ['a-min7-chord', 'minor 7 · 1 · ♭3 · 5 · ♭7'],
-    ['c-dim7-chord', 'fully diminished 7 · 1 · ♭3 · ♭5 · ♭♭7'],
-    ['c-m7b5-chord', 'half-diminished 7 · 1 · ♭3 · ♭5 · ♭7'],
-    ['c-7s11-chord', 'dominant 7 ♯11 · 1 · 3 · 5 · ♭7 · ♯11'],
+    ['f-maj13-chord', 'major 13 · 1 · 3 · 5 · 7 · 9 · 11 · 13'],
+    ['c-7b5-chord', 'altered dominant · 1 · 3 · ♭5 · ♭7'],
+    ['e-7s9-chord', 'altered dominant · 1 · 3 · 5 · ♭7 · ♯9'],
+    ['c-7s11-chord', 'lydian dominant · 1 · 3 · 5 · ♭7 · ♯11'],
     ['c-13b9-chord', 'dominant 13 ♭9 · 1 · 3 · 5 · ♭7 · ♭9 · 11 · 13'],
+    ['c-m7b5-chord', 'half-diminished 7 · 1 · ♭3 · ♭5 · ♭7'],
+    ['c-dim7-chord', 'fully diminished 7 · 1 · ♭3 · ♭5 · ♭♭7'],
+    ['c-maj7s11-chord', 'lydian major · 1 · 3 · 5 · 7 · ♯11'],
     ['c-7alt-chord', 'fully altered dominant · 1 · 3 · ♯5 · ♭7 · ♭9 · ♯9'],
+    ['c-maj7s5-chord', 'augmented major 7 · 1 · 3 · ♯5 · 7'],
   ];
   it.each(cases)('%s → %s', (id, line) => {
     expect(subtitleLine(identityFor(id))).toBe(line);

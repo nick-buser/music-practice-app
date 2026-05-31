@@ -16,6 +16,8 @@ import {
   ScaleSubTab,
 } from '../data/drills';
 import { relTime } from '../lib/time';
+import { CHORD_IDENTITY_BY_ID } from '../data/chord-catalog';
+import { subtitleLine } from '../data/chord-identity';
 import type { Drill, TechniqueFamily } from '../data/schemas';
 
 interface Props {
@@ -325,7 +327,14 @@ function DrillCard({ drill, onStartSession }: CardProps) {
   );
 }
 
+/**
+ * The italic line under each drill card. Chords derive it from their identity
+ * (`subtitleLine`); scales and arpeggios — which aren't chords — keep their
+ * hand-written descriptors.
+ */
 function subtitleFor(drill: Drill): string {
+  const identity = CHORD_IDENTITY_BY_ID.get(drill.id);
+  if (identity) return subtitleLine(identity);
   switch (drill.family) {
     case 'major':
       return 'major scale · one octave';
@@ -339,55 +348,7 @@ function subtitleFor(drill: Drill): string {
       return 'major arpeggio · 1 · 3 · 5 · 8';
     case 'minor-arpeggio':
       return 'minor arpeggio · 1 · ♭3 · 5 · 8';
-    case 'major-chord':
-      return 'major triad · block · root position';
-    case 'minor-chord':
-      return 'minor triad · block · root position';
-    case 'maj7-chord':
-      return 'major 7 · block · 1 · 3 · 5 · 7';
-    case 'dom7-chord':
-      return 'dominant 7 · block · 1 · 3 · 5 · ♭7';
-    case 'min7-chord':
-      return 'minor 7 · block · 1 · ♭3 · 5 · ♭7';
-    case 'maj9-chord':
-      return 'major 9 · block · 1 · 3 · 5 · 7 · 9';
-    case 'dom9-chord':
-      return 'dominant 9 · block · 1 · 3 · 5 · ♭7 · 9';
-    case 'min9-chord':
-      return 'minor 9 · block · 1 · ♭3 · 5 · ♭7 · 9';
-    case 'maj11-chord':
-      return 'major 11 · block · 1 · 3 · 5 · 7 · 9 · 11';
-    case 'dom11-chord':
-      return 'dominant 11 · block · 1 · 3 · 5 · ♭7 · 9 · 11';
-    case 'min11-chord':
-      return 'minor 11 · block · 1 · ♭3 · 5 · ♭7 · 9 · 11';
-    case 'maj13-chord':
-      return 'major 13 · block · 1 · 3 · 5 · 7 · 9 · 11 · 13';
-    case 'dom13-chord':
-      return 'dominant 13 · block · 1 · 3 · 5 · ♭7 · 9 · 11 · 13';
-    case 'min13-chord':
-      return 'minor 13 · block · 1 · ♭3 · 5 · ♭7 · 9 · 11 · 13';
-    case '7b5-chord':
-      return 'altered dominant · 1 · 3 · ♭5 · ♭7';
-    case '7s5-chord':
-      return 'altered dominant · 1 · 3 · ♯5 · ♭7';
-    case '7b9-chord':
-      return 'altered dominant · 1 · 3 · 5 · ♭7 · ♭9';
-    case '7s9-chord':
-      return 'altered dominant · 1 · 3 · 5 · ♭7 · ♯9';
-    case '7s11-chord':
-      return 'lydian dominant · 1 · 3 · 5 · ♭7 · ♯11';
-    case '13b9-chord':
-      return 'dominant 13 ♭9 · 1 · 3 · 5 · ♭7 · ♭9 · 11 · 13';
-    case 'm7b5-chord':
-      return 'half-diminished 7 · 1 · ♭3 · ♭5 · ♭7';
-    case 'dim7-chord':
-      return 'fully diminished 7 · 1 · ♭3 · ♭5 · ♭♭7';
-    case 'maj7s11-chord':
-      return 'lydian major · 1 · 3 · 5 · 7 · ♯11';
-    case '7alt-chord':
-      return 'fully altered dom · 1 · 3 · ♯5 · ♭7 · ♭9 · ♯9';
-    case 'maj7s5-chord':
-      return 'augmented major 7 · 1 · 3 · ♯5 · 7';
+    default:
+      return '';
   }
 }

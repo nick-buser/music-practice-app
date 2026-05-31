@@ -7,7 +7,9 @@
 import { PIECES } from './sounddata';
 import { ABC_BY_PIECE } from './scores';
 import { DRILL_BY_ID } from './drills';
-import type { Section } from './schemas';
+import { CHORD_IDENTITY_BY_ID } from './chord-catalog';
+import { subtitleLine } from './chord-identity';
+import type { Drill, Section } from './schemas';
 
 export type SubjectKind = 'piece' | 'scale';
 
@@ -66,7 +68,7 @@ export function resolveSubject(id: string): Subject {
       id: drill.id,
       kind: 'scale',
       title: drill.name,
-      byline: subjectBylineForScale(drill.family),
+      byline: bylineForDrill(drill),
       subtitle: `tonic ${drill.tonic}`,
       abc: drill.abc,
       meter: '4/4',
@@ -96,8 +98,14 @@ export function resolveSubject(id: string): Subject {
   };
 }
 
-function subjectBylineForScale(family: string): string {
-  switch (family) {
+/**
+ * The italic byline for a drill subject. Chords derive it from their identity
+ * (`subtitleLine`); scales and arpeggios keep their hand-written descriptors.
+ */
+function bylineForDrill(drill: Drill): string {
+  const identity = CHORD_IDENTITY_BY_ID.get(drill.id);
+  if (identity) return subtitleLine(identity);
+  switch (drill.family) {
     case 'major':
       return 'major scale';
     case 'natural-minor':
@@ -110,56 +118,6 @@ function subjectBylineForScale(family: string): string {
       return 'major arpeggio';
     case 'minor-arpeggio':
       return 'minor arpeggio';
-    case 'major-chord':
-      return 'major chord (block)';
-    case 'minor-chord':
-      return 'minor chord (block)';
-    case 'maj7-chord':
-      return 'major 7 chord (block)';
-    case 'dom7-chord':
-      return 'dominant 7 chord (block)';
-    case 'min7-chord':
-      return 'minor 7 chord (block)';
-    case 'maj9-chord':
-      return 'major 9 chord (block)';
-    case 'dom9-chord':
-      return 'dominant 9 chord (block)';
-    case 'min9-chord':
-      return 'minor 9 chord (block)';
-    case 'maj11-chord':
-      return 'major 11 chord (block)';
-    case 'dom11-chord':
-      return 'dominant 11 chord (block)';
-    case 'min11-chord':
-      return 'minor 11 chord (block)';
-    case 'maj13-chord':
-      return 'major 13 chord (block)';
-    case 'dom13-chord':
-      return 'dominant 13 chord (block)';
-    case 'min13-chord':
-      return 'minor 13 chord (block)';
-    case '7b5-chord':
-      return 'altered dom · ♭5';
-    case '7s5-chord':
-      return 'altered dom · ♯5';
-    case '7b9-chord':
-      return 'altered dom · ♭9';
-    case '7s9-chord':
-      return 'altered dom · ♯9';
-    case '7s11-chord':
-      return 'lydian dom · ♯11';
-    case '13b9-chord':
-      return 'dom 13 · ♭9';
-    case 'm7b5-chord':
-      return 'half-diminished 7';
-    case 'dim7-chord':
-      return 'fully diminished 7';
-    case 'maj7s11-chord':
-      return 'lydian major (maj7♯11)';
-    case '7alt-chord':
-      return 'fully altered dominant';
-    case 'maj7s5-chord':
-      return 'augmented major 7';
     default:
       return 'drill';
   }
