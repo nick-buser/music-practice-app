@@ -7,8 +7,8 @@
 import { PIECES } from './sounddata';
 import { ABC_BY_PIECE } from './scores';
 import { DRILL_BY_ID } from './drills';
-import { CHORD_IDENTITY_BY_ID } from './chord-catalog';
-import { subtitleLine } from './chord-identity';
+import { applyVoicing, CHORD_IDENTITY_BY_ID, decodeVoicedId } from './chord-catalog';
+import { displayName, subtitleLine, toAbc } from './chord-identity';
 import type { Drill, Section } from './schemas';
 
 export type SubjectKind = 'piece' | 'scale';
@@ -62,15 +62,20 @@ export function resolveSubject(id: string): Subject {
     };
   }
 
-  const drill = DRILL_BY_ID.get(id);
+  // A drill id may carry a voicing suffix (e.g. "c-maj7-chord~drop2"); resolve
+  // the base drill and, for chords, render the requested voicing on the fly.
+  const { id: baseId, voicing } = decodeVoicedId(id);
+  const drill = DRILL_BY_ID.get(baseId);
   if (drill) {
+    const identity = CHORD_IDENTITY_BY_ID.get(drill.id);
+    const voiced = identity && voicing !== 'root' ? applyVoicing(identity, voicing) : undefined;
     return {
-      id: drill.id,
+      id,
       kind: 'scale',
-      title: drill.name,
-      byline: bylineForDrill(drill),
+      title: voiced ? displayName(voiced) : drill.name,
+      byline: voiced ? subtitleLine(voiced) : bylineForDrill(drill),
       subtitle: `tonic ${drill.tonic}`,
-      abc: drill.abc,
+      abc: voiced ? toAbc(voiced, displayName(voiced)) : drill.abc,
       meter: '4/4',
       bpmTarget: drill.bpmTarget,
       bpmCurrent: drill.bpmCurrent,

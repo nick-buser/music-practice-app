@@ -30,6 +30,21 @@ describe('resolveSubject', () => {
     expect(resolveSubject('a-minor-arp').byline).toBe('minor arpeggio');
   });
 
+  it('resolves a voiced chord id to a voiced subject', () => {
+    const s = resolveSubject('c-maj7-chord~inv1');
+    expect(s.kind).toBe('scale');
+    expect(s.title).toBe('Cmaj7/E');
+    expect(s.byline).toContain('1st inversion');
+    expect(s.id).toBe('c-maj7-chord~inv1');
+    expect(s.abc).toContain('K:C');
+  });
+
+  it('resolves a bare chord id to its root voicing', () => {
+    const s = resolveSubject('c-maj7-chord');
+    expect(s.title).toBe('Cmaj7');
+    expect(s.byline).not.toContain('inversion');
+  });
+
   it('falls back to the first piece for an unknown id', () => {
     const s = resolveSubject('not-a-real-id');
     expect(s.kind).toBe('piece');

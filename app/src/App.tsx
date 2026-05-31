@@ -7,6 +7,7 @@ import { StatsView } from './views/StatsView';
 import { SketchbookView } from './views/SketchbookView';
 import { DrillsView } from './views/DrillsView';
 import { DRILL_BY_ID } from './data/drills';
+import { decodeVoicedId } from './data/chord-catalog';
 
 export default function App() {
   const [view, setView] = useState<View>('library');
@@ -23,7 +24,8 @@ export default function App() {
 
   const startSession = (id: string) => {
     setSubjectId(id);
-    if (DRILL_BY_ID.has(id)) {
+    // A drill id may carry a voicing suffix (e.g. "c-maj7-chord~drop2").
+    if (DRILL_BY_ID.has(decodeVoicedId(id).id)) {
       returnViewRef.current = 'drills';
     } else {
       returnViewRef.current = 'library';
