@@ -1,0 +1,8 @@
+{
+  // Cloudflare Pages — static deploy of the Vite build. Run from app/:
+  //   npm run build && npx wrangler pages deploy
+  // No Workers/Functions: the public site is purely static (backend disabled).
+  "name": "soundings",
+  "pages_build_output_dir": "dist",
+  "compatibility_date": "2025-01-01"
+}

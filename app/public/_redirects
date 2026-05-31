@@ -1,0 +1,2 @@
+# Cloudflare Pages SPA fallback: serve index.html for any path (200, no redirect).
+/*  /index.html  200
