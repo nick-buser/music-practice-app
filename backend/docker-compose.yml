@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-soundings}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-soundings}
+      POSTGRES_DB: ${POSTGRES_DB:-soundings}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-soundings}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    ports:
+      - "5432:5432"
+
+  api:
+    build: .
+    environment:
+      ENV: prod
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-soundings}:${POSTGRES_PASSWORD:-soundings}@db:5432/${POSTGRES_DB:-soundings}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      # OTEL_EXPORTER_OTLP_ENDPOINT: http://signoz-otel-collector:4318
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+volumes:
+  pgdata:
