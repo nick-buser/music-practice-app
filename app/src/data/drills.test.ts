@@ -54,8 +54,17 @@ describe('DRILLS', () => {
     expect(DRILLS.filter((d) => d.family === 'min13-chord')).toHaveLength(12);
   });
 
-  it('totals 240 entries', () => {
-    expect(DRILLS).toHaveLength(240);
+  it('has 72 altered dominants (6 types × 12 keys)', () => {
+    expect(DRILLS.filter((d) => d.family === '7b5-chord')).toHaveLength(12);
+    expect(DRILLS.filter((d) => d.family === '7s5-chord')).toHaveLength(12);
+    expect(DRILLS.filter((d) => d.family === '7b9-chord')).toHaveLength(12);
+    expect(DRILLS.filter((d) => d.family === '7s9-chord')).toHaveLength(12);
+    expect(DRILLS.filter((d) => d.family === '7s11-chord')).toHaveLength(12);
+    expect(DRILLS.filter((d) => d.family === '13b9-chord')).toHaveLength(12);
+  });
+
+  it('totals 312 entries', () => {
+    expect(DRILLS).toHaveLength(312);
   });
 
   it('uses distinct ids across the set', () => {
@@ -108,6 +117,7 @@ describe('DRILLS', () => {
       'maj9-chord', 'dom9-chord', 'min9-chord',
       'maj11-chord', 'dom11-chord', 'min11-chord',
       'maj13-chord', 'dom13-chord', 'min13-chord',
+      '7b5-chord', '7s5-chord', '7b9-chord', '7s9-chord', '7s11-chord', '13b9-chord',
     ];
     const chords = DRILLS.filter((d) => chordFams.includes(d.family));
     for (const d of chords) {
@@ -186,6 +196,36 @@ describe('DRILLS', () => {
     expect(DRILLS.find((d) => d.id === 'a-min13-chord')?.name).toBe('Am13');
   });
 
+  it('altered-chord names use ♭/♯ symbols (C7♭5, E7♯9, Bb13♭9 …)', () => {
+    expect(DRILLS.find((d) => d.id === 'c-7b5-chord')?.name).toBe('C7♭5');
+    expect(DRILLS.find((d) => d.id === 'c-7s5-chord')?.name).toBe('C7♯5');
+    expect(DRILLS.find((d) => d.id === 'c-7b9-chord')?.name).toBe('C7♭9');
+    expect(DRILLS.find((d) => d.id === 'e-7s9-chord')?.name).toBe('E7♯9');
+    expect(DRILLS.find((d) => d.id === 'c-7s11-chord')?.name).toBe('C7♯11');
+    expect(DRILLS.find((d) => d.id === 'bb-13b9-chord')?.name).toBe('B♭13♭9');
+  });
+
+  it('altered dominants land on the right chord-tone counts', () => {
+    const fourTone: TechniqueFamily[] = ['7b5-chord', '7s5-chord'];
+    const fiveTone: TechniqueFamily[] = ['7b9-chord', '7s9-chord', '7s11-chord'];
+    const sevenTone: TechniqueFamily[] = ['13b9-chord'];
+    for (const d of DRILLS.filter((x) => fourTone.includes(x.family))) {
+      const inside = d.abc.match(/\[([^\]]+)\]/)?.[1] ?? '';
+      const letters = inside.replace(/[\^_=,'0-9 ]/g, '');
+      expect(letters.length).toBe(4);
+    }
+    for (const d of DRILLS.filter((x) => fiveTone.includes(x.family))) {
+      const inside = d.abc.match(/\[([^\]]+)\]/)?.[1] ?? '';
+      const letters = inside.replace(/[\^_=,'0-9 ]/g, '');
+      expect(letters.length).toBe(5);
+    }
+    for (const d of DRILLS.filter((x) => sevenTone.includes(x.family))) {
+      const inside = d.abc.match(/\[([^\]]+)\]/)?.[1] ?? '';
+      const letters = inside.replace(/[\^_=,'0-9 ]/g, '');
+      expect(letters.length).toBe(7);
+    }
+  });
+
   it('C#m7 voices the 7th in the same octave as the rest of the chord (regression)', () => {
     // Pre-existing bug fixed in this PR: ABC was [CEGb]4 which placed B5 a
     // full octave above the G#4, leaving a gap in the stack.
@@ -231,11 +271,13 @@ describe('chord-type taxonomy', () => {
     const ninths = CHORD_TYPES.filter((t) => CHORD_TYPE_META[t].category === 'ninths');
     const elevenths = CHORD_TYPES.filter((t) => CHORD_TYPE_META[t].category === 'elevenths');
     const thirteenths = CHORD_TYPES.filter((t) => CHORD_TYPE_META[t].category === 'thirteenths');
+    const altered = CHORD_TYPES.filter((t) => CHORD_TYPE_META[t].category === 'altered');
     expect(triads).toEqual(['major', 'minor']);
     expect(sevenths).toEqual(['maj7', 'dom7', 'min7']);
     expect(ninths).toEqual(['maj9', 'dom9', 'min9']);
     expect(elevenths).toEqual(['maj11', 'dom11', 'min11']);
     expect(thirteenths).toEqual(['maj13', 'dom13', 'min13']);
+    expect(altered).toEqual(['7b5', '7s5', '7b9', '7s9', '7s11', '13b9']);
   });
 });
 

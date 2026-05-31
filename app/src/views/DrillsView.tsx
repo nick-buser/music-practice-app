@@ -367,5 +367,17 @@ function subtitleFor(drill: Drill): string {
       return 'dominant 13 · block · 1 · 3 · 5 · ♭7 · 9 · 11 · 13';
     case 'min13-chord':
       return 'minor 13 · block · 1 · ♭3 · 5 · ♭7 · 9 · 11 · 13';
+    case '7b5-chord':
+      return 'altered dominant · 1 · 3 · ♭5 · ♭7';
+    case '7s5-chord':
+      return 'altered dominant · 1 · 3 · ♯5 · ♭7';
+    case '7b9-chord':
+      return 'altered dominant · 1 · 3 · 5 · ♭7 · ♭9';
+    case '7s9-chord':
+      return 'altered dominant · 1 · 3 · 5 · ♭7 · ♯9';
+    case '7s11-chord':
+      return 'lydian dominant · 1 · 3 · 5 · ♭7 · ♯11';
+    case '13b9-chord':
+      return 'dominant 13 ♭9 · 1 · 3 · 5 · ♭7 · ♭9 · 11 · 13';
   }
 }

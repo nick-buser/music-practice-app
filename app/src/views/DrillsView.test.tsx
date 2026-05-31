@@ -73,13 +73,31 @@ describe('DrillsView', () => {
     expect(screen.getAllByText(/dominant 7/i).length).toBeGreaterThanOrEqual(12);
   });
 
-  it('Chord type picker shows a category label per row (Triads / 7ths / 9ths / 11ths / 13ths)', () => {
+  it('Chord type picker shows a category label per row (Triads / 7ths / 9ths / 11ths / 13ths / Altered)', () => {
     const { container } = render(<DrillsView onStartSession={() => {}} />);
     fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
     const labels = Array.from(container.querySelectorAll('.chord-type-row .cat-label')).map(
       (e) => e.textContent,
     );
-    expect(labels).toEqual(['Triads', '7ths', '9ths', '11ths', '13ths']);
+    expect(labels).toEqual(['Triads', '7ths', '9ths', '11ths', '13ths', 'Altered']);
+  });
+
+  it('Chords → 7♭5 / 7♯9 / 13♭9 each swap to 12 cards with altered-dominant subtitles', () => {
+    render(<DrillsView onStartSession={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
+
+    fireEvent.click(screen.getByRole('button', { name: '7♭5' }));
+    expect(screen.getByRole('button', { name: '7♭5', pressed: true })).toBeInTheDocument();
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getAllByText(/altered dominant.*♭5/i).length).toBeGreaterThanOrEqual(12);
+
+    fireEvent.click(screen.getByRole('button', { name: '7♯9' }));
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getAllByText(/altered dominant.*♯9/i).length).toBeGreaterThanOrEqual(12);
+
+    fireEvent.click(screen.getByRole('button', { name: '13♭9' }));
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getAllByText(/dominant 13 ♭9/i).length).toBeGreaterThanOrEqual(12);
   });
 
   it('Chords → Maj13 / Dom13 / Min13 each swap to 12 cards with the right subtitle', () => {

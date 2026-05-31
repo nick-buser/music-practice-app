@@ -56,7 +56,7 @@ test.describe('Drills view', () => {
     await expect(page.getByRole('button', { name: /^Major$/i })).toHaveAttribute('aria-pressed', 'true');
 
     const catLabels = await page.locator('.chord-type-row .cat-label').allTextContents();
-    expect(catLabels).toEqual(['Triads', '7ths', '9ths', '11ths', '13ths']);
+    expect(catLabels).toEqual(['Triads', '7ths', '9ths', '11ths', '13ths', 'Altered']);
 
     await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/major triad/i);
   });
@@ -116,6 +116,26 @@ test.describe('Drills view', () => {
     await page.getByRole('button', { name: /^Min11$/i }).click();
     await expect(page.locator('.scale-card')).toHaveCount(12);
     await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/minor 11/i);
+  });
+
+  test('Chords sub-toggle: 7♭5 / 7♯5 / 7♭9 / 7♯9 / 7♯11 / 13♭9 each swap to 12 cards', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+
+    for (const [label, subtitleMatch] of [
+      ['7♭5',  /altered dominant.*♭5/i],
+      ['7♯5',  /altered dominant.*♯5/i],
+      ['7♭9',  /altered dominant.*♭9/i],
+      ['7♯9',  /altered dominant.*♯9/i],
+      ['7♯11', /lydian dominant.*♯11/i],
+      ['13♭9', /dominant 13 ♭9/i],
+    ] as const) {
+      await page.getByRole('button', { name: label }).click();
+      await expect(page.getByRole('button', { name: label })).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.locator('.scale-card')).toHaveCount(12);
+      await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(subtitleMatch);
+    }
   });
 
   test('Chords sub-toggle: Maj13 / Dom13 / Min13 each swap to 12 cards', async ({ page }) => {
@@ -225,6 +245,21 @@ test.describe('Drill-aware session', () => {
 
     await expect(page.locator('.session-piece h2')).toContainText('Fmaj13');
     await expect(page.locator('.session-piece h2 em')).toContainText('major 13 chord');
+  });
+
+  test('Run it on an E7♯9 card opens a session with the altered-dominant byline', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+    await page.getByRole('button', { name: '7♯9' }).click();
+    await page.waitForSelector('.scale-card');
+
+    const e7s9 = page.locator('.scale-card', { hasText: 'E7♯9' });
+    await e7s9.getByRole('button', { name: /Run it/i }).click();
+    await page.waitForSelector('.session-score svg', { timeout: 30_000 });
+
+    await expect(page.locator('.session-piece h2')).toContainText('E7♯9');
+    await expect(page.locator('.session-piece h2 em')).toContainText('altered dom');
   });
 
   test('End warmup returns to the Drills view, not the Library', async ({ page }) => {
