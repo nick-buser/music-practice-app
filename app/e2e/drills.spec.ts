@@ -56,7 +56,7 @@ test.describe('Drills view', () => {
     await expect(page.getByRole('button', { name: /^Major$/i })).toHaveAttribute('aria-pressed', 'true');
 
     const catLabels = await page.locator('.chord-type-row .cat-label').allTextContents();
-    expect(catLabels).toEqual(['Triads', '7ths', '9ths', '11ths']);
+    expect(catLabels).toEqual(['Triads', '7ths', '9ths', '11ths', '13ths']);
 
     await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/major triad/i);
   });
@@ -116,6 +116,25 @@ test.describe('Drills view', () => {
     await page.getByRole('button', { name: /^Min11$/i }).click();
     await expect(page.locator('.scale-card')).toHaveCount(12);
     await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/minor 11/i);
+  });
+
+  test('Chords sub-toggle: Maj13 / Dom13 / Min13 each swap to 12 cards', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+
+    await page.getByRole('button', { name: /^Maj13$/i }).click();
+    await expect(page.getByRole('button', { name: /^Maj13$/i })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.scale-card')).toHaveCount(12);
+    await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/major 13/i);
+
+    await page.getByRole('button', { name: /^Dom13$/i }).click();
+    await expect(page.locator('.scale-card')).toHaveCount(12);
+    await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/dominant 13/i);
+
+    await page.getByRole('button', { name: /^Min13$/i }).click();
+    await expect(page.locator('.scale-card')).toHaveCount(12);
+    await expect(page.locator('.scale-card').first().locator('.name .s')).toContainText(/minor 13/i);
   });
 });
 
@@ -191,6 +210,21 @@ test.describe('Drill-aware session', () => {
 
     await expect(page.locator('.session-piece h2')).toContainText('Gm11');
     await expect(page.locator('.session-piece h2 em')).toContainText('minor 11 chord');
+  });
+
+  test('Run it on an Fmaj13 card opens a session with the 13th-chord byline', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+    await page.getByRole('button', { name: /^Maj13$/i }).click();
+    await page.waitForSelector('.scale-card');
+
+    const fmaj13 = page.locator('.scale-card', { hasText: 'Fmaj13' });
+    await fmaj13.getByRole('button', { name: /Run it/i }).click();
+    await page.waitForSelector('.session-score svg', { timeout: 30_000 });
+
+    await expect(page.locator('.session-piece h2')).toContainText('Fmaj13');
+    await expect(page.locator('.session-piece h2 em')).toContainText('major 13 chord');
   });
 
   test('End warmup returns to the Drills view, not the Library', async ({ page }) => {

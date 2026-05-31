@@ -493,8 +493,95 @@ const ELEVENTHS: Spec[] = [
   })),
 ];
 
+/* ─── 36 thirteenth chords (12 maj13 + 12 dom13 + 12 m13) ──────────
+ * 13th chords add a 7th tone (a 6th above the octave) on top of the 11th
+ * block — the next "skip-one" letter again. So Cmaj13 = [CEGBdfa]4. For
+ * B/Bb-rooted chords the stack reaches G6 (g'): Bmaj13 = [Bdfac'e'g']4.
+ *
+ * Key choice subtlety: m13's 13 is a *major* 6 above the root (the Dorian
+ * 6), so the parallel-minor key used for m7/m9/m11 would flatten it to a
+ * ♭6 and produce the wrong chord tone. Instead m13 uses the Dorian-
+ * relative key — one whole step below the parallel major. E.g. Cm13 →
+ * K:Bb gives C Eb G Bb D F A (Dorian on C) with all seven chord tones
+ * landing without explicit accidentals.
+ */
+
+const MAJ13_KEYS: ChordRow7[] = [
+  ['c',  'C',  'C',  '[CEGBdfa]4 |'],
+  ['g',  'G',  'G',  "[GBdfac'e']4 |"],
+  ['d',  'D',  'D',  '[DFAcegb]4 |'],
+  ['a',  'A',  'A',  "[Acegbd'f']4 |"],
+  ['e',  'E',  'E',  "[EGBdfac']4 |"],
+  ['b',  'B',  'B',  "[Bdfac'e'g']4 |"],
+  ['fs', 'F♯', 'F#', "[FAcegbd']4 |"],
+  ['f',  'F',  'F',  "[FAcegbd']4 |"],
+  ['bb', 'B♭', 'Bb', "[Bdfac'e'g']4 |"],
+  ['eb', 'E♭', 'Eb', "[EGBdfac']4 |"],
+  ['ab', 'A♭', 'Ab', "[Acegbd'f']4 |"],
+  ['db', 'D♭', 'Db', '[DFAcegb]4 |'],
+];
+
+const DOM13_KEYS: ChordRow7[] = [
+  ['c',  'C',  'F',  '[CEGBdfa]4 |'],
+  ['g',  'G',  'C',  "[GBdfac'e']4 |"],
+  ['d',  'D',  'G',  '[DFAcegb]4 |'],
+  ['a',  'A',  'D',  "[Acegbd'f']4 |"],
+  ['e',  'E',  'A',  "[EGBdfac']4 |"],
+  ['b',  'B',  'E',  "[Bdfac'e'g']4 |"],
+  ['fs', 'F♯', 'B',  "[FAcegbd']4 |"],
+  ['f',  'F',  'Bb', "[FAcegbd']4 |"],
+  ['bb', 'B♭', 'Eb', "[Bdfac'e'g']4 |"],
+  ['eb', 'E♭', 'Ab', "[EGBdfac']4 |"],
+  ['ab', 'A♭', 'Db', "[Acegbd'f']4 |"],
+  ['db', 'D♭', 'Gb', '[DFAcegb]4 |'],
+];
+
+// m13 uses the Dorian-relative key (one whole step below the parallel major)
+// so the natural-13 lands without an explicit accidental.
+const MIN13_KEYS: ChordRow7[] = [
+  ['a',  'A',  'G',  "[Acegbd'f']4 |"],
+  ['e',  'E',  'D',  "[EGBdfac']4 |"],
+  ['b',  'B',  'A',  "[Bdfac'e'g']4 |"],
+  ['fs', 'F♯', 'E',  "[FAcegbd']4 |"],
+  ['cs', 'C♯', 'B',  '[CEGBdfa]4 |'],
+  ['d',  'D',  'C',  '[DFAcegb]4 |'],
+  ['g',  'G',  'F',  "[GBdfac'e']4 |"],
+  ['c',  'C',  'Bb', '[CEGBdfa]4 |'],
+  ['f',  'F',  'Eb', "[FAcegbd']4 |"],
+  ['bb', 'B♭', 'Ab', "[Bdfac'e'g']4 |"],
+  ['eb', 'E♭', 'Db', "[EGBdfac']4 |"],
+  ['ab', 'A♭', 'Gb', "[Acegbd'f']4 |"],
+];
+
+const THIRTEENTHS: Spec[] = [
+  ...MAJ13_KEYS.map(([idBase, tonic, key, notes]) => ({
+    id: `${idBase}-maj13-chord`,
+    name: `${tonic}maj13`,
+    tonic,
+    family: 'maj13-chord' as TechniqueFamily,
+    abc: abc(`${tonic}maj13 chord`, key, notes),
+    difficulty: (KEY_DIFF[key] ?? 0.5) + 0.2,
+  })),
+  ...DOM13_KEYS.map(([idBase, tonic, key, notes]) => ({
+    id: `${idBase}-dom13-chord`,
+    name: `${tonic}13`,
+    tonic,
+    family: 'dom13-chord' as TechniqueFamily,
+    abc: abc(`${tonic}13 chord`, key, notes),
+    difficulty: (KEY_DIFF[key] ?? 0.5) + 0.2,
+  })),
+  ...MIN13_KEYS.map(([idBase, tonic, key, notes]) => ({
+    id: `${idBase}-min13-chord`,
+    name: `${tonic}m13`,
+    tonic,
+    family: 'min13-chord' as TechniqueFamily,
+    abc: abc(`${tonic}m13 chord`, key, notes),
+    difficulty: (KEY_DIFF[key] ?? 0.5) + 0.2,
+  })),
+];
+
 export const DRILLS: Drill[] = [
-  ...MAJORS, ...MINORS, ...ARPEGGIOS, ...CHORDS, ...SEVENTHS, ...NINTHS, ...ELEVENTHS,
+  ...MAJORS, ...MINORS, ...ARPEGGIOS, ...CHORDS, ...SEVENTHS, ...NINTHS, ...ELEVENTHS, ...THIRTEENTHS,
 ].map(build);
 
 /** Daily routine — the user's "warmup order". A mix across families. */
@@ -510,6 +597,7 @@ export const DAILY_ROUTINE_IDS: string[] = [
   'c-maj7-chord',
   'd-min9-chord',
   'g-min11-chord',
+  'f-maj13-chord',
 ];
 
 /** Lookup by id. */
@@ -567,6 +655,9 @@ export const CHORD_TYPES = [
   'maj11',
   'dom11',
   'min11',
+  'maj13',
+  'dom13',
+  'min13',
 ] as const;
 export type ChordType = (typeof CHORD_TYPES)[number];
 
@@ -575,30 +666,34 @@ export interface ChordTypeMeta {
   /** Pill label shown in the sub-toggle. */
   label: string;
   /** Group the pill is rendered in. */
-  category: 'triads' | 'sevenths' | 'ninths' | 'elevenths';
+  category: 'triads' | 'sevenths' | 'ninths' | 'elevenths' | 'thirteenths';
   /** The TechniqueFamily this type maps to. */
   family: TechniqueFamily;
 }
 
 export const CHORD_TYPE_META: Record<ChordType, ChordTypeMeta> = {
-  major: { type: 'major', label: 'Major', category: 'triads',    family: 'major-chord' },
-  minor: { type: 'minor', label: 'Minor', category: 'triads',    family: 'minor-chord' },
-  maj7:  { type: 'maj7',  label: 'Maj7',  category: 'sevenths',  family: 'maj7-chord' },
-  dom7:  { type: 'dom7',  label: 'Dom7',  category: 'sevenths',  family: 'dom7-chord' },
-  min7:  { type: 'min7',  label: 'Min7',  category: 'sevenths',  family: 'min7-chord' },
-  maj9:  { type: 'maj9',  label: 'Maj9',  category: 'ninths',    family: 'maj9-chord' },
-  dom9:  { type: 'dom9',  label: 'Dom9',  category: 'ninths',    family: 'dom9-chord' },
-  min9:  { type: 'min9',  label: 'Min9',  category: 'ninths',    family: 'min9-chord' },
-  maj11: { type: 'maj11', label: 'Maj11', category: 'elevenths', family: 'maj11-chord' },
-  dom11: { type: 'dom11', label: 'Dom11', category: 'elevenths', family: 'dom11-chord' },
-  min11: { type: 'min11', label: 'Min11', category: 'elevenths', family: 'min11-chord' },
+  major: { type: 'major', label: 'Major', category: 'triads',      family: 'major-chord' },
+  minor: { type: 'minor', label: 'Minor', category: 'triads',      family: 'minor-chord' },
+  maj7:  { type: 'maj7',  label: 'Maj7',  category: 'sevenths',    family: 'maj7-chord' },
+  dom7:  { type: 'dom7',  label: 'Dom7',  category: 'sevenths',    family: 'dom7-chord' },
+  min7:  { type: 'min7',  label: 'Min7',  category: 'sevenths',    family: 'min7-chord' },
+  maj9:  { type: 'maj9',  label: 'Maj9',  category: 'ninths',      family: 'maj9-chord' },
+  dom9:  { type: 'dom9',  label: 'Dom9',  category: 'ninths',      family: 'dom9-chord' },
+  min9:  { type: 'min9',  label: 'Min9',  category: 'ninths',      family: 'min9-chord' },
+  maj11: { type: 'maj11', label: 'Maj11', category: 'elevenths',   family: 'maj11-chord' },
+  dom11: { type: 'dom11', label: 'Dom11', category: 'elevenths',   family: 'dom11-chord' },
+  min11: { type: 'min11', label: 'Min11', category: 'elevenths',   family: 'min11-chord' },
+  maj13: { type: 'maj13', label: 'Maj13', category: 'thirteenths', family: 'maj13-chord' },
+  dom13: { type: 'dom13', label: 'Dom13', category: 'thirteenths', family: 'dom13-chord' },
+  min13: { type: 'min13', label: 'Min13', category: 'thirteenths', family: 'min13-chord' },
 };
 
 export const CHORD_CATEGORIES = [
-  { id: 'triads',    label: 'Triads' },
-  { id: 'sevenths',  label: '7ths' },
-  { id: 'ninths',    label: '9ths' },
-  { id: 'elevenths', label: '11ths' },
+  { id: 'triads',      label: 'Triads' },
+  { id: 'sevenths',    label: '7ths' },
+  { id: 'ninths',      label: '9ths' },
+  { id: 'elevenths',   label: '11ths' },
+  { id: 'thirteenths', label: '13ths' },
 ] as const;
 export type ChordCategory = (typeof CHORD_CATEGORIES)[number]['id'];
 

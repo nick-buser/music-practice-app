@@ -73,13 +73,31 @@ describe('DrillsView', () => {
     expect(screen.getAllByText(/dominant 7/i).length).toBeGreaterThanOrEqual(12);
   });
 
-  it('Chord type picker shows a category label per row (Triads / 7ths / 9ths / 11ths)', () => {
+  it('Chord type picker shows a category label per row (Triads / 7ths / 9ths / 11ths / 13ths)', () => {
     const { container } = render(<DrillsView onStartSession={() => {}} />);
     fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
     const labels = Array.from(container.querySelectorAll('.chord-type-row .cat-label')).map(
       (e) => e.textContent,
     );
-    expect(labels).toEqual(['Triads', '7ths', '9ths', '11ths']);
+    expect(labels).toEqual(['Triads', '7ths', '9ths', '11ths', '13ths']);
+  });
+
+  it('Chords → Maj13 / Dom13 / Min13 each swap to 12 cards with the right subtitle', () => {
+    render(<DrillsView onStartSession={() => {}} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Chords$/i }));
+
+    fireEvent.click(screen.getByRole('button', { name: /^Maj13$/i }));
+    expect(screen.getByRole('button', { name: /^Maj13$/i, pressed: true })).toBeInTheDocument();
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getAllByText(/major 13/i).length).toBeGreaterThanOrEqual(12);
+
+    fireEvent.click(screen.getByRole('button', { name: /^Dom13$/i }));
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getAllByText(/dominant 13/i).length).toBeGreaterThanOrEqual(12);
+
+    fireEvent.click(screen.getByRole('button', { name: /^Min13$/i }));
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+    expect(screen.getAllByText(/minor 13/i).length).toBeGreaterThanOrEqual(12);
   });
 
   it('Chords → Maj11 / Dom11 / Min11 each swap to 12 cards with the right subtitle', () => {

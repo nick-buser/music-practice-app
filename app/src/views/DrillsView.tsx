@@ -361,5 +361,11 @@ function subtitleFor(drill: Drill): string {
       return 'dominant 11 · block · 1 · 3 · 5 · ♭7 · 9 · 11';
     case 'min11-chord':
       return 'minor 11 · block · 1 · ♭3 · 5 · ♭7 · 9 · 11';
+    case 'maj13-chord':
+      return 'major 13 · block · 1 · 3 · 5 · 7 · 9 · 11 · 13';
+    case 'dom13-chord':
+      return 'dominant 13 · block · 1 · 3 · 5 · ♭7 · 9 · 11 · 13';
+    case 'min13-chord':
+      return 'minor 13 · block · 1 · ♭3 · 5 · ♭7 · 9 · 11 · 13';
   }
 }
