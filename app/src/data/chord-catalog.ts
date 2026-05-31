@@ -141,3 +141,8 @@ export function chordDrillCatalog(): ChordDrillEntry[] {
   }
   return out;
 }
+
+/** Chord-drill id → its identity, for the views/data that render chord drills. */
+export const CHORD_IDENTITY_BY_ID: Map<string, ChordIdentity> = new Map(
+  chordDrillCatalog().map((e) => [e.id, e.identity]),
+);

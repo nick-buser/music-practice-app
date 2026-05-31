@@ -218,7 +218,7 @@ test.describe('Drill-aware session', () => {
     await page.waitForSelector('.session-score svg', { timeout: 30_000 });
 
     await expect(page.locator('.session-piece h2')).toContainText('C major chord');
-    await expect(page.locator('.session-piece h2 em')).toContainText('major chord');
+    await expect(page.locator('.session-piece h2 em')).toContainText('major triad');
     await expect(page.getByRole('button', { name: /End warmup/i })).toBeVisible();
   });
 
@@ -233,7 +233,7 @@ test.describe('Drill-aware session', () => {
     await page.waitForSelector('.session-score svg', { timeout: 30_000 });
 
     await expect(page.locator('.session-piece h2')).toContainText('Cmaj7');
-    await expect(page.locator('.session-piece h2 em')).toContainText('major 7 chord');
+    await expect(page.locator('.session-piece h2 em')).toContainText('major 7');
   });
 
   test('Run it on a Dm9 card opens a session with the 9th-chord byline', async ({ page }) => {
@@ -248,7 +248,7 @@ test.describe('Drill-aware session', () => {
     await page.waitForSelector('.session-score svg', { timeout: 30_000 });
 
     await expect(page.locator('.session-piece h2')).toContainText('Dm9');
-    await expect(page.locator('.session-piece h2 em')).toContainText('minor 9 chord');
+    await expect(page.locator('.session-piece h2 em')).toContainText('minor 9');
   });
 
   test('Run it on a Gm11 card opens a session with the 11th-chord byline', async ({ page }) => {
@@ -263,7 +263,7 @@ test.describe('Drill-aware session', () => {
     await page.waitForSelector('.session-score svg', { timeout: 30_000 });
 
     await expect(page.locator('.session-piece h2')).toContainText('Gm11');
-    await expect(page.locator('.session-piece h2 em')).toContainText('minor 11 chord');
+    await expect(page.locator('.session-piece h2 em')).toContainText('minor 11');
   });
 
   test('Run it on an Fmaj13 card opens a session with the 13th-chord byline', async ({ page }) => {
@@ -278,7 +278,7 @@ test.describe('Drill-aware session', () => {
     await page.waitForSelector('.session-score svg', { timeout: 30_000 });
 
     await expect(page.locator('.session-piece h2')).toContainText('Fmaj13');
-    await expect(page.locator('.session-piece h2 em')).toContainText('major 13 chord');
+    await expect(page.locator('.session-piece h2 em')).toContainText('major 13');
   });
 
   test('Run it on an E7♯9 card opens a session with the altered-dominant byline', async ({ page }) => {

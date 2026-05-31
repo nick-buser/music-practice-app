@@ -337,6 +337,21 @@ function rootSymbol(root: Root): string {
 const ALTER_SYMBOL: Record<AlterationChange, string> = { '#': '♯', b: '♭' };
 
 /**
+ * The headline extension for naming: the tallest extension that's present and
+ * *unaltered*. So 13♭9 keeps its "13" (the 11 & 13 are natural), but 7♭9 stays
+ * a "7" (its only extension, the 9, is altered).
+ */
+function headlineExtension(c: ChordIdentity): number {
+  let number = 7;
+  for (const deg of [9, 11, 13] as const) {
+    if (c.extensions.includes(deg) && !alterationFor(c, deg, '#') && !alterationFor(c, deg, 'b')) {
+      number = deg;
+    }
+  }
+  return number;
+}
+
+/**
  * The chord symbol: "Cmaj7", "C7", "Am7", "C7♯11", "C°7", "C7alt"… For inverted
  * voicings it appends a slash bass (e.g. "G/B").
  */
@@ -361,20 +376,12 @@ export function displayName(c: ChordIdentity): string {
   } else {
     // A seventh chord, possibly extended/altered.
     const family = c.quality === 'minor' ? 'm' : c.seventh === 'maj7' ? 'maj' : '';
-    // The headline number is the tallest *natural* extension; altered degrees
-    // are noted as suffixes instead (so 13♭9 keeps its "13", but 7♭9 stays "7").
-    let number = 7;
-    for (const deg of [9, 11, 13] as const) {
-      if (c.extensions.includes(deg) && !alterationFor(c, deg, '#') && !alterationFor(c, deg, 'b')) {
-        number = deg;
-      }
-    }
     const suffix = c.alterations
       .slice()
       .sort((a, b) => a.degree - b.degree)
       .map((a) => ALTER_SYMBOL[a.change] + a.degree)
       .join('');
-    symbol = root + family + number + suffix;
+    symbol = root + family + headlineExtension(c) + suffix;
   }
 
   if (c.voicing.inversion > 0) {
@@ -403,39 +410,43 @@ function degreeLabel(p: Pitch): string {
   }
 }
 
-const QUALITY_PHRASE: Record<string, string> = {
-  'maj-triad': 'major triad',
-  'min-triad': 'minor triad',
-  'dim-triad': 'diminished triad',
-  'aug-triad': 'augmented triad',
-};
+/**
+ * The spoken name of the chord's quality — the idiomatic phrase a player would
+ * say: "major 7", "altered dominant", "half-diminished 7", "lydian major"…
+ */
+function qualityPhrase(c: ChordIdentity): string {
+  if (!c.seventh) return c.quality === 'minor' ? 'minor triad' : 'major triad';
+  if (c.seventh === 'dim7') return 'fully diminished 7';
+  if (c.quality === 'dim') return 'half-diminished 7'; // dim triad + ♭7
+  if (isAltered(c)) return 'fully altered dominant';
+
+  const sharp11 = alterationFor(c, 11, '#');
+  const altered5 = alterationFor(c, 5, '#') || alterationFor(c, 5, 'b');
+  const altered9 = alterationFor(c, 9, '#') || alterationFor(c, 9, 'b');
+
+  if (c.seventh === 'maj7') {
+    if (sharp11) return 'lydian major';
+    if (altered5) return 'augmented major 7';
+    return `major ${headlineExtension(c)}`;
+  }
+  if (c.quality === 'minor') return `minor ${headlineExtension(c)}`;
+
+  // Dominant family (major triad + ♭7).
+  if (sharp11) return 'lydian dominant';
+  if (alterationFor(c, 9, 'b') && c.extensions.includes(13)) return 'dominant 13 ♭9';
+  if (altered5 || altered9) return 'altered dominant';
+  return `dominant ${headlineExtension(c)}`;
+}
 
 /**
- * The italic descriptor beneath a drill: "major 7 · 1 · 3 · 5 · 7". Collapses
- * the two parallel 31-arm switch statements (DrillsView's `subtitleFor` and
- * subject.ts's `subjectBylineForScale`) into one derivation.
+ * The italic descriptor beneath a drill: "major 7 · 1 · 3 · 5 · 7",
+ * "altered dominant · 1 · 3 · ♭5 · ♭7". One derivation in place of the chord
+ * arms of both DrillsView's `subtitleFor` and subject.ts's byline switch.
  */
 export function subtitleLine(c: ChordIdentity): string {
-  const tones = chordTones(c).filter((t) => t.degree !== 8); // skip the octave double
-  const formula = tones.map(degreeLabel).join(' · ');
-
-  let phrase: string;
-  if (c.seventh === 'dim7') phrase = 'fully diminished 7';
-  else if (c.quality === 'dim' && c.seventh === 'min7') phrase = 'half-diminished 7';
-  else if (isAltered(c)) phrase = 'fully altered dominant';
-  else if (!c.seventh) {
-    phrase = QUALITY_PHRASE[`${c.quality === 'minor' ? 'min' : c.quality === 'major' ? 'maj' : c.quality}-triad`]
-      ?? `${c.quality} triad`;
-  } else {
-    let number = 7;
-    for (const deg of [9, 11, 13] as const) {
-      if (c.extensions.includes(deg) && !alterationFor(c, deg, '#') && !alterationFor(c, deg, 'b')) number = deg;
-    }
-    const word = c.quality === 'minor' ? 'minor' : c.seventh === 'maj7' ? 'major' : 'dominant';
-    const alt = c.alterations.slice().sort((a, b) => a.degree - b.degree)
-      .map((a) => ALTER_SYMBOL[a.change] + a.degree).join('');
-    phrase = `${word} ${number}${alt ? ' ' + alt : ''}`;
-  }
-
-  return `${phrase} · ${formula}`;
+  const formula = chordTones(c)
+    .filter((t) => t.degree !== 8) // skip the octave double
+    .map(degreeLabel)
+    .join(' · ');
+  return `${qualityPhrase(c)} · ${formula}`;
 }
