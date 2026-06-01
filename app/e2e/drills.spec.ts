@@ -208,6 +208,20 @@ test.describe('Drills view', () => {
     await expect(first.locator('.name .n')).toContainText('Cmaj7/G');
     await expect(first.locator('.name .s')).toContainText(/drop 2/i);
   });
+
+  test('Guitar notation renders fretboard + chord diagrams', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.side .nav a', { hasText: 'Drills' }).click();
+    await page.waitForSelector('.scale-card .engraving svg', { timeout: 30_000 });
+
+    await page.getByRole('button', { name: /^Guitar$/i }).click();
+    // Scales → fretboard diagrams.
+    await page.waitForSelector('.scale-card .engraving.guitar .guitar-fretboard svg', { timeout: 30_000 });
+
+    // Chords → chord-grip diagrams.
+    await page.getByRole('button', { name: /^Chords$/i }).click();
+    await page.waitForSelector('.scale-card .engraving.guitar .guitar-diagram svg', { timeout: 30_000 });
+  });
 });
 
 test.describe('Drill-aware session', () => {

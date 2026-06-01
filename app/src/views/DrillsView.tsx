@@ -1,5 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Topbar } from '../components/Topbar';
+import { GuitarChord } from '../components/GuitarChord';
+import { GuitarScale } from '../components/GuitarScale';
+import { guitarSupportsChord } from '../guitar/support';
+import { noteToPitchClass } from '../guitar/notes';
 import { Score } from '../verovio/Score';
 import {
   ARP_FAMILY_BY_QUALITY,
@@ -74,12 +78,18 @@ function comfortClass(c: number): string {
   return 'struggle';
 }
 
+/** Notation the engravings render in. Guitar is far more natural on fretted instruments. */
+type Notation = 'staff' | 'guitar';
+const NOTATIONS = ['staff', 'guitar'] as const;
+const NOTATION_LABEL: Record<Notation, string> = { staff: 'Staff', guitar: 'Guitar' };
+
 export function DrillsView({ onStartSession }: Props) {
   const [topTab, setTopTab] = useState<TopTab>('scales');
   const [scaleSub, setScaleSub] = useState<ScaleSubTab>('major');
   const [arpSub, setArpSub] = useState<QualitySubTab>('major');
   const [chordType, setChordType] = useState<ChordType>('major');
   const [voicing, setVoicing] = useState<VoicingKey>('root');
+  const [notation, setNotation] = useState<Notation>('staff');
 
   const activeFamily: TechniqueFamily = useMemo(() => {
     if (topTab === 'scales') return SCALE_FAMILY_BY_SUBTAB[scaleSub];
@@ -156,6 +166,14 @@ export function DrillsView({ onStartSession }: Props) {
             {t.label}
           </button>
         ))}
+        <div className="notation-toggle">
+          <SubToggle
+            options={NOTATIONS}
+            value={notation}
+            onChange={setNotation}
+            labelFor={(v) => NOTATION_LABEL[v]}
+          />
+        </div>
       </div>
 
       {topTab === 'scales' && (
@@ -189,6 +207,7 @@ export function DrillsView({ onStartSession }: Props) {
                 key={d.id}
                 drill={d}
                 voicing={effectiveVoicing}
+                notation={notation}
                 onStartSession={onStartSession}
                 onSave={saved.enabled ? saved.save : undefined}
               />
@@ -376,12 +395,13 @@ function VoicingToggle({
 interface CardProps {
   drill: Drill;
   voicing: VoicingKey;
+  notation: Notation;
   onStartSession: (id: string) => void;
   /** Provided only when the backend is enabled — saves the shown voicing. */
   onSave?: (identity: ChordIdentity, label: string) => void | Promise<void>;
 }
 
-function DrillCard({ drill, voicing, onStartSession, onSave }: CardProps) {
+function DrillCard({ drill, voicing, notation, onStartSession, onSave }: CardProps) {
   const last = drill.lastTouched ? relTime(drill.lastTouched) : 'never';
   const atTarget = drill.bpmCurrent >= drill.bpmTarget;
 
@@ -394,6 +414,14 @@ function DrillCard({ drill, voicing, onStartSession, onSave }: CardProps) {
   const abc = voiced ? toAbc(voiced, name) : drill.abc;
   const runId = voiced ? encodeVoicedId(drill.id, voicing) : drill.id;
 
+  // Guitar view: chord grips for chords (canonical, voicing-independent), a
+  // fretboard for scales/arpeggios. Unsupported chord types fall back to staff.
+  const chordType = identity ? (drill.family.replace('-chord', '') as ChordType) : null;
+  const showGuitarChord =
+    notation === 'guitar' && chordType !== null && guitarSupportsChord(chordType);
+  const showGuitarScale = notation === 'guitar' && identity === undefined;
+  const showingGuitar = showGuitarChord || showGuitarScale;
+
   return (
     <article className="scale-card" data-comfort={comfortClass(drill.comfort)}>
       <header>
@@ -405,12 +433,14 @@ function DrillCard({ drill, voicing, onStartSession, onSave }: CardProps) {
         <span className={`dot ${comfortClass(drill.comfort)}`} />
       </header>
 
-      <div className="engraving">
-        <Score
-          data={abc}
-          options={DRILL_THUMB_OPTS}
-          ariaLabel={name}
-        />
+      <div className={`engraving ${showingGuitar ? 'guitar' : ''}`}>
+        {notation === 'guitar' && chordType !== null && guitarSupportsChord(chordType) ? (
+          <GuitarChord type={chordType} pitchClass={noteToPitchClass(drill.tonic)} name={drill.name} />
+        ) : showGuitarScale ? (
+          <GuitarScale family={drill.family} tonic={drill.tonic} />
+        ) : (
+          <Score data={abc} options={DRILL_THUMB_OPTS} ariaLabel={name} />
+        )}
       </div>
 
       <div className="meta">
