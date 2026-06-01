@@ -50,3 +50,28 @@ npm install && npm run dev                    # http://localhost:5173
 Multitenancy stays off everywhere: the backend is single-tenant and only run
 locally. If it's ever exposed, flip on auth at `backend/app/deps.py::get_current_user`
 first (see backend/README.md).
+
+## Contract (backend ↔ frontend)
+
+`backend/openapi.json` is the single source of truth. The frontend's typed API
+client is **generated** from it — never hand-written — and two drift checks keep
+the chain honest:
+
+```
+Pydantic models ──► openapi.json ──► src/api/schema.d.ts ──► openapi-fetch client
+        └─ test_openapi_drift.py ─┘     └─ schema.drift.test.mjs ─┘
+                                        └─ contract.test.ts (frontend type ⊆ contract)
+```
+
+- **Backend ↔ openapi** — `backend/tests/test_openapi_drift.py` fails if the
+  committed `openapi.json` doesn't match what the live app generates. Refresh
+  with `uv run python scripts/export_openapi.py`.
+- **openapi ↔ frontend types** — `app/src/api/schema.drift.test.mjs` regenerates
+  the client types and fails on drift. Refresh with `npm run gen:api`.
+- **frontend domain ↔ contract** — `app/src/api/contract.test.ts` is a
+  compile-time guard (via `tsc`) that the hand-authored `ChordIdentity` stays
+  assignable to the generated contract shape.
+
+Backend-only features (e.g. saved chords on the Drills tab) call through the
+generated client and are gated on `backendEnabled`, so they vanish on the
+public build.

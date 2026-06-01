@@ -25,6 +25,8 @@ import {
   type VoicingOption,
 } from '../data/chord-catalog';
 import { coreToneCount, displayName, subtitleLine, toAbc } from '../data/chord-identity';
+import type { ChordIdentity } from '../data/chord-identity';
+import { useSavedChords } from '../hooks/useSavedChords';
 import type { Drill, TechniqueFamily } from '../data/schemas';
 
 interface Props {
@@ -103,6 +105,10 @@ export function DrillsView({ onStartSession }: Props) {
 
   const effectiveVoicing: VoicingKey =
     availableVoicings.some((v) => v.key === voicing) ? voicing : 'root';
+
+  // Backend-gated: saving chords is a local-build feature (no-op / hidden on
+  // the public, backend-less deploy). Only fetches while the Chords tab is open.
+  const saved = useSavedChords(topTab === 'chords');
 
   const routine = useMemo(() => {
     const byId = new Map(DRILLS.map((d) => [d.id, d]));
@@ -184,12 +190,39 @@ export function DrillsView({ onStartSession }: Props) {
                 drill={d}
                 voicing={effectiveVoicing}
                 onStartSession={onStartSession}
+                onSave={saved.enabled ? saved.save : undefined}
               />
             ))}
           </div>
         </div>
 
         <aside className="tech-rail">
+          {saved.enabled && topTab === 'chords' && (
+            <div className="card" data-testid="saved-chords">
+              <div className="head">
+                <h3>Saved chords</h3>
+                <span className="eyebrow">— local</span>
+              </div>
+              {saved.error && <div className="s" style={{ color: 'var(--krill)' }}>{saved.error}</div>}
+              {saved.chords.length === 0 ? (
+                <div style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', color: 'var(--shoal)', fontSize: 13 }}>
+                  Save a voicing from any chord card to keep it here.
+                </div>
+              ) : (
+                <div className="routine-list">
+                  {saved.chords.map((c) => (
+                    <div key={c.id} className="routine-item">
+                      <div className="what"><div className="t">{c.label ?? 'Untitled'}</div></div>
+                      <button className="btn btn-ghost" onClick={() => void saved.remove(c.id)}>
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="today-panel">
             <div className="head">
               <span className="l">— today's routine</span>
@@ -344,9 +377,11 @@ interface CardProps {
   drill: Drill;
   voicing: VoicingKey;
   onStartSession: (id: string) => void;
+  /** Provided only when the backend is enabled — saves the shown voicing. */
+  onSave?: (identity: ChordIdentity, label: string) => void | Promise<void>;
 }
 
-function DrillCard({ drill, voicing, onStartSession }: CardProps) {
+function DrillCard({ drill, voicing, onStartSession, onSave }: CardProps) {
   const last = drill.lastTouched ? relTime(drill.lastTouched) : 'never';
   const atTarget = drill.bpmCurrent >= drill.bpmTarget;
 
@@ -394,6 +429,11 @@ function DrillCard({ drill, voicing, onStartSession }: CardProps) {
         <button className="btn btn-ghost" onClick={() => onStartSession(runId)}>
           Run it →
         </button>
+        {onSave && identity && (
+          <button className="btn btn-ghost" onClick={() => void onSave(voiced ?? identity, name)}>
+            ★ Save
+          </button>
+        )}
       </footer>
     </article>
   );
