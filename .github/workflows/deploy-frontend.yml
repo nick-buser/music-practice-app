@@ -1,0 +1,56 @@
+name: Deploy frontend (Cloudflare Pages)
+
+# Builds the Vite app in app/ and deploys app/dist to the "soundings"
+# Cloudflare Pages project. The build runs FIRST and we deploy the build
+# output (not the source tree) — serving source is what breaks SPAs with
+# "Failed to load module script".
+#
+# Backend (backend/) is intentionally not deployed.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - '.github/workflows/deploy-frontend.yml'
+  workflow_dispatch: {}
+
+# One in-flight production deploy at a time; newer pushes cancel older runs.
+concurrency:
+  group: pages-deploy-soundings
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          # Public build is backend-free: leave VITE_API_BASE_URL unset so
+          # config.ts -> backendEnabled is false.
+          VITE_API_BASE_URL: ''
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: app
+          command: pages deploy dist --project-name=soundings --branch=main
