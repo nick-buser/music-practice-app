@@ -3,8 +3,11 @@ import {
   chordDrillCatalog,
   type ChordDrillEntry,
   type ChordTypeId,
+  MAJOR_ROOTS,
 } from './chord-catalog';
 import { chordKey, displayName, toAbc } from './chord-identity';
+import { scaleAbc } from './scales/engraving';
+import { JAPANESE_SCALES } from './scales/world';
 
 /**
  * The drills library: 12 major scales, 36 minor scales (12 keys × natural /
@@ -235,8 +238,27 @@ function chordSpec({ id, type, tonic, identity }: ChordDrillEntry): Spec {
 
 const CHORDS: Spec[] = chordDrillCatalog().map(chordSpec);
 
+/* ─── 60 world-music scales (5 Japanese pentatonics × 12 keys) ──────────
+ * Generated from interval sets (scales/world.ts) — `scaleAbc` renders the
+ * ascending engraving, no hand-typed strings. The microtonal traditions are a
+ * later phase. */
+const WORLD_SCALES: Spec[] = JAPANESE_SCALES.flatMap((scale) =>
+  MAJOR_ROOTS.map(({ idBase, tonic, root }) => {
+    const name = `${tonic} ${scale.name}`;
+    const majorKey = root.letter + (root.accidental === 'sharp' ? '#' : root.accidental === 'flat' ? 'b' : '');
+    return {
+      id: `${idBase}-${scale.id}`,
+      name,
+      tonic,
+      family: scale.id as TechniqueFamily,
+      abc: scaleAbc(scale, root.letter, root.accidental, name),
+      difficulty: (KEY_DIFF[majorKey] ?? 0.5) + 0.1,
+    };
+  }),
+);
+
 export const DRILLS: Drill[] = [
-  ...MAJORS, ...MINORS, ...ARPEGGIOS, ...CHORDS,
+  ...MAJORS, ...MINORS, ...ARPEGGIOS, ...CHORDS, ...WORLD_SCALES,
 ].map(build);
 
 /** Daily routine — the user's "warmup order". A mix across families. */
@@ -264,7 +286,10 @@ export const DRILL_BY_ID: Map<string, Drill> = new Map(DRILLS.map((d) => [d.id, 
 /* ─── Filter helpers consumed by DrillsView ───────────────────── */
 
 /** Sub-toggle values within each top tab. */
-export const SCALE_SUBTABS = ['major', 'natural', 'harmonic', 'melodic'] as const;
+export const SCALE_SUBTABS = [
+  'major', 'natural', 'harmonic', 'melodic',
+  'hirajoshi', 'in-sen', 'yo', 'iwato', 'kumoi',
+] as const;
 export type ScaleSubTab = (typeof SCALE_SUBTABS)[number];
 
 export const QUALITY_SUBTABS = ['major', 'minor'] as const;
@@ -275,6 +300,23 @@ export const SCALE_FAMILY_BY_SUBTAB: Record<ScaleSubTab, TechniqueFamily> = {
   natural:  'natural-minor',
   harmonic: 'harmonic-minor',
   melodic:  'melodic-minor',
+  hirajoshi: 'hirajoshi',
+  'in-sen':  'in-sen',
+  yo:        'yo',
+  iwato:     'iwato',
+  kumoi:     'kumoi',
+};
+
+/** Scales are grouped into labelled rows (Western · Japanese …). */
+export const SCALE_CATEGORIES = [
+  { id: 'western',  label: 'Western' },
+  { id: 'japanese', label: 'Japanese' },
+] as const;
+export type ScaleCategory = (typeof SCALE_CATEGORIES)[number]['id'];
+
+export const SCALE_SUBTAB_CATEGORY: Record<ScaleSubTab, ScaleCategory> = {
+  major: 'western', natural: 'western', harmonic: 'western', melodic: 'western',
+  hirajoshi: 'japanese', 'in-sen': 'japanese', yo: 'japanese', iwato: 'japanese', kumoi: 'japanese',
 };
 
 export const ARP_FAMILY_BY_QUALITY: Record<QualitySubTab, TechniqueFamily> = {

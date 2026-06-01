@@ -17,6 +17,7 @@
   "dependencies": {
     "@moonwave99/fretboard.js": "^0.2.13",
     "@tombatossals/chords-db": "^0.5.1",
+    "@tonaljs/scale-type": "^4.9.2",
     "d3-array": "^3.2.4",
     "d3-scale": "^4.0.2",
     "d3-shape": "^3.2.0",

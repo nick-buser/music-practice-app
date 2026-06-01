@@ -15,7 +15,9 @@ import {
   DRILLS,
   QualitySubTab,
   QUALITY_SUBTABS,
+  SCALE_CATEGORIES,
   SCALE_FAMILY_BY_SUBTAB,
+  SCALE_SUBTAB_CATEGORY,
   SCALE_SUBTABS,
   ScaleSubTab,
 } from '../data/drills';
@@ -51,6 +53,11 @@ const SCALE_SUBTAB_LABEL: Record<ScaleSubTab, string> = {
   natural:  'Natural minor',
   harmonic: 'Harmonic minor',
   melodic:  'Melodic minor',
+  hirajoshi: 'Hirajōshi',
+  'in-sen':  'In',
+  yo:        'Yo',
+  iwato:     'Iwato',
+  kumoi:     'Kumoi',
 };
 
 const QUALITY_LABEL: Record<QualitySubTab, string> = {
@@ -177,12 +184,7 @@ export function DrillsView({ onStartSession }: Props) {
       </div>
 
       {topTab === 'scales' && (
-        <SubToggle
-          options={SCALE_SUBTABS}
-          value={scaleSub}
-          onChange={setScaleSub}
-          labelFor={(v) => SCALE_SUBTAB_LABEL[v]}
-        />
+        <ScaleTypePicker value={scaleSub} onChange={setScaleSub} />
       )}
       {topTab === 'arpeggios' && (
         <SubToggle
@@ -317,6 +319,44 @@ function SubToggle<T extends string>({ options, value, onChange, labelFor }: Sub
           {labelFor(opt)}
         </button>
       ))}
+    </div>
+  );
+}
+
+/**
+ * The Scales sub-toggle, grouped into labelled rows (Western · Japanese …) like
+ * the chord picker, so new scale traditions slot in without crowding one row.
+ */
+function ScaleTypePicker({
+  value,
+  onChange,
+}: {
+  value: ScaleSubTab;
+  onChange: (v: ScaleSubTab) => void;
+}) {
+  return (
+    <div className="chord-type-picker">
+      {SCALE_CATEGORIES.map((cat) => {
+        const subs = SCALE_SUBTABS.filter((s) => SCALE_SUBTAB_CATEGORY[s] === cat.id);
+        if (subs.length === 0) return null;
+        return (
+          <div key={cat.id} className="chord-type-row">
+            <span className="cat-label">{cat.label}</span>
+            <div className="chord-pills">
+              {subs.map((s) => (
+                <button
+                  key={s}
+                  className={`sub-chip ${s === value ? 'active' : ''}`}
+                  onClick={() => onChange(s)}
+                  aria-pressed={s === value}
+                >
+                  {SCALE_SUBTAB_LABEL[s]}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

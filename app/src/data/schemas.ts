@@ -128,6 +128,12 @@ export const TechniqueFamily = z.enum([
   'melodic-minor',
   'major-arpeggio',
   'minor-arpeggio',
+  // Japanese pentatonic scales (world music — phase 1, 12-TET).
+  'hirajoshi',
+  'in-sen',
+  'yo',
+  'iwato',
+  'kumoi',
   // Triad block chords
   'major-chord',
   'minor-chord',
