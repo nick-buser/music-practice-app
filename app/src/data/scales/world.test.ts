@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
 import { scaleAbcMeasure } from './engraving';
-import { JAPANESE_SCALES, WORLD_SCALE_BY_FAMILY } from './world';
+import { CHINESE_SCALES, JAPANESE_SCALES, WORLD_SCALES, WORLD_SCALE_BY_FAMILY } from './world';
 
 const byId = (id: string) => WORLD_SCALE_BY_FAMILY.get(id)!;
 
-describe('Japanese scale data', () => {
-  it('defines five pentatonic scales', () => {
+describe('world scale data', () => {
+  it('defines ten pentatonic scales (5 Japanese + 5 Chinese)', () => {
     expect(JAPANESE_SCALES).toHaveLength(5);
-    for (const s of JAPANESE_SCALES) expect(s.degrees).toHaveLength(5); // pentatonic
+    expect(CHINESE_SCALES).toHaveLength(5);
+    expect(WORLD_SCALES).toHaveLength(10);
+    for (const s of WORLD_SCALES) expect(s.degrees).toHaveLength(5); // all pentatonic
   });
 });
 
@@ -24,5 +26,13 @@ describe('scaleAbcMeasure', () => {
   it('spells correctly across an octave crossing (F♯ hirajōshi)', () => {
     // F♯ G♯ A C♯ D f♯ — the 5th/♭6 wrap into the next octave.
     expect(scaleAbcMeasure(byId('hirajoshi'), 'F', 'sharp')).toBe('^F^GA^cd^f |');
+  });
+
+  it('spells the Chinese five-tone modes (root C)', () => {
+    expect(scaleAbcMeasure(byId('gong'), 'C', 'natural')).toBe('CDEGAc |');
+    expect(scaleAbcMeasure(byId('shang'), 'C', 'natural')).toBe('CDFG_Bc |');
+    expect(scaleAbcMeasure(byId('jue'), 'C', 'natural')).toBe('C_EF_A_Bc |');
+    expect(scaleAbcMeasure(byId('zhi'), 'C', 'natural')).toBe('CDFGAc |');
+    expect(scaleAbcMeasure(byId('yu'), 'C', 'natural')).toBe('C_EFG_Bc |');
   });
 });

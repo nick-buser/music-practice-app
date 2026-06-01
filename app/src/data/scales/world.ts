@@ -9,7 +9,7 @@
  * engravings, consistent with how chords work.
  */
 
-export type ScaleRegion = 'japanese';
+export type ScaleRegion = 'japanese' | 'chinese';
 
 export interface ScaleDegree {
   /** Diatonic letter steps above the root (0 = root, 1 = next letter, …). */
@@ -79,6 +79,54 @@ export const JAPANESE_SCALES: WorldScale[] = [
   },
 ];
 
+// The Chinese five-tone modes (五声音阶: gōng/shāng/jué/zhǐ/yǔ) — the rotations
+// of the pentatonic. All five are already in Tonal, so the guitar view needs no
+// registration.
+export const CHINESE_SCALES: WorldScale[] = [
+  // C D E G A  (major pentatonic)
+  {
+    id: 'gong',
+    name: 'Gōng',
+    region: 'chinese',
+    tonalType: 'major pentatonic',
+    degrees: [d(0, 0), d(1, 2), d(2, 4), d(4, 7), d(5, 9)],
+  },
+  // C D F G B♭
+  {
+    id: 'shang',
+    name: 'Shāng',
+    region: 'chinese',
+    tonalType: 'egyptian',
+    degrees: [d(0, 0), d(1, 2), d(3, 5), d(4, 7), d(6, 10)],
+  },
+  // C E♭ F A♭ B♭
+  {
+    id: 'jue',
+    name: 'Jué',
+    region: 'chinese',
+    tonalType: 'malkos raga',
+    degrees: [d(0, 0), d(2, 3), d(3, 5), d(5, 8), d(6, 10)],
+  },
+  // C D F G A
+  {
+    id: 'zhi',
+    name: 'Zhǐ',
+    region: 'chinese',
+    tonalType: 'ritusen',
+    degrees: [d(0, 0), d(1, 2), d(3, 5), d(4, 7), d(5, 9)],
+  },
+  // C E♭ F G B♭  (minor pentatonic)
+  {
+    id: 'yu',
+    name: 'Yǔ',
+    region: 'chinese',
+    tonalType: 'minor pentatonic',
+    degrees: [d(0, 0), d(2, 3), d(3, 5), d(4, 7), d(6, 10)],
+  },
+];
+
+export const WORLD_SCALES: WorldScale[] = [...JAPANESE_SCALES, ...CHINESE_SCALES];
+
 export const WORLD_SCALE_BY_FAMILY: Map<string, WorldScale> = new Map(
-  JAPANESE_SCALES.map((s) => [s.id, s]),
+  WORLD_SCALES.map((s) => [s.id, s]),
 );
