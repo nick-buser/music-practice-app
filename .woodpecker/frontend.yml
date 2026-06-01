@@ -1,0 +1,46 @@
+# Frontend CI — typecheck, contract drift, tests, build.
+#
+# Targets the Woodpecker 1.0+ schema (`steps:` / `when:` map). Steps share the
+# cloned workspace, so node_modules from `install` is reused by later steps.
+# Assumes a Docker backend with network egress (to pull images + npm registry).
+when:
+  event: [push, pull_request]
+  # Monorepo filter: also run when the backend contract changes, since the
+  # generated client (src/api/schema.d.ts) is derived from backend/openapi.json.
+  path:
+    include:
+      - 'app/**'
+      - 'backend/openapi.json'
+      - '.woodpecker/frontend.yml'
+
+steps:
+  - name: install
+    image: node:22
+    commands:
+      - cd app
+      - npm ci
+
+  - name: typecheck
+    image: node:22
+    commands:
+      - cd app
+      - npm run typecheck
+
+  - name: api-types-drift
+    image: node:22
+    # Fails if src/api/schema.d.ts is stale vs backend/openapi.json (run gen:api).
+    commands:
+      - cd app
+      - npm run gen:api:check
+
+  - name: test
+    image: node:22
+    commands:
+      - cd app
+      - npm run test
+
+  - name: build
+    image: node:22
+    commands:
+      - cd app
+      - npm run build

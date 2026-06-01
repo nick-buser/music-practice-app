@@ -1,0 +1,42 @@
+# Backend CI — lint, types, tests (incl. the openapi drift guard).
+#
+# Targets the Woodpecker 1.0+ schema. The official uv image ships Python 3.12 +
+# uv; `setup` builds .venv in the shared workspace and later steps reuse it via
+# `uv run`. Assumes a Docker backend with network egress (PyPI + the node that
+# the `pyright` package fetches on first run).
+when:
+  event: [push, pull_request]
+  path:
+    include:
+      - 'backend/**'
+      - '.woodpecker/backend.yml'
+
+steps:
+  - name: setup
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+    commands:
+      - cd backend
+      - uv sync --frozen
+
+  - name: lint
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+    commands:
+      - cd backend
+      - uv run ruff check .
+      - uv run ruff format --check .
+
+  - name: typecheck
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+    commands:
+      - cd backend
+      - uv run pyright
+
+  - name: test
+    # Default suite: fast SQLite + the openapi-drift guard. The `integration`
+    # (real Postgres via testcontainers) and `contract` suites are opt-in and
+    # need Docker access / more time — wire them with a postgres service when
+    # the agent allows it (see .woodpecker/README.md).
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+    commands:
+      - cd backend
+      - uv run pytest
