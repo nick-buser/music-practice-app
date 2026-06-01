@@ -2038,6 +2038,26 @@ button { font-family: inherit; }
   padding: 4px 8px;
   overflow: hidden;
 }
+/* Guitar diagrams are taller than the staff thumbnail — let the box grow. */
+.scale-card .engraving.guitar {
+  height: auto;
+  min-height: 120px;
+  padding: 8px;
+}
+.guitar-diagram, .guitar-fretboard {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center;
+}
+.guitar-diagram svg, .guitar-fretboard svg {
+  width: 100%; height: auto; max-height: 150px;
+}
+.guitar-unsupported {
+  font-family: var(--font-body); font-style: italic;
+  color: var(--shoal); font-size: 12px;
+}
+/* Notation switch sits at the right of the top-tab row. */
+.notation-toggle { margin-left: auto; display: flex; align-items: center; }
+.notation-toggle .tech-sub-toggle { margin-bottom: 0; }
 .scale-card .engraving svg { max-width: 100%; max-height: 100%; display: block; }
 .scale-card .engraving svg * {
   fill: var(--mist) !important;
