@@ -74,8 +74,14 @@ describe('DRILLS', () => {
     expect(DRILLS.filter((d) => d.family === 'maj7s5-chord')).toHaveLength(12);
   });
 
-  it('totals 372 entries', () => {
-    expect(DRILLS).toHaveLength(372);
+  it('has 60 Japanese pentatonic scales (5 families × 12 keys)', () => {
+    for (const fam of ['hirajoshi', 'in-sen', 'yo', 'iwato', 'kumoi'] as const) {
+      expect(DRILLS.filter((d) => d.family === fam)).toHaveLength(12);
+    }
+  });
+
+  it('totals 432 entries', () => {
+    expect(DRILLS).toHaveLength(432);
   });
 
   it('uses distinct ids across the set', () => {

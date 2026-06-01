@@ -1,3 +1,4 @@
+import { get as getScaleType } from '@tonaljs/scale-type';
 import { describe, expect, it } from 'vitest';
 
 import { CHORD_TYPES } from '../data/drills';
@@ -92,5 +93,17 @@ describe('scale-spec', () => {
 
   it('returns null for chord families', () => {
     expect(guitarScaleSpec('maj7-chord')).toBeNull();
+  });
+
+  it('maps Japanese families to their Tonal scale type', () => {
+    expect(guitarScaleSpec('hirajoshi')).toEqual({ kind: 'scale', scaleType: 'hirajoshi' });
+    expect(guitarScaleSpec('in-sen')).toEqual({ kind: 'scale', scaleType: 'in sen' });
+    expect(guitarScaleSpec('yo')).toEqual({ kind: 'scale', scaleType: 'yo' });
+  });
+
+  it('registers In/Yo with Tonal so the fretboard can resolve them', () => {
+    // Importing scale-spec runs the registration side-effect.
+    expect(getScaleType('in sen').empty).toBe(false);
+    expect(getScaleType('yo').empty).toBe(false);
   });
 });

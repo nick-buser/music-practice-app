@@ -30,6 +30,14 @@ describe('resolveSubject', () => {
     expect(resolveSubject('a-minor-arp').byline).toBe('minor arpeggio');
   });
 
+  it('resolves a Japanese pentatonic scale', () => {
+    const s = resolveSubject('c-hirajoshi');
+    expect(s.kind).toBe('scale');
+    expect(s.title).toBe('C Hirajōshi');
+    expect(s.byline).toBe('Hirajōshi · pentatonic');
+    expect(s.abc).toContain('K:C');
+  });
+
   it('resolves a voiced chord id to a voiced subject', () => {
     const s = resolveSubject('c-maj7-chord~inv1');
     expect(s.kind).toBe('scale');

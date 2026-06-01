@@ -9,6 +9,7 @@ import { ABC_BY_PIECE } from './scores';
 import { DRILL_BY_ID } from './drills';
 import { applyVoicing, CHORD_IDENTITY_BY_ID, decodeVoicedId } from './chord-catalog';
 import { displayName, subtitleLine, toAbc } from './chord-identity';
+import { WORLD_SCALE_BY_FAMILY } from './scales/world';
 import type { Drill, Section } from './schemas';
 
 export type SubjectKind = 'piece' | 'scale';
@@ -110,6 +111,8 @@ export function resolveSubject(id: string): Subject {
 function bylineForDrill(drill: Drill): string {
   const identity = CHORD_IDENTITY_BY_ID.get(drill.id);
   if (identity) return subtitleLine(identity);
+  const world = WORLD_SCALE_BY_FAMILY.get(drill.family);
+  if (world) return `${world.name} · pentatonic`;
   switch (drill.family) {
     case 'major':
       return 'major scale';

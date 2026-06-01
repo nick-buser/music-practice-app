@@ -3,8 +3,18 @@
  *
  *  - scales use Tonal scale names via fretboard.js `renderScale`
  *  - arpeggios are the parent scale filtered to the triad's intervals
+ *
+ * The world scales Tonal doesn't ship (In, Yo) are registered with the shared
+ * Tonal scale-type dictionary at import, so fretboard.js can resolve them too.
  */
+import { add as addScaleType } from '@tonaljs/scale-type';
+
+import { JAPANESE_SCALES, WORLD_SCALE_BY_FAMILY } from '../data/scales/world';
 import type { TechniqueFamily } from '../data/schemas';
+
+for (const scale of JAPANESE_SCALES) {
+  if (scale.registerIntervals) addScaleType(scale.registerIntervals, scale.tonalType);
+}
 
 export type GuitarScaleSpec =
   | { kind: 'scale'; scaleType: string }
@@ -27,7 +37,9 @@ export function guitarScaleSpec(family: TechniqueFamily): GuitarScaleSpec | null
       return { kind: 'arpeggio', scaleType: 'major', intervals: MAJOR_TRIAD };
     case 'minor-arpeggio':
       return { kind: 'arpeggio', scaleType: 'minor', intervals: MINOR_TRIAD };
-    default:
-      return null; // chords are handled by GuitarChord
   }
+
+  const world = WORLD_SCALE_BY_FAMILY.get(family);
+  if (world) return { kind: 'scale', scaleType: world.tonalType };
+  return null; // chords are handled by GuitarChord
 }

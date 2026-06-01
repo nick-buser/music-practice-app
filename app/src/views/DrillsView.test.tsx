@@ -28,6 +28,18 @@ describe('DrillsView', () => {
     expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
   });
 
+  it('Scales tab groups Western and Japanese; Hirajōshi shows 12 cards', () => {
+    const { container } = render(<DrillsView onStartSession={() => {}} />);
+    const labels = Array.from(container.querySelectorAll('.chord-type-row .cat-label')).map(
+      (e) => e.textContent,
+    );
+    expect(labels).toEqual(['Western', 'Japanese']);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hirajōshi' }));
+    expect(screen.getByRole('button', { name: 'Hirajōshi', pressed: true })).toBeInTheDocument();
+    expect(screen.getAllByTestId('score-stub')).toHaveLength(12);
+  });
+
   it('Arpeggios tab shows 12 cards with a Major/Minor sub-toggle', () => {
     render(<DrillsView onStartSession={() => {}} />);
     fireEvent.click(screen.getByRole('button', { name: /^Arpeggios$/i }));
