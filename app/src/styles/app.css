@@ -2209,3 +2209,61 @@ button { font-family: inherit; }
   color: var(--shoal);
   margin-right: 10px;
 }
+
+/* ── World Notation — raga score (custom SVG sargam engraving) ───────────── */
+.raga-score {
+  display: block;
+  overflow: visible;
+}
+.raga-score .raga-letter {
+  font-family: var(--font-display);
+  font-size: 20px;
+  fill: var(--foam);
+}
+.raga-score .raga-letter.small {
+  font-size: 13px;
+}
+.raga-score .komal-line,
+.raga-score .tivra-line {
+  stroke: var(--foam);
+  stroke-width: 1.4;
+}
+.raga-score .octave-dot {
+  fill: var(--lumen);
+}
+.raga-score .raga-sustain,
+.raga-score .raga-rest {
+  font-family: var(--font-display);
+  font-size: 18px;
+  fill: var(--fg-quiet);
+}
+.raga-score .tala-marker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--shoal);
+}
+.raga-score .vibhag-divider {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.raga-score .raga-lyric {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  fill: var(--fg-muted);
+}
+.raga-score .matra-cursor {
+  fill: var(--lumen);
+  opacity: 0.16;
+  rx: 4;
+}
+.raga-composition-section {
+  margin-bottom: 18px;
+}
+.raga-section-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--shoal);
+  margin-bottom: 4px;
+}
