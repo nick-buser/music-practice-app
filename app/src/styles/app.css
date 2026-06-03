@@ -2267,3 +2267,105 @@ button { font-family: inherit; }
   color: var(--shoal);
   margin-bottom: 4px;
 }
+
+/* ── World Notation view ─────────────────────────────────────────────────── */
+.raga-tradition-blurb {
+  font-family: var(--font-body);
+  color: var(--fg-muted);
+  max-width: 640px;
+  margin: 6px 0 18px;
+  font-size: 14px;
+}
+.raga-picker {
+  margin-bottom: 18px;
+}
+.raga-head h2 {
+  font-family: var(--font-display);
+  font-size: 30px;
+  margin: 0 0 6px;
+}
+.raga-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--shoal);
+}
+.raga-desc {
+  font-family: var(--font-body);
+  color: var(--fg);
+  max-width: 640px;
+  margin: 14px 0 20px;
+}
+.raga-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.raga-line {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.raga-line-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--shoal);
+  width: 86px;
+  flex: none;
+  text-align: right;
+}
+.raga-comps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.raga-comp {
+  padding: 16px 18px;
+}
+.raga-comp-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.raga-comp-head h3 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  margin: 0;
+}
+.raga-comp-tala {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--lumen);
+}
+.raga-comp-note {
+  font-family: var(--font-body);
+  font-style: italic;
+  color: var(--fg-muted);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.raga-legend ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.raga-legend li {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--fg-muted);
+}
+.raga-legend b {
+  color: var(--fg);
+}
