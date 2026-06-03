@@ -2369,3 +2369,53 @@ button { font-family: inherit; }
 .raga-legend b {
   color: var(--fg);
 }
+
+/* ── World Notation — playback transport ─────────────────────────────────── */
+.raga-comp-section {
+  margin-bottom: 14px;
+}
+.raga-transport {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.raga-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--abyss-ink);
+  background: var(--lumen);
+  border: none;
+  border-radius: var(--r-lozenge);
+  padding: 5px 12px;
+  cursor: pointer;
+}
+.raga-play.on {
+  background: var(--krill);
+}
+.raga-loop {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--shoal);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lozenge);
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.raga-loop.active {
+  color: var(--lumen);
+  border-color: var(--lumen);
+}
+.raga-laya {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-quiet);
+}

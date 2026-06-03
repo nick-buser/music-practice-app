@@ -26,6 +26,8 @@ export function Icon({ name, size = 16, color = 'currentColor' }: IconProps) {
       return (<svg {...p}><path d="M3 21l3.5-1L18 8.5 15.5 6 4 17.5z"/><path d="M14 7l3 3"/></svg>);
     case 'play':
       return (<svg {...p}><path d="M8 5v14l11-7z" fill={color} stroke="none"/></svg>);
+    case 'stop':
+      return (<svg {...p}><rect x="6" y="6" width="12" height="12" rx="1.5" fill={color} stroke="none"/></svg>);
     case 'arrow-right':
       return (<svg {...p}><path d="M5 12h14M13 6l6 6-6 6"/></svg>);
     case 'plus':

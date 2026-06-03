@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 
 import { Topbar } from '../components/Topbar';
-import { CompositionScore, PhraseLine } from '../components/raga/RagaScore';
+import { PhraseLine } from '../components/raga/RagaScore';
+import { CompositionPlayer } from '../components/raga/CompositionPlayer';
 import { COMPOSITIONS } from '../data/raga/composition';
 import { RAGAS, type Raga } from '../data/raga/raga';
 import { TALA_BY_ID } from '../data/raga/tala';
@@ -86,7 +87,7 @@ function RagaPanel({ raga }: { raga: Raga }) {
                 </div>
                 {comp.note && <div className="raga-comp-note">{comp.note}</div>}
                 {comp.sections.map((section) => (
-                  <CompositionScore key={section.id} section={section} tala={tala} />
+                  <CompositionPlayer key={section.id} section={section} tala={tala} bpm={comp.layaBpm} />
                 ))}
               </div>
             );
