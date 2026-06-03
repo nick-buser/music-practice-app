@@ -53,4 +53,21 @@ describe('CompositionScore', () => {
     const { container } = render(<CompositionScore section={sarali} tala={adi} />);
     expect(texts(container, '.tala-marker')).toEqual(['×', 'O', 'O']);
   });
+
+  it('renders Devanagari numerals for tali in devanagari script', () => {
+    const { container } = render(<CompositionScore section={section} tala={tala} script="devanagari" />);
+    expect(texts(container, '.tala-marker')).toEqual(['×', '२', '○', '३']);
+  });
+});
+
+describe('script', () => {
+  it('spells swaras in Devanagari when asked', () => {
+    const { container } = render(<PhraseLine phrase={parsePhrase('S R G')} script="devanagari" />);
+    expect(texts(container, '.raga-letter')).toEqual(['सा', 'रे', 'ग']);
+  });
+
+  it('defaults to Roman letters', () => {
+    const { container } = render(<PhraseLine phrase={parsePhrase('S R G')} />);
+    expect(texts(container, '.raga-letter')).toEqual(['S', 'R', 'G']);
+  });
 });

@@ -2269,6 +2269,22 @@ button { font-family: inherit; }
 }
 
 /* ── World Notation view ─────────────────────────────────────────────────── */
+.raga-toggles {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.raga-script-toggle .sub-chip {
+  min-width: 64px;
+}
+/* Devanagari sargam: let the browser reach a system Devanagari face, since we
+   don't bundle one. The komal/tivra marks and octave dots are script-neutral. */
+.raga-score.deva .raga-letter {
+  font-family: 'Noto Sans Devanagari', 'Nirmala UI', 'Mangal', 'Kohinoor Devanagari', sans-serif;
+  font-size: 17px;
+}
 .raga-tradition-blurb {
   font-family: var(--font-body);
   color: var(--fg-muted);

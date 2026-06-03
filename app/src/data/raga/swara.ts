@@ -98,6 +98,36 @@ export function swaraGlyph(swara: Swara): SwaraGlyph {
   };
 }
 
+/** Which script the swaras are spelled in. */
+export type SwaraScript = 'roman' | 'devanagari';
+
+/** Devanagari sargam syllables (Bhatkhande short forms). */
+const DEVANAGARI: Record<SwaraName, string> = {
+  S: 'सा',
+  R: 'रे',
+  G: 'ग',
+  M: 'म',
+  P: 'प',
+  D: 'ध',
+  N: 'नि',
+};
+
+/** The display syllable for a swara's base letter in the chosen script. */
+export function swaraSyllable(name: SwaraName, script: SwaraScript): string {
+  return script === 'devanagari' ? DEVANAGARI[name] : name;
+}
+
+const DEVANAGARI_DIGITS = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+
+/** Render a small non-negative integer in the chosen script. */
+export function scriptNumeral(n: number, script: SwaraScript): string {
+  if (script !== 'devanagari') return String(n);
+  return String(n)
+    .split('')
+    .map((d) => DEVANAGARI_DIGITS[Number(d)] ?? d)
+    .join('');
+}
+
 // ── Compact ASCII spelling ──────────────────────────────────────────────────
 // Seed data reads more naturally as text than as object literals. The grammar
 // for a single swara token:

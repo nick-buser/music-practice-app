@@ -7,6 +7,7 @@ import { useState } from 'react';
 
 import { Icon } from '../Icon';
 import type { CompositionSection } from '../../data/raga/composition';
+import type { SwaraScript } from '../../data/raga/swara';
 import type { Tala } from '../../data/raga/tala';
 import { CompositionScore } from './RagaScore';
 import { DEFAULT_SA_HZ, useSwaraPlayback } from './playback';
@@ -17,9 +18,10 @@ interface Props {
   /** Matras per minute. */
   bpm: number;
   saHz?: number;
+  script?: SwaraScript;
 }
 
-export function CompositionPlayer({ section, tala, bpm, saHz = DEFAULT_SA_HZ }: Props) {
+export function CompositionPlayer({ section, tala, bpm, saHz = DEFAULT_SA_HZ, script = 'roman' }: Props) {
   const [running, setRunning] = useState(false);
   const [loop, setLoop] = useState(true);
   const { activeIndex } = useSwaraPlayback({
@@ -52,7 +54,12 @@ export function CompositionPlayer({ section, tala, bpm, saHz = DEFAULT_SA_HZ }: 
         </button>
         <span className="raga-laya">{bpm} mpm</span>
       </div>
-      <CompositionScore section={section} tala={tala} activeMatra={running ? activeIndex : undefined} />
+      <CompositionScore
+        section={section}
+        tala={tala}
+        activeMatra={running ? activeIndex : undefined}
+        script={script}
+      />
     </div>
   );
 }

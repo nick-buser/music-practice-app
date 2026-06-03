@@ -6,7 +6,12 @@ import { CompositionPlayer } from '../components/raga/CompositionPlayer';
 import { COMPOSITIONS } from '../data/raga/composition';
 import { RAGAS, type Raga } from '../data/raga/raga';
 import { TALA_BY_ID } from '../data/raga/tala';
-import { type MusicSystem, type Swara } from '../data/raga/swara';
+import { type MusicSystem, type Swara, type SwaraScript } from '../data/raga/swara';
+
+const SCRIPTS: Array<{ id: SwaraScript; label: string }> = [
+  { id: 'roman', label: 'Roman' },
+  { id: 'devanagari', label: 'देवनागरी' },
+];
 
 const TRADITIONS: Array<{ id: MusicSystem; label: string; blurb: string }> = [
   {
@@ -39,7 +44,7 @@ function swaraName(s: Swara): string {
   return `${prefix}${FULL_NAME[s.name]}`;
 }
 
-function RagaPanel({ raga }: { raga: Raga }) {
+function RagaPanel({ raga, script }: { raga: Raga; script: SwaraScript }) {
   const comps = COMPOSITIONS.filter((c) => c.ragaId === raga.id);
   return (
     <div className="raga-panel">
@@ -59,16 +64,16 @@ function RagaPanel({ raga }: { raga: Raga }) {
       <div className="raga-lines">
         <div className="raga-line">
           <span className="raga-line-label">Ārohaṇa</span>
-          <PhraseLine phrase={raga.aroha} ariaLabel={`${raga.name} aroha`} />
+          <PhraseLine phrase={raga.aroha} ariaLabel={`${raga.name} aroha`} script={script} />
         </div>
         <div className="raga-line">
           <span className="raga-line-label">Avarohaṇa</span>
-          <PhraseLine phrase={raga.avaroha} ariaLabel={`${raga.name} avaroha`} />
+          <PhraseLine phrase={raga.avaroha} ariaLabel={`${raga.name} avaroha`} script={script} />
         </div>
         {raga.pakad && (
           <div className="raga-line">
             <span className="raga-line-label">Pakaḍ</span>
-            <PhraseLine phrase={raga.pakad} ariaLabel={`${raga.name} pakad`} />
+            <PhraseLine phrase={raga.pakad} ariaLabel={`${raga.name} pakad`} script={script} />
           </div>
         )}
       </div>
@@ -87,7 +92,13 @@ function RagaPanel({ raga }: { raga: Raga }) {
                 </div>
                 {comp.note && <div className="raga-comp-note">{comp.note}</div>}
                 {comp.sections.map((section) => (
-                  <CompositionPlayer key={section.id} section={section} tala={tala} bpm={comp.layaBpm} />
+                  <CompositionPlayer
+                    key={section.id}
+                    section={section}
+                    tala={tala}
+                    bpm={comp.layaBpm}
+                    script={script}
+                  />
                 ))}
               </div>
             );
@@ -107,7 +118,7 @@ function Legend() {
         <span className="eyebrow">— legend</span>
       </div>
       <ul>
-        <li><b>S R G M P D N</b> — the seven swaras (Sa Re Ga Ma Pa Dha Ni).</li>
+        <li><b>S R G M P D N</b> — the seven swaras (Sa Re Ga Ma Pa Dha Ni). Toggle <b>Roman ↔ देवनागरी</b> above to switch script.</li>
         <li><u>Underline</u> marks a <b>komal</b> (flat) swara; an overline marks <b>tivra</b> (sharp) Ma.</li>
         <li>A dot <b>above</b> raises a swara to the upper octave (taar); a dot <b>below</b> drops it to the lower octave (mandra).</li>
         <li><b>–</b> sustains the previous swara; <b>·</b> is a rest.</li>
@@ -119,6 +130,7 @@ function Legend() {
 
 export function WorldNotationView() {
   const [system, setSystem] = useState<MusicSystem>('hindustani');
+  const [script, setScript] = useState<SwaraScript>('roman');
   const ragas = useMemo(() => RAGAS.filter((r) => r.system === system), [system]);
   const [ragaId, setRagaId] = useState<string>(ragas[0]?.id ?? '');
 
@@ -154,17 +166,31 @@ export function WorldNotationView() {
         </div>
       </div>
 
-      <div className="tech-sub-toggle">
-        {TRADITIONS.map((t) => (
-          <button
-            key={t.id}
-            className={`sub-chip ${t.id === system ? 'active' : ''}`}
-            onClick={() => chooseSystem(t.id)}
-            aria-pressed={t.id === system}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="raga-toggles">
+        <div className="tech-sub-toggle">
+          {TRADITIONS.map((t) => (
+            <button
+              key={t.id}
+              className={`sub-chip ${t.id === system ? 'active' : ''}`}
+              onClick={() => chooseSystem(t.id)}
+              aria-pressed={t.id === system}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <div className="tech-sub-toggle raga-script-toggle" role="group" aria-label="Script">
+          {SCRIPTS.map((s) => (
+            <button
+              key={s.id}
+              className={`sub-chip ${s.id === script ? 'active' : ''}`}
+              onClick={() => setScript(s.id)}
+              aria-pressed={s.id === script}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <p className="raga-tradition-blurb">{tradition.blurb}</p>
@@ -185,7 +211,7 @@ export function WorldNotationView() {
               ))}
             </div>
           )}
-          {selected && <RagaPanel raga={selected} />}
+          {selected && <RagaPanel raga={selected} script={script} />}
         </div>
 
         <aside className="tech-rail">

@@ -21,6 +21,15 @@ describe('WorldNotationView', () => {
     expect(screen.queryByText('Yaman — Sargam Practice')).toBeNull();
   });
 
+  it('switches the swara script to Devanagari', () => {
+    render(<WorldNotationView />);
+    // Roman by default — no Devanagari syllables yet.
+    expect(screen.queryAllByText('सा')).toHaveLength(0);
+    fireEvent.click(screen.getByRole('button', { name: 'देवनागरी' }));
+    // Yaman resolves on taar Sa, so सा is now drawn.
+    expect(screen.getAllByText('सा').length).toBeGreaterThan(0);
+  });
+
   it('always shows the how-to-read legend', () => {
     render(<WorldNotationView />);
     const legend = screen.getByRole('heading', { name: 'Reading the notation' }).closest('.card');

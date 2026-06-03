@@ -12,8 +12,11 @@
  */
 
 import {
+  scriptNumeral,
   swaraGlyph,
+  swaraSyllable,
   type Swara,
+  type SwaraScript,
 } from '../../data/raga/swara';
 import {
   sectionStarts,
@@ -31,7 +34,7 @@ const SWARA_H = 40; // band: octave dots + letter + komal line
 const LYRIC_Y = MARKER_H + SWARA_H + 13;
 
 /** Renders the swaras that sit inside one matra column centred on `cx`. */
-function CellGlyphs({ cell, cx }: { cell: Cell; cx: number }) {
+function CellGlyphs({ cell, cx, script }: { cell: Cell; cx: number; script: SwaraScript }) {
   if (cell.kind === 'sustain') {
     return (
       <text className="raga-sustain" x={cx} y={LETTER_Y} textAnchor="middle">
@@ -53,20 +56,30 @@ function CellGlyphs({ cell, cx }: { cell: Cell; cx: number }) {
     <>
       {cell.swaras.map((swara, i) => {
         const x = n === 1 ? cx : cx - span / 2 + (span * (i + 0.5)) / n;
-        return <SwaraMark key={i} swara={swara} cx={x} small={n > 1} />;
+        return <SwaraMark key={i} swara={swara} cx={x} small={n > 1} script={script} />;
       })}
     </>
   );
 }
 
 /** A single swara: letter + komal/tivra mark + octave dot(s). */
-function SwaraMark({ swara, cx, small }: { swara: Swara; cx: number; small?: boolean }) {
+function SwaraMark({
+  swara,
+  cx,
+  small,
+  script,
+}: {
+  swara: Swara;
+  cx: number;
+  small?: boolean;
+  script: SwaraScript;
+}) {
   const g = swaraGlyph(swara);
   const half = small ? 5 : 8;
   return (
     <g className="raga-swara" data-swara={`${g.komal ? 'komal ' : ''}${g.tivra ? 'tivra ' : ''}${g.letter}`}>
       <text className={`raga-letter${small ? ' small' : ''}`} x={cx} y={LETTER_Y} textAnchor="middle">
-        {g.letter}
+        {swaraSyllable(g.letter, script)}
       </text>
       {g.komal && (
         <line className="komal-line" x1={cx - half} y1={LETTER_Y + 3} x2={cx + half} y2={LETTER_Y + 3} />
@@ -80,11 +93,19 @@ function SwaraMark({ swara, cx, small }: { swara: Swara; cx: number; small?: boo
   );
 }
 
-export function PhraseLine({ phrase, ariaLabel }: { phrase: Swara[]; ariaLabel?: string }) {
+export function PhraseLine({
+  phrase,
+  ariaLabel,
+  script = 'roman',
+}: {
+  phrase: Swara[];
+  ariaLabel?: string;
+  script?: SwaraScript;
+}) {
   const width = PAD_X * 2 + phrase.length * CELL_W;
   return (
     <svg
-      className="raga-score phrase"
+      className={`raga-score phrase${script === 'devanagari' ? ' deva' : ''}`}
       width={width}
       height={MARKER_H + SWARA_H}
       viewBox={`0 0 ${width} ${MARKER_H + SWARA_H}`}
@@ -92,14 +113,14 @@ export function PhraseLine({ phrase, ariaLabel }: { phrase: Swara[]; ariaLabel?:
       aria-label={ariaLabel}
     >
       {phrase.map((swara, i) => (
-        <SwaraMark key={i} swara={swara} cx={PAD_X + i * CELL_W + CELL_W / 2} />
+        <SwaraMark key={i} swara={swara} cx={PAD_X + i * CELL_W + CELL_W / 2} script={script} />
       ))}
     </svg>
   );
 }
 
 /** The marker symbol shown above each section start (sam / tali / khali / anga). */
-function markerSymbols(tala: Tala): Array<{ matra: number; symbol: string }> {
+function markerSymbols(tala: Tala, script: SwaraScript): Array<{ matra: number; symbol: string }> {
   const starts = sectionStarts(tala);
   let taliNum = 1; // the sam is the first clap
   return tala.sections.map((sec, i) => {
@@ -112,7 +133,7 @@ function markerSymbols(tala: Tala): Array<{ matra: number; symbol: string }> {
         symbol = '○';
       } else {
         taliNum += 1;
-        symbol = String(taliNum);
+        symbol = scriptNumeral(taliNum, script);
       }
     } else {
       symbol = sec.marker === 'laghu' ? '|' : sec.marker === 'drutam' ? 'O' : 'U';
@@ -126,11 +147,12 @@ interface CompositionScoreProps {
   tala: Tala;
   /** Index into `section.cells` to highlight (the playback cursor). */
   activeMatra?: number;
+  script?: SwaraScript;
 }
 
-export function CompositionScore({ section, tala, activeMatra }: CompositionScoreProps) {
+export function CompositionScore({ section, tala, activeMatra, script = 'roman' }: CompositionScoreProps) {
   const beats = talaMatras(tala);
-  const markers = markerSymbols(tala);
+  const markers = markerSymbols(tala, script);
   const starts = sectionStarts(tala);
   const hasLyrics = !!section.lyrics?.length;
   const rowH = MARKER_H + SWARA_H + (hasLyrics ? 18 : 0);
@@ -145,7 +167,7 @@ export function CompositionScore({ section, tala, activeMatra }: CompositionScor
         return (
           <svg
             key={row}
-            className="raga-score grid"
+            className={`raga-score grid${script === 'devanagari' ? ' deva' : ''}`}
             width={width}
             height={rowH}
             viewBox={`0 0 ${width} ${rowH}`}
@@ -192,7 +214,7 @@ export function CompositionScore({ section, tala, activeMatra }: CompositionScor
                       height={SWARA_H}
                     />
                   )}
-                  <CellGlyphs cell={cell} cx={cx} />
+                  <CellGlyphs cell={cell} cx={cx} script={script} />
                   {hasLyrics && section.lyrics?.[idx] && (
                     <text className="raga-lyric" x={cx} y={LYRIC_Y} textAnchor="middle">
                       {section.lyrics[idx]}
