@@ -101,6 +101,12 @@ describe('scale-spec', () => {
     expect(guitarScaleSpec('yo')).toEqual({ kind: 'scale', scaleType: 'yo' });
   });
 
+  it('maps Chinese families to their (already-in-Tonal) scale type', () => {
+    expect(guitarScaleSpec('gong')).toEqual({ kind: 'scale', scaleType: 'major pentatonic' });
+    expect(guitarScaleSpec('jue')).toEqual({ kind: 'scale', scaleType: 'malkos raga' });
+    expect(guitarScaleSpec('yu')).toEqual({ kind: 'scale', scaleType: 'minor pentatonic' });
+  });
+
   it('registers In/Yo with Tonal so the fretboard can resolve them', () => {
     // Importing scale-spec runs the registration side-effect.
     expect(getScaleType('in sen').empty).toBe(false);

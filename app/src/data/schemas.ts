@@ -134,6 +134,12 @@ export const TechniqueFamily = z.enum([
   'yo',
   'iwato',
   'kumoi',
+  // Chinese five-tone modes (五声音阶 — phase 2, 12-TET).
+  'gong',
+  'shang',
+  'jue',
+  'zhi',
+  'yu',
   // Triad block chords
   'major-chord',
   'minor-chord',

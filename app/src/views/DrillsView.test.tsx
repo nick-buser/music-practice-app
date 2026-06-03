@@ -33,7 +33,7 @@ describe('DrillsView', () => {
     const labels = Array.from(container.querySelectorAll('.chord-type-row .cat-label')).map(
       (e) => e.textContent,
     );
-    expect(labels).toEqual(['Western', 'Japanese']);
+    expect(labels).toEqual(['Western', 'Japanese', 'Chinese']);
 
     fireEvent.click(screen.getByRole('button', { name: 'Hirajōshi' }));
     expect(screen.getByRole('button', { name: 'Hirajōshi', pressed: true })).toBeInTheDocument();

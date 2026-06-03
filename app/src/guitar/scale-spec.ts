@@ -9,10 +9,10 @@
  */
 import { add as addScaleType } from '@tonaljs/scale-type';
 
-import { JAPANESE_SCALES, WORLD_SCALE_BY_FAMILY } from '../data/scales/world';
+import { WORLD_SCALES, WORLD_SCALE_BY_FAMILY } from '../data/scales/world';
 import type { TechniqueFamily } from '../data/schemas';
 
-for (const scale of JAPANESE_SCALES) {
+for (const scale of WORLD_SCALES) {
   if (scale.registerIntervals) addScaleType(scale.registerIntervals, scale.tonalType);
 }
 

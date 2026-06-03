@@ -58,6 +58,11 @@ const SCALE_SUBTAB_LABEL: Record<ScaleSubTab, string> = {
   yo:        'Yo',
   iwato:     'Iwato',
   kumoi:     'Kumoi',
+  gong:      'Gōng',
+  shang:     'Shāng',
+  jue:       'Jué',
+  zhi:       'Zhǐ',
+  yu:        'Yǔ',
 };
 
 const QUALITY_LABEL: Record<QualitySubTab, string> = {

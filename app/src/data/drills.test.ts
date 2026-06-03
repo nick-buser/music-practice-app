@@ -80,8 +80,14 @@ describe('DRILLS', () => {
     }
   });
 
-  it('totals 432 entries', () => {
-    expect(DRILLS).toHaveLength(432);
+  it('has 60 Chinese five-tone scales (5 families × 12 keys)', () => {
+    for (const fam of ['gong', 'shang', 'jue', 'zhi', 'yu'] as const) {
+      expect(DRILLS.filter((d) => d.family === fam)).toHaveLength(12);
+    }
+  });
+
+  it('totals 492 entries', () => {
+    expect(DRILLS).toHaveLength(492);
   });
 
   it('uses distinct ids across the set', () => {
