@@ -47,6 +47,16 @@ describe('swara — parsing & pitch', () => {
     expect(swaraSemitones(parseSwara('.N'))).toBe(-1);
   });
 
+  it('reads ornaments: kan grace, gamaka, and meend', () => {
+    expect(parseSwara('G~').ornaments).toEqual({ gamaka: true });
+    expect(parseSwara('D>').ornaments).toEqual({ meend: true });
+    const kan = parseSwara("(R)S'");
+    expect(kan).toMatchObject({ name: 'S', register: 'taar' });
+    expect(kan.ornaments?.kan).toEqual({ name: 'R', variant: 'shuddha', register: 'madhya' });
+    // a plain swara carries no ornaments key
+    expect(parseSwara('S').ornaments).toBeUndefined();
+  });
+
   it('rejects illegal swaras and tokens', () => {
     expect(isValidSwara('S', 'komal')).toBe(false);
     expect(isValidSwara('M', 'tivra')).toBe(true);

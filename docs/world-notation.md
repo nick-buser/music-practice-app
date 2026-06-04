@@ -71,6 +71,10 @@ Use `|` as a visual barline, `-` to sustain, `~` to rest, and `S,R` for a
 subdivided matra. A `seed data integrity` test asserts every section is a whole
 number of tala cycles, so misaligned content fails fast.
 
+**Ornament a swara** anywhere it's spelled: `G~` for a gamaka (oscillation),
+`(R)S` for a kan (grace note), and `D>` for a meend (glide into the next swara).
+Ornaments are drawn but not sounded, and never change the matra count.
+
 The new raga/composition shows up in the area automatically (the view derives
 its lists from the seed arrays) and is immediately playable.
 
@@ -83,9 +87,12 @@ the first two Carnatic sarali varisai.
 Carnatic ragas are labelled with their finer **swarasthana** index (R₁/G₃/M₂ …),
 derived from each swara's variant so the printed label always matches the pitch.
 
+Swaras can be ornamented — **gamaka** (`G~`), **kan** grace (`(R)S`) and **meend**
+glide (`D>`) — drawn by the renderer but not yet sounded by playback.
+
 **Deliberately not yet** (the model leaves room for each):
 
-- Ornaments — gamaka, meend, kan — as cell annotations.
+- Sounding the ornaments (gamaka pitch-bend, kan as a real grace tone).
 - Microtonal shruti tuning (pitches are 12-TET).
 - Backend persistence for user-authored compositions, via the existing CRUD
   contract gated by `backendEnabled`.

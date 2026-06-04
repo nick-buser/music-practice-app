@@ -34,6 +34,6 @@ describe('WorldNotationView', () => {
     render(<WorldNotationView />);
     const legend = screen.getByRole('heading', { name: 'Reading the notation' }).closest('.card');
     expect(legend).toBeTruthy();
-    expect(within(legend as HTMLElement).getByText(/komal/)).toBeTruthy();
+    expect(within(legend as HTMLElement).getAllByText(/komal/).length).toBeGreaterThan(0);
   });
 });

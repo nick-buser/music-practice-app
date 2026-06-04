@@ -35,6 +35,16 @@ describe('PhraseLine', () => {
     // Carnatic uses the index, never the komal/tivra lines
     expect(container.querySelectorAll('.komal-line, .tivra-line')).toHaveLength(0);
   });
+
+  it('draws ornament marks: gamaka, kan grace, and a meend arc', () => {
+    const { container } = render(<PhraseLine phrase={parsePhrase("G~ (R)S' D")} />);
+    expect(container.querySelectorAll('.gamaka-mark')).toHaveLength(1); // G~
+    expect(container.querySelectorAll('.kan-grace')).toHaveLength(1); // (R)S'
+    // a meend draws an arc only when there is a following swara to glide to
+    expect(container.querySelectorAll('.meend-arc')).toHaveLength(0);
+    const { container: c2 } = render(<PhraseLine phrase={parsePhrase('D> N')} />);
+    expect(c2.querySelectorAll('.meend-arc')).toHaveLength(1);
+  });
 });
 
 describe('CompositionScore', () => {

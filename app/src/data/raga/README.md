@@ -52,6 +52,20 @@ the same compact spelling, with `|` as a visual barline and `,` joining a
 subdivided matra. `assertCycleAligned` checks a section is a whole number of
 cycles.
 
+### Ornaments
+
+A swara can carry `ornaments` — a notation/teaching layer the renderer draws and
+playback ignores (it doesn't change the matra count or the sounding pitch):
+
+```
+G~       gamaka — an oscillation, drawn as a wavy mark above the swara
+(R)S     kan    — a grace note (here Re) touched just before the main swara
+D>       meend  — a glide into the next swara, drawn as a slur arc
+```
+
+Markers stack, e.g. `(N)S'~`. Meend arcs are drawn in phrase lines and between
+adjacent single-swara cells of one tala cycle.
+
 ### Carnatic swarasthana labels
 
 For Carnatic ragas the renderer prints the finer **swarasthana** index as a
@@ -65,8 +79,8 @@ the label always agrees with the sounding pitch. The two enharmonic positions a
 
 - **Enharmonic swarasthanas.** R₃/G₁ and D₃/N₁ collapse onto one pitch each (see
   above); naming them apart would need an explicit label + a finer pitch model.
-- **Ornaments (gamaka, meend, kan).** Not modelled yet — the cell is a bare
-  swara. The `Cell` union is the natural place to add an `ornament` annotation.
+- **Ornaments are visual only.** Gamaka, kan and meend are drawn but not yet
+  sounded — playback plays the bare swara.
 - **Microtonal shruti.** Pitches are 12-TET; true shruti tuning is out of scope.
 
 ## Seed content

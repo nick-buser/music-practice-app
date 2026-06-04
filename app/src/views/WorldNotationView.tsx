@@ -123,6 +123,7 @@ function Legend() {
         <li><b>Carnatic:</b> a subscript names the <b>swarasthana</b> instead — e.g. R<sub>1</sub> komal Re, G<sub>3</sub> shuddha Ga, M<sub>2</sub> tivra Ma.</li>
         <li>A dot <b>above</b> raises a swara to the upper octave (taar); a dot <b>below</b> drops it to the lower octave (mandra).</li>
         <li><b>–</b> sustains the previous swara; <b>·</b> is a rest.</li>
+        <li>Ornaments: a <b>wavy mark</b> above a swara is a <b>gamaka</b> (oscillation), a small note before it is a <b>kan</b> (grace), and a <b>slur arc</b> joins two swaras in a <b>meend</b> (glide).</li>
         <li>Above the grid: <b>×</b> is the sam (cycle start), numbers are tali (claps), <b>○</b> is khali (wave). Carnatic shows angas (<b>|</b> laghu, <b>O</b> drutam).</li>
       </ul>
     </div>

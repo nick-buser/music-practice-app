@@ -2237,6 +2237,18 @@ button { font-family: inherit; }
   font-size: 9px;
   fill: var(--lumen);
 }
+/* Ornaments: gamaka (wavy shake), kan (grace note), meend (glide arc). */
+.raga-score .gamaka-mark,
+.raga-score .meend-arc {
+  fill: none;
+  stroke: var(--lumen);
+  stroke-width: 1.2;
+}
+.raga-score .kan-grace {
+  font-family: var(--font-display);
+  font-size: 11px;
+  fill: var(--shoal);
+}
 .raga-score .raga-sustain,
 .raga-score .raga-rest {
   font-family: var(--font-display);

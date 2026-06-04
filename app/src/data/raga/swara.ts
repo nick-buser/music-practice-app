@@ -26,10 +26,25 @@ export const REGISTERS = ['mandra', 'madhya', 'taar'] as const;
 /** Lower / middle / upper octave (saptak). Dots below or above the glyph. */
 export type Register = (typeof REGISTERS)[number];
 
+/**
+ * Ornaments decorate a swara without changing which beats it occupies or the
+ * pitch it sounds — they're a notation/teaching layer the renderer draws and
+ * playback ignores (for now).
+ */
+export interface SwaraOrnaments {
+  /** Oscillation / shake on the note (gamaka) — drawn as a wavy mark above. */
+  gamaka?: boolean;
+  /** Grace note (kan / sparsha) lightly touched just before the main swara. */
+  kan?: Swara;
+  /** Glide (meend) from this swara into the next — drawn as a slur arc. */
+  meend?: boolean;
+}
+
 export interface Swara {
   name: SwaraName;
   variant: SwaraVariant;
   register: Register;
+  ornaments?: SwaraOrnaments;
 }
 
 /** Semitone of each *shuddha* swara above Sa (the bilaval / major reference). */
@@ -166,8 +181,11 @@ export function scriptNumeral(n: number, script: SwaraScript): string {
 //   • a letter picks the swara + variant (case matters, see LETTER below)
 //   • a leading "."  drops it to the mandra (lower) octave
 //   • a trailing "'" raises it to the taar (upper) octave
+//   • a leading "(x)" adds a kan (grace) of swara x, e.g. "(N)S'" Ni→Sa
+//   • a trailing "~" marks a gamaka (oscillation) on the swara
+//   • a trailing ">" marks a meend (glide) from this swara into the next
 // e.g.  "S" madhya Sa · "r" komal Re · "M" tivra Ma · "m" shuddha Ma ·
-//       ".P" mandra Pa · "S'" taar Sa.
+//       ".P" mandra Pa · "S'" taar Sa · "G~" oscillated Ga · "D>" Dha glides on.
 
 const LETTER: Record<string, { name: SwaraName; variant: SwaraVariant }> = {
   S: { name: 'S', variant: 'shuddha' },
@@ -185,8 +203,27 @@ const LETTER: Record<string, { name: SwaraName; variant: SwaraVariant }> = {
 };
 
 export function parseSwara(token: string): Swara {
-  let register: Register = 'madhya';
   let body = token;
+
+  // Leading "(x)" grace note (kan). The inner token is itself a swara, but
+  // carries no nested grace of its own.
+  let kan: Swara | undefined;
+  const grace = body.match(/^\(([^()]+)\)(.+)$/);
+  if (grace) {
+    kan = parseSwara(grace[1]);
+    body = grace[2];
+  }
+
+  // Trailing ornament markers, in any order: "~" gamaka, ">" meend.
+  let gamaka = false;
+  let meend = false;
+  for (let mark = body.at(-1); mark === '~' || mark === '>'; mark = body.at(-1)) {
+    if (mark === '~') gamaka = true;
+    else meend = true;
+    body = body.slice(0, -1);
+  }
+
+  let register: Register = 'madhya';
   if (body.startsWith('.')) {
     register = 'mandra';
     body = body.slice(1);
@@ -199,7 +236,15 @@ export function parseSwara(token: string): Swara {
   if (!entry || body.length !== 1) {
     throw new Error(`unparseable swara token: "${token}"`);
   }
-  return { name: entry.name, variant: entry.variant, register };
+  const swara: Swara = { name: entry.name, variant: entry.variant, register };
+  if (gamaka || meend || kan) {
+    const ornaments: SwaraOrnaments = {};
+    if (gamaka) ornaments.gamaka = true;
+    if (meend) ornaments.meend = true;
+    if (kan) ornaments.kan = kan;
+    swara.ornaments = ornaments;
+  }
+  return swara;
 }
 
 /** Parse a space-separated phrase, e.g. ".N R G M D N S'" (Yaman aroha). */
