@@ -26,6 +26,8 @@ export function Icon({ name, size = 16, color = 'currentColor' }: IconProps) {
       return (<svg {...p}><path d="M3 21l3.5-1L18 8.5 15.5 6 4 17.5z"/><path d="M14 7l3 3"/></svg>);
     case 'play':
       return (<svg {...p}><path d="M8 5v14l11-7z" fill={color} stroke="none"/></svg>);
+    case 'stop':
+      return (<svg {...p}><rect x="6" y="6" width="12" height="12" rx="1.5" fill={color} stroke="none"/></svg>);
     case 'arrow-right':
       return (<svg {...p}><path d="M5 12h14M13 6l6 6-6 6"/></svg>);
     case 'plus':
@@ -44,6 +46,8 @@ export function Icon({ name, size = 16, color = 'currentColor' }: IconProps) {
           <circle cx="19" cy="6" r="0.8" fill={color} stroke="none" />
         </svg>
       );
+    case 'globe':
+      return (<svg {...p}><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.5 3.8 5.7 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.7-3.8-9s1.3-6.5 3.8-9z"/></svg>);
     case 'more':
       return (<svg {...p}><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>);
     default:

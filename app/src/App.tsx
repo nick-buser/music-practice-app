@@ -6,6 +6,7 @@ import { SessionView } from './views/SessionView';
 import { StatsView } from './views/StatsView';
 import { SketchbookView } from './views/SketchbookView';
 import { DrillsView } from './views/DrillsView';
+import { WorldNotationView } from './views/WorldNotationView';
 import { DRILL_BY_ID } from './data/drills';
 import { decodeVoicedId } from './data/chord-catalog';
 
@@ -47,6 +48,8 @@ export default function App() {
     body = <StatsView />;
   } else if (view === 'drills') {
     body = <DrillsView onStartSession={startSession} />;
+  } else if (view === 'world-notation') {
+    body = <WorldNotationView />;
   } else {
     body = <SketchbookView />;
   }

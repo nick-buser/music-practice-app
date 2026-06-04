@@ -2209,3 +2209,229 @@ button { font-family: inherit; }
   color: var(--shoal);
   margin-right: 10px;
 }
+
+/* ── World Notation — raga score (custom SVG sargam engraving) ───────────── */
+.raga-score {
+  display: block;
+  overflow: visible;
+}
+.raga-score .raga-letter {
+  font-family: var(--font-display);
+  font-size: 20px;
+  fill: var(--foam);
+}
+.raga-score .raga-letter.small {
+  font-size: 13px;
+}
+.raga-score .komal-line,
+.raga-score .tivra-line {
+  stroke: var(--foam);
+  stroke-width: 1.4;
+}
+.raga-score .octave-dot {
+  fill: var(--lumen);
+}
+.raga-score .raga-sustain,
+.raga-score .raga-rest {
+  font-family: var(--font-display);
+  font-size: 18px;
+  fill: var(--fg-quiet);
+}
+.raga-score .tala-marker {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--shoal);
+}
+.raga-score .vibhag-divider {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.raga-score .raga-lyric {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  fill: var(--fg-muted);
+}
+.raga-score .matra-cursor {
+  fill: var(--lumen);
+  opacity: 0.16;
+  rx: 4;
+}
+.raga-composition-section {
+  margin-bottom: 18px;
+}
+.raga-section-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--shoal);
+  margin-bottom: 4px;
+}
+
+/* ── World Notation view ─────────────────────────────────────────────────── */
+.raga-toggles {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.raga-script-toggle .sub-chip {
+  min-width: 64px;
+}
+/* Devanagari sargam: let the browser reach a system Devanagari face, since we
+   don't bundle one. The komal/tivra marks and octave dots are script-neutral. */
+.raga-score.deva .raga-letter {
+  font-family: 'Noto Sans Devanagari', 'Nirmala UI', 'Mangal', 'Kohinoor Devanagari', sans-serif;
+  font-size: 17px;
+}
+.raga-tradition-blurb {
+  font-family: var(--font-body);
+  color: var(--fg-muted);
+  max-width: 640px;
+  margin: 6px 0 18px;
+  font-size: 14px;
+}
+.raga-picker {
+  margin-bottom: 18px;
+}
+.raga-head h2 {
+  font-family: var(--font-display);
+  font-size: 30px;
+  margin: 0 0 6px;
+}
+.raga-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--shoal);
+}
+.raga-desc {
+  font-family: var(--font-body);
+  color: var(--fg);
+  max-width: 640px;
+  margin: 14px 0 20px;
+}
+.raga-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.raga-line {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.raga-line-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--shoal);
+  width: 86px;
+  flex: none;
+  text-align: right;
+}
+.raga-comps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.raga-comp {
+  padding: 16px 18px;
+}
+.raga-comp-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.raga-comp-head h3 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  margin: 0;
+}
+.raga-comp-tala {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--lumen);
+}
+.raga-comp-note {
+  font-family: var(--font-body);
+  font-style: italic;
+  color: var(--fg-muted);
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.raga-legend ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.raga-legend li {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--fg-muted);
+}
+.raga-legend b {
+  color: var(--fg);
+}
+
+/* ── World Notation — playback transport ─────────────────────────────────── */
+.raga-comp-section {
+  margin-bottom: 14px;
+}
+.raga-transport {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.raga-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--abyss-ink);
+  background: var(--lumen);
+  border: none;
+  border-radius: var(--r-lozenge);
+  padding: 5px 12px;
+  cursor: pointer;
+}
+.raga-play.on {
+  background: var(--krill);
+}
+.raga-loop {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--shoal);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lozenge);
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.raga-loop.active {
+  color: var(--lumen);
+  border-color: var(--lumen);
+}
+.raga-laya {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-quiet);
+}

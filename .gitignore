@@ -1,0 +1,5 @@
+# Dependencies / build caches (per-package .gitignores cover app/ and backend/;
+# this covers any stray root-level installs or test caches).
+node_modules/
+dist/
+.vite/
