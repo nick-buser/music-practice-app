@@ -2303,10 +2303,11 @@ button { font-family: inherit; }
 .raga-script-toggle .sub-chip {
   min-width: 64px;
 }
-/* Devanagari sargam: let the browser reach a system Devanagari face, since we
-   don't bundle one. The komal/tivra marks and octave dots are script-neutral. */
+/* Devanagari sargam in the bundled Noto Sans Devanagari webfont, so the glyphs
+   are consistent across platforms (system faces fall back via --font-deva). The
+   komal/tivra marks and octave dots are script-neutral. */
 .raga-score.deva .raga-letter {
-  font-family: 'Noto Sans Devanagari', 'Nirmala UI', 'Mangal', 'Kohinoor Devanagari', sans-serif;
+  font-family: var(--font-deva);
   font-size: 17px;
 }
 .raga-tradition-blurb {

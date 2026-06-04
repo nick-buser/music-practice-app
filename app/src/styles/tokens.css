@@ -8,8 +8,9 @@
    Body:    Spectral     — scholarly long-form serif
    Sans:    IBM Plex Sans — scientific UI / labels / captions
    Mono:    IBM Plex Mono — data, scientific notation, sonar timecodes
+   Deva:    Noto Sans Devanagari — sargam swaras in Devanagari (World Notation)
 */
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,300;1,6..72,400;1,6..72,500&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,300;1,6..72,400;1,6..72,500&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap');
 
 :root {
   /* ─── Depth-zone palette ──────────────────────────────────
@@ -75,6 +76,7 @@
   --font-body:    'Spectral', Georgia, 'Times New Roman', serif;
   --font-sans:    'IBM Plex Sans', system-ui, sans-serif;
   --font-mono:    'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
+  --font-deva:    'Noto Sans Devanagari', 'Nirmala UI', 'Mangal', sans-serif;
 
   /* Type scale — fluid, monumental. Uses optical-size axis of Newsreader. */
   --t-hero:    clamp(4rem, 9vw, 9.5rem);     /* 144px+ — slide titles, hero */
