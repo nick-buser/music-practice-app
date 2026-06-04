@@ -80,9 +80,11 @@ its lists from the seed arrays) and is immediately playable.
 two ragas (Yaman, Māyāmāḷavagowḷa) with an original Yaman sargam exercise and
 the first two Carnatic sarali varisai.
 
+Carnatic ragas are labelled with their finer **swarasthana** index (R₁/G₃/M₂ …),
+derived from each swara's variant so the printed label always matches the pitch.
+
 **Deliberately not yet** (the model leaves room for each):
 
-- Finer Carnatic `R1/R2/R3` swarasthana labelling (we mark komal/tivra today).
 - Ornaments — gamaka, meend, kan — as cell annotations.
 - Microtonal shruti tuning (pitches are 12-TET).
 - Backend persistence for user-authored compositions, via the existing CRUD

@@ -52,11 +52,19 @@ the same compact spelling, with `|` as a visual barline and `,` joining a
 subdivided matra. `assertCycleAligned` checks a section is a whole number of
 cycles.
 
+### Carnatic swarasthana labels
+
+For Carnatic ragas the renderer prints the finer **swarasthana** index as a
+subscript (R₁ komal Re, G₃ shuddha Ga, M₂ tivra Ma …) in place of the Hindustani
+komal/tivra marks. `swarasthana()` derives the index from the swara's variant, so
+the label always agrees with the sounding pitch. The two enharmonic positions a
+12-tone model can't disambiguate — shatshruti Re (R₃ = G₁) and shatshruti Dha
+(D₃ = N₁) — share a pitch with shuddha Ga / Ni and are labelled there.
+
 ## Known simplifications (v1)
 
-- **Carnatic swarasthana labels.** We mark komal/tivra, not the finer
-  `R1/R2/R3` indices. Mayamalavagowla maps cleanly onto komal/shuddha, so it is
-  correct today; full `Rn/Gn` subscript labelling is a future refinement.
+- **Enharmonic swarasthanas.** R₃/G₁ and D₃/N₁ collapse onto one pitch each (see
+  above); naming them apart would need an explicit label + a finer pitch model.
 - **Ornaments (gamaka, meend, kan).** Not modelled yet — the cell is a bare
   swara. The `Cell` union is the natural place to add an `ornament` annotation.
 - **Microtonal shruti.** Pitches are 12-TET; true shruti tuning is out of scope.

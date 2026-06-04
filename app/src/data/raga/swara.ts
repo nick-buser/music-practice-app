@@ -98,6 +98,38 @@ export function swaraGlyph(swara: Swara): SwaraGlyph {
   };
 }
 
+/** A Carnatic swarasthana index — which of a swara's 1–3 positions it occupies. */
+export type Swarasthana = 1 | 2 | 3;
+
+/**
+ * The Carnatic swarasthana index for a swara, or `undefined` for the achala
+ * (fixed) swaras Sa and Pa. Derived from the variant so the printed label always
+ * agrees with the sounding pitch: komal Re is R1 and shuddha Re is R2; komal Ga
+ * is G2 and shuddha Ga is G3; shuddha Ma is M1 and tivra Ma is M2; komal Dha is
+ * D1 and shuddha Dha is D2; komal Ni is N2 and shuddha Ni is N3.
+ *
+ * The two enharmonic positions a 12-tone model can't disambiguate — shatshruti
+ * Re (R3 = G1) and shatshruti Dha (D3 = N1) — share a pitch with shuddha Ga / Ni
+ * and so are labelled there; ragas that name them differently would need an
+ * explicit-label extension (see README).
+ */
+export function swarasthana(swara: Swara): Swarasthana | undefined {
+  switch (swara.name) {
+    case 'R':
+      return swara.variant === 'komal' ? 1 : 2;
+    case 'G':
+      return swara.variant === 'komal' ? 2 : 3;
+    case 'M':
+      return swara.variant === 'tivra' ? 2 : 1;
+    case 'D':
+      return swara.variant === 'komal' ? 1 : 2;
+    case 'N':
+      return swara.variant === 'komal' ? 2 : 3;
+    default:
+      return undefined; // S and P are achala
+  }
+}
+
 /** Which script the swaras are spelled in. */
 export type SwaraScript = 'roman' | 'devanagari';
 

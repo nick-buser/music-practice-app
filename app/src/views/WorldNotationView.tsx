@@ -64,16 +64,16 @@ function RagaPanel({ raga, script }: { raga: Raga; script: SwaraScript }) {
       <div className="raga-lines">
         <div className="raga-line">
           <span className="raga-line-label">Ārohaṇa</span>
-          <PhraseLine phrase={raga.aroha} ariaLabel={`${raga.name} aroha`} script={script} />
+          <PhraseLine phrase={raga.aroha} ariaLabel={`${raga.name} aroha`} script={script} system={raga.system} />
         </div>
         <div className="raga-line">
           <span className="raga-line-label">Avarohaṇa</span>
-          <PhraseLine phrase={raga.avaroha} ariaLabel={`${raga.name} avaroha`} script={script} />
+          <PhraseLine phrase={raga.avaroha} ariaLabel={`${raga.name} avaroha`} script={script} system={raga.system} />
         </div>
         {raga.pakad && (
           <div className="raga-line">
             <span className="raga-line-label">Pakaḍ</span>
-            <PhraseLine phrase={raga.pakad} ariaLabel={`${raga.name} pakad`} script={script} />
+            <PhraseLine phrase={raga.pakad} ariaLabel={`${raga.name} pakad`} script={script} system={raga.system} />
           </div>
         )}
       </div>
@@ -119,7 +119,8 @@ function Legend() {
       </div>
       <ul>
         <li><b>S R G M P D N</b> — the seven swaras (Sa Re Ga Ma Pa Dha Ni). Toggle <b>Roman ↔ देवनागरी</b> above to switch script.</li>
-        <li><u>Underline</u> marks a <b>komal</b> (flat) swara; an overline marks <b>tivra</b> (sharp) Ma.</li>
+        <li><b>Hindustani:</b> an <u>underline</u> marks a <b>komal</b> (flat) swara, an overline marks <b>tivra</b> (sharp) Ma.</li>
+        <li><b>Carnatic:</b> a subscript names the <b>swarasthana</b> instead — e.g. R<sub>1</sub> komal Re, G<sub>3</sub> shuddha Ga, M<sub>2</sub> tivra Ma.</li>
         <li>A dot <b>above</b> raises a swara to the upper octave (taar); a dot <b>below</b> drops it to the lower octave (mandra).</li>
         <li><b>–</b> sustains the previous swara; <b>·</b> is a rest.</li>
         <li>Above the grid: <b>×</b> is the sam (cycle start), numbers are tali (claps), <b>○</b> is khali (wave). Carnatic shows angas (<b>|</b> laghu, <b>O</b> drutam).</li>

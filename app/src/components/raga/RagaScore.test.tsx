@@ -25,6 +25,16 @@ describe('PhraseLine', () => {
     const { container } = render(<PhraseLine phrase={parsePhrase(".P S S'")} />);
     expect(container.querySelectorAll('.octave-dot')).toHaveLength(2);
   });
+
+  it('labels Carnatic swaras with a swarasthana subscript instead of komal marks', () => {
+    const { container } = render(
+      <PhraseLine phrase={parsePhrase("S r G m P d N S'")} system="carnatic" />,
+    );
+    // R1 G3 M1 D1 N3 — Sa/Pa/Sa' carry no index
+    expect(texts(container, '.swarasthana-num')).toEqual(['1', '3', '1', '1', '3']);
+    // Carnatic uses the index, never the komal/tivra lines
+    expect(container.querySelectorAll('.komal-line, .tivra-line')).toHaveLength(0);
+  });
 });
 
 describe('CompositionScore', () => {

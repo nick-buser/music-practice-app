@@ -15,6 +15,8 @@ import {
   scriptNumeral,
   swaraGlyph,
   swaraSyllable,
+  swarasthana,
+  type MusicSystem,
   type Swara,
   type SwaraScript,
 } from '../../data/raga/swara';
@@ -34,7 +36,17 @@ const SWARA_H = 40; // band: octave dots + letter + komal line
 const LYRIC_Y = MARKER_H + SWARA_H + 13;
 
 /** Renders the swaras that sit inside one matra column centred on `cx`. */
-function CellGlyphs({ cell, cx, script }: { cell: Cell; cx: number; script: SwaraScript }) {
+function CellGlyphs({
+  cell,
+  cx,
+  script,
+  system,
+}: {
+  cell: Cell;
+  cx: number;
+  script: SwaraScript;
+  system: MusicSystem;
+}) {
   if (cell.kind === 'sustain') {
     return (
       <text className="raga-sustain" x={cx} y={LETTER_Y} textAnchor="middle">
@@ -56,35 +68,51 @@ function CellGlyphs({ cell, cx, script }: { cell: Cell; cx: number; script: Swar
     <>
       {cell.swaras.map((swara, i) => {
         const x = n === 1 ? cx : cx - span / 2 + (span * (i + 0.5)) / n;
-        return <SwaraMark key={i} swara={swara} cx={x} small={n > 1} script={script} />;
+        return <SwaraMark key={i} swara={swara} cx={x} small={n > 1} script={script} system={system} />;
       })}
     </>
   );
 }
 
-/** A single swara: letter + komal/tivra mark + octave dot(s). */
+/**
+ * A single swara. Hindustani spells inflections as komal/tivra marks; Carnatic
+ * names the finer swarasthana and prints it as a subscript index instead — so
+ * the tradition picks the labelling style. Octave dots are shared by both.
+ */
 function SwaraMark({
   swara,
   cx,
   small,
   script,
+  system,
 }: {
   swara: Swara;
   cx: number;
   small?: boolean;
   script: SwaraScript;
+  system: MusicSystem;
 }) {
   const g = swaraGlyph(swara);
   const half = small ? 5 : 8;
+  const carnatic = system === 'carnatic';
+  const sthana = carnatic ? swarasthana(swara) : undefined;
+  const dataSwara = carnatic
+    ? `${g.letter}${sthana ?? ''}`
+    : `${g.komal ? 'komal ' : ''}${g.tivra ? 'tivra ' : ''}${g.letter}`;
   return (
-    <g className="raga-swara" data-swara={`${g.komal ? 'komal ' : ''}${g.tivra ? 'tivra ' : ''}${g.letter}`}>
+    <g className="raga-swara" data-swara={dataSwara}>
       <text className={`raga-letter${small ? ' small' : ''}`} x={cx} y={LETTER_Y} textAnchor="middle">
         {swaraSyllable(g.letter, script)}
       </text>
-      {g.komal && (
+      {sthana !== undefined && (
+        <text className="swarasthana-num" x={cx + half - 1} y={LETTER_Y + 4} textAnchor="start">
+          {scriptNumeral(sthana, script)}
+        </text>
+      )}
+      {!carnatic && g.komal && (
         <line className="komal-line" x1={cx - half} y1={LETTER_Y + 3} x2={cx + half} y2={LETTER_Y + 3} />
       )}
-      {g.tivra && (
+      {!carnatic && g.tivra && (
         <line className="tivra-line" x1={cx - half} y1={SWARA_TOP + 3} x2={cx + half} y2={SWARA_TOP + 3} />
       )}
       {g.register === 'taar' && <circle className="octave-dot" cx={cx} cy={SWARA_TOP + 6} r={1.6} />}
@@ -97,10 +125,12 @@ export function PhraseLine({
   phrase,
   ariaLabel,
   script = 'roman',
+  system = 'hindustani',
 }: {
   phrase: Swara[];
   ariaLabel?: string;
   script?: SwaraScript;
+  system?: MusicSystem;
 }) {
   const width = PAD_X * 2 + phrase.length * CELL_W;
   return (
@@ -113,7 +143,13 @@ export function PhraseLine({
       aria-label={ariaLabel}
     >
       {phrase.map((swara, i) => (
-        <SwaraMark key={i} swara={swara} cx={PAD_X + i * CELL_W + CELL_W / 2} script={script} />
+        <SwaraMark
+          key={i}
+          swara={swara}
+          cx={PAD_X + i * CELL_W + CELL_W / 2}
+          script={script}
+          system={system}
+        />
       ))}
     </svg>
   );
@@ -214,7 +250,7 @@ export function CompositionScore({ section, tala, activeMatra, script = 'roman' 
                       height={SWARA_H}
                     />
                   )}
-                  <CellGlyphs cell={cell} cx={cx} script={script} />
+                  <CellGlyphs cell={cell} cx={cx} script={script} system={tala.system} />
                   {hasLyrics && section.lyrics?.[idx] && (
                     <text className="raga-lyric" x={cx} y={LYRIC_Y} textAnchor="middle">
                       {section.lyrics[idx]}
