@@ -2294,6 +2294,12 @@ button { font-family: inherit; }
   flex-wrap: wrap;
   gap: 12px;
 }
+.raga-display-toggles {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 .raga-script-toggle .sub-chip {
   min-width: 64px;
 }

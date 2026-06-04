@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { Topbar } from '../components/Topbar';
 import { PhraseLine } from '../components/raga/RagaScore';
 import { CompositionPlayer } from '../components/raga/CompositionPlayer';
+import type { TuningSystem } from '../components/raga/playback';
 import { COMPOSITIONS } from '../data/raga/composition';
 import { RAGAS, type Raga } from '../data/raga/raga';
 import { TALA_BY_ID } from '../data/raga/tala';
@@ -11,6 +12,11 @@ import { type MusicSystem, type Swara, type SwaraScript } from '../data/raga/swa
 const SCRIPTS: Array<{ id: SwaraScript; label: string }> = [
   { id: 'roman', label: 'Roman' },
   { id: 'devanagari', label: 'देवनागरी' },
+];
+
+const TUNINGS: Array<{ id: TuningSystem; label: string }> = [
+  { id: 'equal', label: 'Equal' },
+  { id: 'just', label: 'Just (shruti)' },
 ];
 
 const TRADITIONS: Array<{ id: MusicSystem; label: string; blurb: string }> = [
@@ -44,7 +50,15 @@ function swaraName(s: Swara): string {
   return `${prefix}${FULL_NAME[s.name]}`;
 }
 
-function RagaPanel({ raga, script }: { raga: Raga; script: SwaraScript }) {
+function RagaPanel({
+  raga,
+  script,
+  tuning,
+}: {
+  raga: Raga;
+  script: SwaraScript;
+  tuning: TuningSystem;
+}) {
   const comps = COMPOSITIONS.filter((c) => c.ragaId === raga.id);
   return (
     <div className="raga-panel">
@@ -98,6 +112,7 @@ function RagaPanel({ raga, script }: { raga: Raga; script: SwaraScript }) {
                     tala={tala}
                     bpm={comp.layaBpm}
                     script={script}
+                    tuning={tuning}
                   />
                 ))}
               </div>
@@ -125,6 +140,7 @@ function Legend() {
         <li><b>–</b> sustains the previous swara; <b>·</b> is a rest.</li>
         <li>Ornaments: a <b>wavy mark</b> above a swara is a <b>gamaka</b> (oscillation), a small note before it is a <b>kan</b> (grace), and a <b>slur arc</b> joins two swaras in a <b>meend</b> (glide).</li>
         <li>Above the grid: <b>×</b> is the sam (cycle start), numbers are tali (claps), <b>○</b> is khali (wave). Carnatic shows angas (<b>|</b> laghu, <b>O</b> drutam).</li>
+        <li><b>Tuning</b> sets the playback intonation: <b>Equal</b> (12-TET) or <b>Just (shruti)</b>, which tunes swaras to consonant whole-number ratios.</li>
       </ul>
     </div>
   );
@@ -133,6 +149,7 @@ function Legend() {
 export function WorldNotationView() {
   const [system, setSystem] = useState<MusicSystem>('hindustani');
   const [script, setScript] = useState<SwaraScript>('roman');
+  const [tuning, setTuning] = useState<TuningSystem>('equal');
   const ragas = useMemo(() => RAGAS.filter((r) => r.system === system), [system]);
   const [ragaId, setRagaId] = useState<string>(ragas[0]?.id ?? '');
 
@@ -181,17 +198,32 @@ export function WorldNotationView() {
             </button>
           ))}
         </div>
-        <div className="tech-sub-toggle raga-script-toggle" role="group" aria-label="Script">
-          {SCRIPTS.map((s) => (
-            <button
-              key={s.id}
-              className={`sub-chip ${s.id === script ? 'active' : ''}`}
-              onClick={() => setScript(s.id)}
-              aria-pressed={s.id === script}
-            >
-              {s.label}
-            </button>
-          ))}
+        <div className="raga-display-toggles">
+          <div className="tech-sub-toggle raga-script-toggle" role="group" aria-label="Script">
+            {SCRIPTS.map((s) => (
+              <button
+                key={s.id}
+                className={`sub-chip ${s.id === script ? 'active' : ''}`}
+                onClick={() => setScript(s.id)}
+                aria-pressed={s.id === script}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+          <div className="tech-sub-toggle raga-tuning-toggle" role="group" aria-label="Tuning">
+            {TUNINGS.map((t) => (
+              <button
+                key={t.id}
+                className={`sub-chip ${t.id === tuning ? 'active' : ''}`}
+                onClick={() => setTuning(t.id)}
+                aria-pressed={t.id === tuning}
+                title="Playback intonation"
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -213,7 +245,7 @@ export function WorldNotationView() {
               ))}
             </div>
           )}
-          {selected && <RagaPanel raga={selected} script={script} />}
+          {selected && <RagaPanel raga={selected} script={script} tuning={tuning} />}
         </div>
 
         <aside className="tech-rail">

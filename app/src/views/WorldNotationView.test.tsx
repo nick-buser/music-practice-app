@@ -30,6 +30,16 @@ describe('WorldNotationView', () => {
     expect(screen.getAllByText('सा').length).toBeGreaterThan(0);
   });
 
+  it('offers a playback tuning toggle (equal / just)', () => {
+    render(<WorldNotationView />);
+    const equal = screen.getByRole('button', { name: 'Equal' });
+    const just = screen.getByRole('button', { name: 'Just (shruti)' });
+    expect(equal.getAttribute('aria-pressed')).toBe('true'); // equal by default
+    fireEvent.click(just);
+    expect(just.getAttribute('aria-pressed')).toBe('true');
+    expect(equal.getAttribute('aria-pressed')).toBe('false');
+  });
+
   it('always shows the how-to-read legend', () => {
     render(<WorldNotationView />);
     const legend = screen.getByRole('heading', { name: 'Reading the notation' }).closest('.card');

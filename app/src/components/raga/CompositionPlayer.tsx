@@ -10,7 +10,7 @@ import type { CompositionSection } from '../../data/raga/composition';
 import type { SwaraScript } from '../../data/raga/swara';
 import type { Tala } from '../../data/raga/tala';
 import { CompositionScore } from './RagaScore';
-import { DEFAULT_SA_HZ, useSwaraPlayback } from './playback';
+import { DEFAULT_SA_HZ, useSwaraPlayback, type TuningSystem } from './playback';
 
 interface Props {
   section: CompositionSection;
@@ -19,15 +19,24 @@ interface Props {
   bpm: number;
   saHz?: number;
   script?: SwaraScript;
+  tuning?: TuningSystem;
 }
 
-export function CompositionPlayer({ section, tala, bpm, saHz = DEFAULT_SA_HZ, script = 'roman' }: Props) {
+export function CompositionPlayer({
+  section,
+  tala,
+  bpm,
+  saHz = DEFAULT_SA_HZ,
+  script = 'roman',
+  tuning = 'equal',
+}: Props) {
   const [running, setRunning] = useState(false);
   const [loop, setLoop] = useState(true);
   const { activeIndex } = useSwaraPlayback({
     cells: section.cells,
     bpm,
     saHz,
+    tuning,
     running,
     loop,
     onEnded: () => setRunning(false),

@@ -48,7 +48,8 @@ Four layers, bottom-up:
 3. **Playback** — `buildTimeline()` turns cells into pitched tone events;
    `useSwaraPlayback()` schedules them on the Web Audio clock (the same
    two-clock lookahead as the metronome) and reports the active matra so the
-   cursor tracks the sound. Sa is movable, so a piece plays at any pitch.
+   cursor tracks the sound. Sa is movable, so a piece plays at any pitch, in
+   either equal temperament or a 5-limit just-intonation (shruti) tuning.
 4. **Area** — a top-level view with a tradition toggle, a per-raga reference,
    playable exercises, and a how-to-read legend.
 
@@ -90,9 +91,12 @@ derived from each swara's variant so the printed label always matches the pitch.
 Swaras can be ornamented — **gamaka** (`G~`), **kan** grace (`(R)S`) and **meend**
 glide (`D>`) — drawn by the renderer but not yet sounded by playback.
 
+Playback can sound either **equal temperament** or a 5-limit **just-intonation
+(shruti)** tuning, chosen from the header.
+
 **Deliberately not yet** (the model leaves room for each):
 
 - Sounding the ornaments (gamaka pitch-bend, kan as a real grace tone).
-- Microtonal shruti tuning (pitches are 12-TET).
+- The full 22-shruti, raga-dependent intonation (just intonation approximates it).
 - Backend persistence for user-authored compositions, via the existing CRUD
   contract gated by `backendEnabled`.

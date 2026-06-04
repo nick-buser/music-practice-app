@@ -81,7 +81,9 @@ the label always agrees with the sounding pitch. The two enharmonic positions a
   above); naming them apart would need an explicit label + a finer pitch model.
 - **Ornaments are visual only.** Gamaka, kan and meend are drawn but not yet
   sounded — playback plays the bare swara.
-- **Microtonal shruti.** Pitches are 12-TET; true shruti tuning is out of scope.
+- **Shruti is approximated.** Playback offers a 5-limit just-intonation tuning
+  (`swaraHz`, in `playback.ts`) alongside 12-TET; the full 22-shruti,
+  raga-dependent system is still out of scope.
 
 ## Seed content
 
