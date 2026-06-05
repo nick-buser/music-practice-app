@@ -14,6 +14,7 @@ import {
   parseSwara,
   swaraGlyph,
   swaraSemitones,
+  swarasthana,
 } from './swara';
 import { sectionStarts, talaMatras } from './tala';
 
@@ -46,6 +47,16 @@ describe('swara — parsing & pitch', () => {
     expect(swaraSemitones(parseSwara('.N'))).toBe(-1);
   });
 
+  it('reads ornaments: kan grace, gamaka, and meend', () => {
+    expect(parseSwara('G~').ornaments).toEqual({ gamaka: true });
+    expect(parseSwara('D>').ornaments).toEqual({ meend: true });
+    const kan = parseSwara("(R)S'");
+    expect(kan).toMatchObject({ name: 'S', register: 'taar' });
+    expect(kan.ornaments?.kan).toEqual({ name: 'R', variant: 'shuddha', register: 'madhya' });
+    // a plain swara carries no ornaments key
+    expect(parseSwara('S').ornaments).toBeUndefined();
+  });
+
   it('rejects illegal swaras and tokens', () => {
     expect(isValidSwara('S', 'komal')).toBe(false);
     expect(isValidSwara('M', 'tivra')).toBe(true);
@@ -66,6 +77,24 @@ describe('swara — parsing & pitch', () => {
 
   it('parses a whole phrase', () => {
     expect(parsePhrase(".N R G M D N S'")).toHaveLength(7);
+  });
+
+  it('derives Carnatic swarasthana indices that agree with the pitch', () => {
+    // achala swaras have no index
+    expect(swarasthana(parseSwara('S'))).toBeUndefined();
+    expect(swarasthana(parseSwara('P'))).toBeUndefined();
+    // komal / shuddha / tivra map to the standard positions
+    expect(swarasthana(parseSwara('r'))).toBe(1); // komal Re  → R1
+    expect(swarasthana(parseSwara('R'))).toBe(2); // shuddha Re → R2
+    expect(swarasthana(parseSwara('g'))).toBe(2); // komal Ga  → G2
+    expect(swarasthana(parseSwara('G'))).toBe(3); // shuddha Ga → G3
+    expect(swarasthana(parseSwara('m'))).toBe(1); // shuddha Ma → M1
+    expect(swarasthana(parseSwara('M'))).toBe(2); // tivra Ma   → M2
+    expect(swarasthana(parseSwara('d'))).toBe(1); // komal Dha  → D1
+    expect(swarasthana(parseSwara('N'))).toBe(3); // shuddha Ni → N3
+    // Mayamalavagowla's swarasthanas, in order
+    const maya = RAGA_BY_ID.get('mayamalavagowla')!;
+    expect(maya.aroha.map(swarasthana)).toEqual([undefined, 1, 3, 1, undefined, 1, 3, undefined]);
   });
 });
 

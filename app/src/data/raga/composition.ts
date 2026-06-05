@@ -91,8 +91,10 @@ export const COMPOSITIONS: Composition[] = [
     layaBpm: 120,
     note: 'An original sargam exercise tracing Yaman in Tīntāl (one avartana per line).',
     sections: [
-      // 16 matras, ascending through the raga and resting on Sa of the upper octave.
-      sthayi('Sthāyī', ".N R G M | D N S' - | S' N D P | M G R S"),
+      // 16 matras, ascending through the raga and resting on Sa of the upper
+      // octave. Ornamented to show the notation: a gamaka on Ga, a meend from
+      // Dha into Ni, and a kan (grace Ma) touching the Ga on the way down.
+      sthayi('Sthāyī', ".N R G~ M | D> N S' - | S' N D P | M (M)G R S"),
       // 16 matras, a descending answer phrase landing back on the sam.
       sthayi('Antarā', "G M D N | S' - N D | P M G R | G R S -"),
     ],

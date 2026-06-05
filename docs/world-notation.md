@@ -48,7 +48,8 @@ Four layers, bottom-up:
 3. **Playback** — `buildTimeline()` turns cells into pitched tone events;
    `useSwaraPlayback()` schedules them on the Web Audio clock (the same
    two-clock lookahead as the metronome) and reports the active matra so the
-   cursor tracks the sound. Sa is movable, so a piece plays at any pitch.
+   cursor tracks the sound. Sa is movable, so a piece plays at any pitch, in
+   either equal temperament or a 5-limit just-intonation (shruti) tuning.
 4. **Area** — a top-level view with a tradition toggle, a per-raga reference,
    playable exercises, and a how-to-read legend.
 
@@ -71,6 +72,10 @@ Use `|` as a visual barline, `-` to sustain, `~` to rest, and `S,R` for a
 subdivided matra. A `seed data integrity` test asserts every section is a whole
 number of tala cycles, so misaligned content fails fast.
 
+**Ornament a swara** anywhere it's spelled: `G~` for a gamaka (oscillation),
+`(R)S` for a kan (grace note), and `D>` for a meend (glide into the next swara).
+Ornaments are drawn but not sounded, and never change the matra count.
+
 The new raga/composition shows up in the area automatically (the view derives
 its lists from the seed arrays) and is immediately playable.
 
@@ -80,10 +85,18 @@ its lists from the seed arrays) and is immediately playable.
 two ragas (Yaman, Māyāmāḷavagowḷa) with an original Yaman sargam exercise and
 the first two Carnatic sarali varisai.
 
+Carnatic ragas are labelled with their finer **swarasthana** index (R₁/G₃/M₂ …),
+derived from each swara's variant so the printed label always matches the pitch.
+
+Swaras can be ornamented — **gamaka** (`G~`), **kan** grace (`(R)S`) and **meend**
+glide (`D>`) — drawn by the renderer but not yet sounded by playback.
+
+Playback can sound either **equal temperament** or a 5-limit **just-intonation
+(shruti)** tuning, chosen from the header.
+
 **Deliberately not yet** (the model leaves room for each):
 
-- Finer Carnatic `R1/R2/R3` swarasthana labelling (we mark komal/tivra today).
-- Ornaments — gamaka, meend, kan — as cell annotations.
-- Microtonal shruti tuning (pitches are 12-TET).
+- Sounding the ornaments (gamaka pitch-bend, kan as a real grace tone).
+- The full 22-shruti, raga-dependent intonation (just intonation approximates it).
 - Backend persistence for user-authored compositions, via the existing CRUD
   contract gated by `backendEnabled`.

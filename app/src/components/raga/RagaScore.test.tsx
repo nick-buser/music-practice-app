@@ -25,6 +25,26 @@ describe('PhraseLine', () => {
     const { container } = render(<PhraseLine phrase={parsePhrase(".P S S'")} />);
     expect(container.querySelectorAll('.octave-dot')).toHaveLength(2);
   });
+
+  it('labels Carnatic swaras with a swarasthana subscript instead of komal marks', () => {
+    const { container } = render(
+      <PhraseLine phrase={parsePhrase("S r G m P d N S'")} system="carnatic" />,
+    );
+    // R1 G3 M1 D1 N3 — Sa/Pa/Sa' carry no index
+    expect(texts(container, '.swarasthana-num')).toEqual(['1', '3', '1', '1', '3']);
+    // Carnatic uses the index, never the komal/tivra lines
+    expect(container.querySelectorAll('.komal-line, .tivra-line')).toHaveLength(0);
+  });
+
+  it('draws ornament marks: gamaka, kan grace, and a meend arc', () => {
+    const { container } = render(<PhraseLine phrase={parsePhrase("G~ (R)S' D")} />);
+    expect(container.querySelectorAll('.gamaka-mark')).toHaveLength(1); // G~
+    expect(container.querySelectorAll('.kan-grace')).toHaveLength(1); // (R)S'
+    // a meend draws an arc only when there is a following swara to glide to
+    expect(container.querySelectorAll('.meend-arc')).toHaveLength(0);
+    const { container: c2 } = render(<PhraseLine phrase={parsePhrase('D> N')} />);
+    expect(c2.querySelectorAll('.meend-arc')).toHaveLength(1);
+  });
 });
 
 describe('CompositionScore', () => {

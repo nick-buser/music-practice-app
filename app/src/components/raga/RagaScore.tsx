@@ -15,6 +15,8 @@ import {
   scriptNumeral,
   swaraGlyph,
   swaraSyllable,
+  swarasthana,
+  type MusicSystem,
   type Swara,
   type SwaraScript,
 } from '../../data/raga/swara';
@@ -32,9 +34,31 @@ const SWARA_TOP = MARKER_H;
 const LETTER_Y = MARKER_H + 22;
 const SWARA_H = 40; // band: octave dots + letter + komal line
 const LYRIC_Y = MARKER_H + SWARA_H + 13;
+const GAMAKA_Y = SWARA_TOP + 1; // wavy gamaka mark, just above the letter
+
+/** A small tilde (~12px) centred on `cx`, drawn above a gamaka'd swara. */
+function gamakaPath(cx: number): string {
+  return `M ${cx - 6} ${GAMAKA_Y} q 3 -3 6 0 q 3 3 6 0`;
+}
+
+/** A shallow slur arc from `x1` to `x2`, drawn over a meend (glide). */
+function meendPath(x1: number, x2: number): string {
+  const y = LETTER_Y - 14;
+  return `M ${x1} ${y} Q ${(x1 + x2) / 2} ${y - 8} ${x2} ${y}`;
+}
 
 /** Renders the swaras that sit inside one matra column centred on `cx`. */
-function CellGlyphs({ cell, cx, script }: { cell: Cell; cx: number; script: SwaraScript }) {
+function CellGlyphs({
+  cell,
+  cx,
+  script,
+  system,
+}: {
+  cell: Cell;
+  cx: number;
+  script: SwaraScript;
+  system: MusicSystem;
+}) {
   if (cell.kind === 'sustain') {
     return (
       <text className="raga-sustain" x={cx} y={LETTER_Y} textAnchor="middle">
@@ -56,39 +80,61 @@ function CellGlyphs({ cell, cx, script }: { cell: Cell; cx: number; script: Swar
     <>
       {cell.swaras.map((swara, i) => {
         const x = n === 1 ? cx : cx - span / 2 + (span * (i + 0.5)) / n;
-        return <SwaraMark key={i} swara={swara} cx={x} small={n > 1} script={script} />;
+        return <SwaraMark key={i} swara={swara} cx={x} small={n > 1} script={script} system={system} />;
       })}
     </>
   );
 }
 
-/** A single swara: letter + komal/tivra mark + octave dot(s). */
+/**
+ * A single swara. Hindustani spells inflections as komal/tivra marks; Carnatic
+ * names the finer swarasthana and prints it as a subscript index instead — so
+ * the tradition picks the labelling style. Octave dots are shared by both.
+ */
 function SwaraMark({
   swara,
   cx,
   small,
   script,
+  system,
 }: {
   swara: Swara;
   cx: number;
   small?: boolean;
   script: SwaraScript;
+  system: MusicSystem;
 }) {
   const g = swaraGlyph(swara);
   const half = small ? 5 : 8;
+  const carnatic = system === 'carnatic';
+  const sthana = carnatic ? swarasthana(swara) : undefined;
+  const dataSwara = carnatic
+    ? `${g.letter}${sthana ?? ''}`
+    : `${g.komal ? 'komal ' : ''}${g.tivra ? 'tivra ' : ''}${g.letter}`;
   return (
-    <g className="raga-swara" data-swara={`${g.komal ? 'komal ' : ''}${g.tivra ? 'tivra ' : ''}${g.letter}`}>
+    <g className="raga-swara" data-swara={dataSwara}>
       <text className={`raga-letter${small ? ' small' : ''}`} x={cx} y={LETTER_Y} textAnchor="middle">
         {swaraSyllable(g.letter, script)}
       </text>
-      {g.komal && (
+      {sthana !== undefined && (
+        <text className="swarasthana-num" x={cx + half - 1} y={LETTER_Y + 4} textAnchor="start">
+          {scriptNumeral(sthana, script)}
+        </text>
+      )}
+      {!carnatic && g.komal && (
         <line className="komal-line" x1={cx - half} y1={LETTER_Y + 3} x2={cx + half} y2={LETTER_Y + 3} />
       )}
-      {g.tivra && (
+      {!carnatic && g.tivra && (
         <line className="tivra-line" x1={cx - half} y1={SWARA_TOP + 3} x2={cx + half} y2={SWARA_TOP + 3} />
       )}
       {g.register === 'taar' && <circle className="octave-dot" cx={cx} cy={SWARA_TOP + 6} r={1.6} />}
       {g.register === 'mandra' && <circle className="octave-dot" cx={cx} cy={LETTER_Y + 9} r={1.6} />}
+      {swara.ornaments?.gamaka && <path className="gamaka-mark" d={gamakaPath(cx)} />}
+      {swara.ornaments?.kan && (
+        <text className="kan-grace" x={cx - half - 2} y={LETTER_Y - 8} textAnchor="end">
+          {swaraSyllable(swara.ornaments.kan.name, script)}
+        </text>
+      )}
     </g>
   );
 }
@@ -97,10 +143,12 @@ export function PhraseLine({
   phrase,
   ariaLabel,
   script = 'roman',
+  system = 'hindustani',
 }: {
   phrase: Swara[];
   ariaLabel?: string;
   script?: SwaraScript;
+  system?: MusicSystem;
 }) {
   const width = PAD_X * 2 + phrase.length * CELL_W;
   return (
@@ -112,8 +160,23 @@ export function PhraseLine({
       role="img"
       aria-label={ariaLabel}
     >
+      {phrase.map((swara, i) =>
+        swara.ornaments?.meend && phrase[i + 1] ? (
+          <path
+            key={`meend-${i}`}
+            className="meend-arc"
+            d={meendPath(PAD_X + i * CELL_W + CELL_W / 2, PAD_X + (i + 1) * CELL_W + CELL_W / 2)}
+          />
+        ) : null,
+      )}
       {phrase.map((swara, i) => (
-        <SwaraMark key={i} swara={swara} cx={PAD_X + i * CELL_W + CELL_W / 2} script={script} />
+        <SwaraMark
+          key={i}
+          swara={swara}
+          cx={PAD_X + i * CELL_W + CELL_W / 2}
+          script={script}
+          system={system}
+        />
       ))}
     </svg>
   );
@@ -214,7 +277,7 @@ export function CompositionScore({ section, tala, activeMatra, script = 'roman' 
                       height={SWARA_H}
                     />
                   )}
-                  <CellGlyphs cell={cell} cx={cx} script={script} />
+                  <CellGlyphs cell={cell} cx={cx} script={script} system={tala.system} />
                   {hasLyrics && section.lyrics?.[idx] && (
                     <text className="raga-lyric" x={cx} y={LYRIC_Y} textAnchor="middle">
                       {section.lyrics[idx]}
@@ -222,6 +285,14 @@ export function CompositionScore({ section, tala, activeMatra, script = 'roman' 
                   )}
                 </g>
               );
+            })}
+            {/* meend arcs between adjacent single-swara cells in this cycle */}
+            {Array.from({ length: beats - 1 }, (_, col) => {
+              const cell = section.cells[base + col];
+              if (cell?.kind !== 'swara' || !section.cells[base + col + 1]) return null;
+              if (!cell.swaras.at(-1)?.ornaments?.meend) return null;
+              const x1 = PAD_X + col * CELL_W + CELL_W / 2;
+              return <path key={`meend-${col}`} className="meend-arc" d={meendPath(x1, x1 + CELL_W)} />;
             })}
           </svg>
         );

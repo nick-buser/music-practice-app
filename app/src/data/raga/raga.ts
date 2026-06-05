@@ -5,10 +5,9 @@
  * Hindustani ragas have a parent thaat, a vadi/samvadi (sonant/consonant
  * notes) and a time of day; Carnatic ragas have a parent melakarta number.
  *
- * Note on Carnatic labelling: our swara model marks komal/tivra, not the finer
- * R1/R2/R3 swarasthana indices. Mayamalavagowla maps cleanly onto komal/shuddha
- * positions, so it renders correctly today; full Rn/Gn subscript labelling is a
- * later refinement (tracked in the folder README).
+ * Note on Carnatic labelling: the renderer prints the finer swarasthana index
+ * (R1/R2/R3 …) for Carnatic ragas, derived from each swara's variant so the
+ * label always agrees with the sounding pitch (see `swarasthana`).
  */
 
 import { parsePhrase, parseSwara, type MusicSystem, type Swara } from './swara';

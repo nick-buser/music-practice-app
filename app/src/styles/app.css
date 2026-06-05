@@ -2231,6 +2231,24 @@ button { font-family: inherit; }
 .raga-score .octave-dot {
   fill: var(--lumen);
 }
+/* Carnatic swarasthana index, set as a subscript after the swara letter. */
+.raga-score .swarasthana-num {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--lumen);
+}
+/* Ornaments: gamaka (wavy shake), kan (grace note), meend (glide arc). */
+.raga-score .gamaka-mark,
+.raga-score .meend-arc {
+  fill: none;
+  stroke: var(--lumen);
+  stroke-width: 1.2;
+}
+.raga-score .kan-grace {
+  font-family: var(--font-display);
+  font-size: 11px;
+  fill: var(--shoal);
+}
 .raga-score .raga-sustain,
 .raga-score .raga-rest {
   font-family: var(--font-display);
@@ -2276,13 +2294,20 @@ button { font-family: inherit; }
   flex-wrap: wrap;
   gap: 12px;
 }
+.raga-display-toggles {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 .raga-script-toggle .sub-chip {
   min-width: 64px;
 }
-/* Devanagari sargam: let the browser reach a system Devanagari face, since we
-   don't bundle one. The komal/tivra marks and octave dots are script-neutral. */
+/* Devanagari sargam in the bundled Noto Sans Devanagari webfont, so the glyphs
+   are consistent across platforms (system faces fall back via --font-deva). The
+   komal/tivra marks and octave dots are script-neutral. */
 .raga-score.deva .raga-letter {
-  font-family: 'Noto Sans Devanagari', 'Nirmala UI', 'Mangal', 'Kohinoor Devanagari', sans-serif;
+  font-family: var(--font-deva);
   font-size: 17px;
 }
 .raga-tradition-blurb {

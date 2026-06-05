@@ -16,6 +16,37 @@ import { swaraSemitones } from '../../data/raga/swara';
 /** A pleasant mid-register default for Sa (A3). */
 export const DEFAULT_SA_HZ = 220;
 
+/** Equal temperament (12-TET) or a 5-limit just-intonation shruti approximation. */
+export type TuningSystem = 'equal' | 'just';
+
+/**
+ * 5-limit just-intonation ratios above Sa, one per chromatic position. These
+ * tune the swaras to the consonant whole-number ratios Indian classical
+ * intonation is built on — an approximation of shruti, not the full 22-shruti,
+ * raga-dependent system.
+ */
+const JUST_RATIOS = [
+  1, // Sa
+  16 / 15, // komal Re  (R1)
+  9 / 8, // shuddha Re (R2)
+  6 / 5, // komal Ga  (G2)
+  5 / 4, // shuddha Ga (G3)
+  4 / 3, // shuddha Ma (M1)
+  45 / 32, // tivra Ma   (M2)
+  3 / 2, // Pa
+  8 / 5, // komal Dha  (D1)
+  5 / 3, // shuddha Dha(D2)
+  16 / 9, // komal Ni  (N2)
+  15 / 8, // shuddha Ni (N3)
+];
+
+/** Frequency of a swara `semis` semitones above Sa, in the chosen tuning. */
+export function swaraHz(saHz: number, semis: number, tuning: TuningSystem): number {
+  if (tuning === 'equal') return saHz * 2 ** (semis / 12);
+  const oct = Math.floor(semis / 12);
+  return saHz * JUST_RATIOS[semis - oct * 12] * 2 ** oct;
+}
+
 const LOOKAHEAD_MS = 25;
 const SCHEDULE_AHEAD_S = 0.12;
 
@@ -44,9 +75,14 @@ export interface Timeline {
  * rests) occupies one beat; a held swara rings on through the sustains that
  * follow it, and a subdivided matra splits its beat evenly.
  */
-export function buildTimeline(cells: Cell[], bpm: number, saHz: number): Timeline {
+export function buildTimeline(
+  cells: Cell[],
+  bpm: number,
+  saHz: number,
+  tuning: TuningSystem = 'equal',
+): Timeline {
   const matraDur = 60 / bpm;
-  const hz = (semis: number) => saHz * 2 ** (semis / 12);
+  const hz = (semis: number) => swaraHz(saHz, semis, tuning);
   const events: MatraEvent[] = cells.map((cell, i) => {
     const base = { index: i, offset: i * matraDur };
     if (cell.kind !== 'swara') return { ...base, tones: [] };
@@ -71,6 +107,7 @@ interface Options {
   /** Matras per minute. */
   bpm: number;
   saHz: number;
+  tuning?: TuningSystem;
   running: boolean;
   loop: boolean;
   onEnded?: () => void;
@@ -81,7 +118,15 @@ interface PlaybackState {
   activeIndex: number;
 }
 
-export function useSwaraPlayback({ cells, bpm, saHz, running, loop, onEnded }: Options): PlaybackState {
+export function useSwaraPlayback({
+  cells,
+  bpm,
+  saHz,
+  tuning = 'equal',
+  running,
+  loop,
+  onEnded,
+}: Options): PlaybackState {
   const [activeIndex, setActiveIndex] = useState(-1);
 
   const ctxRef = useRef<AudioContext | null>(null);
@@ -97,11 +142,13 @@ export function useSwaraPlayback({ cells, bpm, saHz, running, loop, onEnded }: O
   const cellsRef = useRef(cells);
   const bpmRef = useRef(bpm);
   const saRef = useRef(saHz);
+  const tuningRef = useRef(tuning);
   const loopRef = useRef(loop);
   const onEndedRef = useRef(onEnded);
   useEffect(() => { cellsRef.current = cells; }, [cells]);
   useEffect(() => { bpmRef.current = bpm; }, [bpm]);
   useEffect(() => { saRef.current = saHz; }, [saHz]);
+  useEffect(() => { tuningRef.current = tuning; }, [tuning]);
   useEffect(() => { loopRef.current = loop; }, [loop]);
   useEffect(() => { onEndedRef.current = onEnded; }, [onEnded]);
 
@@ -118,7 +165,7 @@ export function useSwaraPlayback({ cells, bpm, saHz, running, loop, onEnded }: O
     ctxRef.current = ctx;
     void ctx.resume();
 
-    let timeline = buildTimeline(cellsRef.current, bpmRef.current, saRef.current);
+    let timeline = buildTimeline(cellsRef.current, bpmRef.current, saRef.current, tuningRef.current);
     eiRef.current = 0;
     doneRef.current = false;
     queueRef.current = [];
@@ -148,7 +195,7 @@ export function useSwaraPlayback({ cells, bpm, saHz, running, loop, onEnded }: O
         }
         // Recompute each loop so a tempo change takes hold at the cycle seam.
         baseRef.current += timeline.totalDur;
-        timeline = buildTimeline(cellsRef.current, bpmRef.current, saRef.current);
+        timeline = buildTimeline(cellsRef.current, bpmRef.current, saRef.current, tuningRef.current);
         eiRef.current = 0;
       }
       const ev = timeline.events[eiRef.current];
