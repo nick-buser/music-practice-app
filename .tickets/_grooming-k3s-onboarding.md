@@ -58,18 +58,22 @@ in their owning repo with that repo's numbering.
 `music-practice-app` to match GitHub and the local checkout (litholens
 precedent: repo name ≠ app slug is fine).
 
-## Ticket 1 — feat-0001: Forge onboarding + container images + docker CI
+**Amendment (2026-07-11, docs-0002):** PR #1 merged — naming default
+ratified. Already done as PR #1 pre-steps: Gitea repo
+`nick-b/music-practice-app` created, `main` pushed, `gitea` remote added to
+the local checkout. Ticket 1 is split below into a code ticket (loop-
+pickable) and an operator ticket (H — the loop must never attempt the
+secret-value write). Tier tags: **S** = delegate to a sonnet-class subagent,
+**O** = opus-class/session-model judgment, **H** = human/operator step;
+gates always run in the orchestrating session. Queue is driven by
+`/loop /ticket-loop` with gates in `.tickets/loop.md`.
+
+## Ticket 1a — feat-0001 (tier S): Container images + docker CI (code only)
 
 **Repo:** music-practice-app (this repo)
-**Why:** Nothing can deploy until images exist in the Gitea registry and
-Woodpecker builds them. The repo isn't even on the forge yet.
+**Why:** Nothing can deploy until buildable image definitions and the build
+pipeline exist in the repo. Forge onboarding already done (see Amendment).
 **Scope / surfaces / files:**
-- *Pre-steps (operational, no diff):* create `nick-b/music-practice-app` on
-  Gitea (private), add `gitea` remote here, push `main`; activate the repo
-  in Woodpecker via API (`POST /api/repos?forge_remote_id=<id>`) and set
-  repo secrets `gitea_username`/`gitea_token` (value: vault
-  `gitea_registry_push_token`) — token write is operator-gated; hand Nick
-  the exact curl.
 - `app/Dockerfile.web` + nginx conf: multi-stage `node:22` build
   (`VITE_API_BASE_URL=/api` build arg) → nginx static image with SPA
   fallback (`try_files ... /index.html`).
@@ -79,24 +83,51 @@ Woodpecker builds them. The repo isn't even on the forge yet.
 - `.woodpecker/docker.yml`: two `woodpeckerci/plugin-docker-buildx` steps
   (`soundings-api` from `backend/`, `soundings-web` from `app/`), registry
   `git.bittern-chameleon.dev`, tags `${CI_COMMIT_SHA:0:8}` + `latest` (that
-  form is proven in plugin settings only — never in `commands:`).
+  form is proven in plugin settings only — never in `commands:`; no `$`/`{}`
+  in YAML comments).
 - Backend CORS: confirm `settings.cors_origins` accepts env override; in
   prod same-origin makes it moot, keep the Vite-dev entry.
 **Decision needed:** none blocking. (Origin-flip — making Gitea `origin` and
 GitHub a `github` mirror remote per house pattern — deferred; GitHub Actions
 Pages deploy keys off GitHub pushes today, so leave `origin` alone for now.)
 **Acceptance criteria:**
-- [ ] Repo visible at `git.bittern-chameleon.dev/nick-b/music-practice-app`,
-      existing `frontend.yml`/`backend.yml` checks run and pass.
-- [ ] First green `docker.yml` build pushes `soundings-api:<sha8>` and
-      `soundings-web:<sha8>` to the Gitea registry; sha8 recorded for T3.
-- [ ] `docker run soundings-web` serves the SPA with backend features
-      compiled in (`/api` base); api image unchanged in behavior locally.
+- [ ] Repo gates green (`.tickets/loop.md`); frontend build succeeds with
+      `VITE_API_BASE_URL=/api` (backend features compiled in).
+- [ ] Image builds are NOT verifiable on this laptop (no container
+      runtime) — PR body says "image build verified in CI only"; Dockerfile
+      correctness is reviewed, then proven by ops-0001's first green build.
+- [ ] Existing compose flow unbroken (`RUN_MIGRATIONS` defaults on).
 
-## Ticket 2 — infra-####: Substrate contract — Postgres, Garage, vault
+## Ticket 1b — ops-0001 (tier H): Woodpecker activation + registry secrets
+
+**Repo:** operational (no diff; recorded here)
+**Why:** Woodpecker must know the repo and hold registry-push credentials
+before any image build can go green. The secret-value write is
+classifier-blocked for agents — operator runs it.
+**Scope / commands** (admin PAT at `~/.claude/skills/woodpecker/token`;
+vault value via `scripts/labctl vault view` in the infra repo):
+- Agent-runnable: find `forge_remote_id` via
+  `GET https://ci.bittern-chameleon.dev/api/user/repos?all=true`, then
+  activate: `POST /api/repos?forge_remote_id=<id>`.
+- Operator-only (live token value): two
+  `POST /api/repos/<repo_id>/secrets` calls setting `gitea_username` =
+  `nick-b` and `gitea_token` = vault `gitea_registry_push_token`
+  (write:package), `events: [push]`. Exact curls to be pasted in this
+  ticket's Notes by the loop when feat-0001's PR opens.
+**Acceptance criteria:**
+- [ ] Repo active in Woodpecker; `frontend.yml`/`backend.yml` checks run
+      and pass on the feat-0001 PR.
+- [ ] After feat-0001 merges: first green `docker.yml` build on main pushes
+      `soundings-api:<sha8>` + `soundings-web:<sha8>` to the registry; sha8
+      recorded here for T3.
+
+## Ticket 2 — infra-#### (tier S code + H ops): Substrate contract — Postgres, Garage, vault
 
 **Repo:** homelab_infra_and_planning (claim with its numbering; PR from a
-worktree per its enforced workflow)
+worktree per its enforced workflow; that repo's gates apply)
+**Tier note:** the YAML/contract edits are S; the `labctl` runs (scaffold,
+vault set, `deploy nas-services --force`) mutate shared substrate — run
+attended in that repo's session, never fire-and-forget from a subagent.
 **Why:** The app needs a database and object storage that exist before the
 chart references their credentials. Recordings + sheet scans are personal
 media → per-env scoped Garage keys, off the shared `homelab-main` grant loop
@@ -119,9 +150,10 @@ media → per-env scoped Garage keys, off the shared `homelab-main` grant loop
       bucket; `homelab-main` cannot reach either.
 - [ ] Vault keys committed; no plaintext secret in any diff.
 
-## Ticket 3 — gitops: Helm chart + Argo Application + SOPS secret + Kyverno
+## Ticket 3 — gitops (tier O): Helm chart + Argo Application + SOPS secret + Kyverno
 
-**Repo:** homelab-gitops (branch per its convention)
+**Repo:** homelab-gitops (branch per its convention; SOPS encryption via the
+in-cluster cmp-sops sidecar is an attended step)
 **Why:** The GitOps half — everything Argo needs to run and auto-roll the
 app.
 **Scope / surfaces / files:**
@@ -159,7 +191,7 @@ hostname-agnostic; flip to absolute origin if the middleware fights us.)
 - [ ] `https://soundings.k8s.bittern-chameleon.dev` serves the SPA; a
       backend-gated feature (saved chords) round-trips through `/api`.
 
-## Ticket 4 — feat-0002: Rollout verification + deploy doc
+## Ticket 4 — feat-0002 (tier O + H ratify): Rollout verification + deploy doc
 
 **Repo:** music-practice-app (this repo)
 **Why:** Close the loop end-to-end and leave the runbook the next change
@@ -195,10 +227,15 @@ rides on (litholens' deploy doc is the model).
 
 ## Suggested ordering
 
-T1 and T2 are independent — run in parallel. T3 needs both (sha8s from T1,
-vault creds from T2). T4 rides T3. Merge order within T3 is load-bearing:
-app-repo PR merged and green **before** the gitops PR (pin real sha8s, never
-placeholders).
+T1a and T2 are independent — free parallelism (different repos). T1b's
+activation half runs as soon as T1a's PR opens (so its checks run on the
+PR); its secrets half is the operator's. T3 needs T1a merged + T1b done
+(real sha8s) + T2 done (vault creds). T4 rides T3. Merge order within T3 is
+load-bearing: app-repo PR merged and green **before** the gitops PR (pin
+real sha8s, never placeholders).
+
+Loop-eligibility summary: T1a → loop now; T2 code → loop now (cross-repo);
+T1b, T2 ops, T3's SOPS step → H/attended; T3, T4 → loop once deps merge.
 
 ## Notes (dogfooding)
 
