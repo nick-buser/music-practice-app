@@ -1,0 +1,49 @@
+# Container image CI — builds the API and web images and pushes them to the
+# Gitea registry. Only runs on main (the frontend/backend workflows already
+# cover PRs), so every push here is a candidate for the k3s deploy.
+#
+# Secrets (Woodpecker, repo-level): gitea_username + gitea_token must map to a
+# Gitea account + token with WRITE:PACKAGE scope.
+when:
+  event: push
+  branch: main
+  path:
+    include:
+      - 'app/**'
+      - 'backend/**'
+      - '.woodpecker/docker.yml'
+
+steps:
+  - name: soundings-api
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      registry: git.bittern-chameleon.dev
+      repo: git.bittern-chameleon.dev/nick-b/soundings-api
+      dockerfile: backend/Dockerfile
+      context: backend/
+      platforms: linux/amd64
+      tags:
+        - latest
+        - ${CI_COMMIT_SHA:0:8}
+      username:
+        from_secret: gitea_username
+      password:
+        from_secret: gitea_token
+
+  - name: soundings-web
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      registry: git.bittern-chameleon.dev
+      repo: git.bittern-chameleon.dev/nick-b/soundings-web
+      dockerfile: app/Dockerfile.web
+      context: app/
+      platforms: linux/amd64
+      build_args:
+        VITE_API_BASE_URL: /api
+      tags:
+        - latest
+        - ${CI_COMMIT_SHA:0:8}
+      username:
+        from_secret: gitea_username
+      password:
+        from_secret: gitea_token

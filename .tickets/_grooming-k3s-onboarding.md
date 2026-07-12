@@ -115,11 +115,30 @@ vault value via `scripts/labctl vault view` in the infra repo):
   (write:package), `events: [push]`. Exact curls to be pasted in this
   ticket's Notes by the loop when feat-0001's PR opens.
 **Acceptance criteria:**
-- [ ] Repo active in Woodpecker; `frontend.yml`/`backend.yml` checks run
-      and pass on the feat-0001 PR.
-- [ ] After feat-0001 merges: first green `docker.yml` build on main pushes
-      `soundings-api:<sha8>` + `soundings-web:<sha8>` to the registry; sha8
+- [x] Repo active in Woodpecker (repo id 42; activated 2026-07-11 via API).
+- [ ] Registry secrets set — **operator key-turn required** (see Notes).
+- [ ] After feat-0001 merges + secrets set: first green `docker.yml` build
+      on main pushes `soundings-api:<sha8>` + `soundings-web:<sha8>`; sha8
       recorded here for T3.
+
+**Notes (2026-07-11):** the loop attempted the secret write attended
+(value in a shell var only); the auto-mode classifier denied it — this half
+is confirmed operator-only. Nick: run these two (or via `!` in the
+session; values never print):
+
+```bash
+WP_TOKEN=$(cat ~/.claude/skills/woodpecker/token)
+VAL=$(cd ~/Projects/homelab/proxmox/homelab_infra_and_planning && scripts/labctl vault get gitea_registry_push_token --show | tr -d '[:space:]')
+curl -fsS -X POST -H "Authorization: Bearer $WP_TOKEN" -H 'Content-Type: application/json' \
+  -d '{"name":"gitea_username","value":"nick-b","events":["push"]}' \
+  https://ci.bittern-chameleon.dev/api/repos/42/secrets
+curl -fsS -X POST -H "Authorization: Bearer $WP_TOKEN" -H 'Content-Type: application/json' \
+  -d "{\"name\":\"gitea_token\",\"value\":\"$VAL\",\"events\":[\"push\"]}" \
+  https://ci.bittern-chameleon.dev/api/repos/42/secrets
+```
+
+Until run, `docker.yml` builds on main fail at the registry-push step —
+harmless; re-run the pipeline (woodpecker skill) after the key-turn.
 
 ## Ticket 2 — infra-#### (tier S code + H ops): Substrate contract — Postgres, Garage, vault
 
