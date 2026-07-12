@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.vite/
+e2e/
+playwright-report/
+test-results/
+blob-report/
+.git/
+*.md
