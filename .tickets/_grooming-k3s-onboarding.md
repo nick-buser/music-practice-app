@@ -235,7 +235,12 @@ load-bearing: app-repo PR merged and green **before** the gitops PR (pin
 real sha8s, never placeholders).
 
 Loop-eligibility summary: T1a → loop now; T2 code → loop now (cross-repo);
-T1b, T2 ops, T3's SOPS step → H/attended; T3, T4 → loop once deps merge.
+T1b, T2 ops, T3's SOPS step → attempted attended by the loop (values stay in
+shell vars); genuinely-blocked steps get the exact command posted in Notes +
+push notification, and the loop terminates rather than idles (progress-or-
+death doctrine, 2026-07-11). T3, T4 → loop once deps merge.
+
+Claimed: docs-0002 (loop config) — merged PR #2.
 
 ## Notes (dogfooding)
 
