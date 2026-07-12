@@ -263,8 +263,11 @@ export interface HeatDay {
 function buildHeatmap(): HeatDay[] {
   const today = JOURNAL_TODAY;
   // This week's Sunday, then back 52 weeks → the grid's first Sunday.
+  // All arithmetic in UTC: JOURNAL_TODAY parses as UTC midnight and cells
+  // render via toISOString(), so local-time math would shift the grid a day
+  // in any non-UTC timezone.
   const start = new Date(today);
-  start.setDate(start.getDate() - today.getDay() - 52 * 7);
+  start.setUTCDate(start.getUTCDate() - today.getUTCDay() - 52 * 7);
 
   let seed = 9173;
   const rng = () => {
@@ -275,7 +278,7 @@ function buildHeatmap(): HeatDay[] {
   const cells: HeatDay[] = [];
   for (let i = 0; i < 53 * 7; i++) {
     const d = new Date(start);
-    d.setDate(start.getDate() + i);
+    d.setUTCDate(start.getUTCDate() + i);
     const iso = d.toISOString().slice(0, 10);
 
     if (d > today) {
