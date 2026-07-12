@@ -259,7 +259,24 @@ shell vars); genuinely-blocked steps get the exact command posted in Notes +
 push notification, and the loop terminates rather than idles (progress-or-
 death doctrine, 2026-07-11). T3, T4 → loop once deps merge.
 
-Claimed: docs-0002 (loop config) — merged PR #2.
+Claimed: docs-0002 (loop config) — merged PR #2. fix-0001 (unplanned,
+heatmap UTC) — merged PR #3. feat-0001 (T1a) — merged PR #4. service-0263
+(T2 code half, infra repo) — merged infra PR #243.
+
+**LOOP TERMINATED 2026-07-11 (starved on operator key-turns).** All
+agent-runnable work is merged; the classifier gates every vault/secret
+write, so these two key-turn blocks are what feeds the next loop run:
+
+1. **Woodpecker registry secrets** — curls in ops-0001 Notes above.
+2. **Infra vault ops + deploy** — `scripts/labctl contracts scaffold`, four
+   Garage keypair mints, vault.yml commit, `labctl deploy nas-services
+   --force` — exact commands in the infra repo's
+   `.tickets/service-0263.md` Notes (merged PR #243).
+
+After both: re-run/trigger `docker.yml` on main → record the `soundings-api`
+/`soundings-web` sha8s in ops-0001 → relaunch `/loop /ticket-loop` and T3
+(gitops chart) unblocks with everything it needs (images + vault creds for
+the SOPS secret). T4 rides T3.
 
 ## Notes (dogfooding)
 
