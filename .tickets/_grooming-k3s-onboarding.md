@@ -278,6 +278,16 @@ After both: re-run/trigger `docker.yml` on main → record the `soundings-api`
 (gitops chart) unblocks with everything it needs (images + vault creds for
 the SOPS secret). T4 rides T3.
 
+**State check 2026-08-29 (docs-0004):** key-turn 2 is **done** — the infra
+repo's `fix-0219` (PR #293) minted the 36 Postgres vault keys + 4 Garage
+keypairs and ran `labctl deploy nas-services --force` (`failed=0`);
+`soundings_{dev,prod}` DBs/roles and `soundings-{dev,prod}` buckets with
+scoped keys verified there. Key-turn 1 is **still pending**: Woodpecker
+repo 42 has no secrets set, `docker.yml` on main last ran 2026-07-12
+(pipeline 6, error at registry push), no image exists. `homelab-gitops`
+has nothing for soundings (no chart/app/secrets). So the next loop run
+needs: ops-0001 curls → re-run docker.yml → record sha8s → T3 → T4.
+
 ## Notes (dogfooding)
 
 - Three-repo effort, three numbering schemes; per the tasks-as-files rule
