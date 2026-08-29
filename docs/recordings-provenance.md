@@ -108,6 +108,13 @@ The rules that make it a contract rather than a schema:
 - **Superseding is a view, not a delete**: the newest succeeded run per
   `(extractor, kind)` is the default read; older runs remain for
   comparison and time-travel. Rows are cheap; trust is not.
+- **Runs are keyed by subject, not by recording** *(amendment 2026-08-29,
+  [sketchbook.md](sketchbook.md))*: `extraction_runs.recording_id` becomes
+  `(subject_kind, subject_id)` plus `input_sha256s`, so the same two tables
+  serve recordings, sketchbook idea assets (MIDI features, rendered
+  previews), and whatever comes next. A derived *file* (a FluidSynth or
+  REAPER render) is an asset row carrying a `run_id`, the same lineage as a
+  jsonb property.
 - **The MIDI matcher is an extractor.** Sight-reading verdicts are
   extracted properties of a MIDI track with the expected ScoreDoc in
   `params` — one contract for every machine-derived datum in the app, and
