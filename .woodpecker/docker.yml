@@ -4,14 +4,21 @@
 #
 # Secrets (Woodpecker, repo-level): gitea_username + gitea_token must map to a
 # Gitea account + token with WRITE:PACKAGE scope.
+#
+# Two OR'd conditions. The push rule is the normal path. The manual rule has no
+# path filter on purpose: a manual trigger has no diff to match against, so a
+# path-filtered workflow is skipped and the whole pipeline comes back
+# "pipeline definition not found" — which is exactly what blocked the first
+# soundings deploy, with the images needing a build and no app change to make.
 when:
-  event: push
-  branch: main
-  path:
-    include:
-      - 'app/**'
-      - 'backend/**'
-      - '.woodpecker/docker.yml'
+  - event: push
+    branch: main
+    path:
+      include:
+        - 'app/**'
+        - 'backend/**'
+        - '.woodpecker/docker.yml'
+  - event: manual
 
 steps:
   - name: soundings-api
