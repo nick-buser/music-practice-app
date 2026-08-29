@@ -288,6 +288,31 @@ repo 42 has no secrets set, `docker.yml` on main last ran 2026-07-12
 has nothing for soundings (no chart/app/secrets). So the next loop run
 needs: ops-0001 curls → re-run docker.yml → record sha8s → T3 → T4.
 
+**Amendment 2026-08-29 (T3 built, gitops repo).** Ticket 3 is implemented on
+`homelab-gitops` branch `service-0373` (pushed; ticket file
+`.tickets/service-0373.md` there). Two changes to what this doc groomed:
+
+- **Two slots, not "dev first, prod reserved."** `soundings` (prod:
+  `soundings_prod` + `soundings-prod`, `soundings.k8s.*`) and `soundings-dev`
+  (dev: `soundings_dev` + `soundings-dev`, `soundings-dev.k8s.*`) ship
+  together as two Applications over one chart. Caveat recorded in
+  `values-dev.yaml`: both slots track the SAME image tags, because
+  `.woodpecker/docker.yml` only builds on pushes to main with the bare sha8.
+  A real preview slot needs a docker.yml change here (PR builds tagged
+  `dev-<sha8>` + a narrower `allow-tags`) — new follow-up, not in T3.
+- **Precedent check is already retired.** reading-list (service-0261) reaches
+  NAS Postgres + Garage from k3s today, so pod→NAS egress is proven and the
+  "escalate before falling back to in-namespace Postgres" clause is moot.
+
+Everything in T3 is built and gated except the image tags: both value files
+carry `PLACEHOLDER_SET_BEFORE_MERGE` and the branch must not merge until real
+sha8s are pinned. So **key-turn 1 (ops-0001, above) is now the only thing
+between here and a running deploy** — it is what T3, and then T4, wait on.
+
+Also found: `mlserve` refuses this laptop's SSH key, so the gate host named in
+the gitops repo's `.tickets/loop.md` is unreachable from here; those gates ran
+on `dev-workshop` instead.
+
 ## Notes (dogfooding)
 
 - Three-repo effort, three numbering schemes; per the tasks-as-files rule
