@@ -313,6 +313,42 @@ Also found: `mlserve` refuses this laptop's SSH key, so the gate host named in
 the gitops repo's `.tickets/loop.md` is unreachable from here; those gates ran
 on `dev-workshop` instead.
 
+**DONE 2026-08-29 — T1 through T4 all landed; Soundings is serving.**
+
+Both slots are live: `soundings.k8s.bittern-chameleon.dev` (prod DB + bucket)
+and `soundings-dev.k8s.bittern-chameleon.dev` (dev DB + bucket). Full runbook
+in `docs/deploy-k3s.md`; do not re-derive any of this from the tickets above.
+
+Every acceptance criterion is met, including the ones this doc flagged as
+precedent-setting:
+
+- Migrate Jobs completed against the real NAS databases in both slots — the
+  pod→NAS Postgres path is proven, so the "escalate before falling back to
+  in-namespace Postgres" clause never fired.
+- Persistence round-trip: chord created through the ingress, api pod deleted,
+  read back intact after the rollout.
+- Slot isolation: that chord was visible only in prod; dev stayed empty.
+- Loop test: push `62159b38` → Woodpecker → Image Updater wrote the tag into
+  **both** value files on homelab-gitops main → Argo rolled. No human step.
+
+Three things bit us and are written up in `docs/deploy-k3s.md` §Rough edges:
+`docker.yml` was untriggerable (fix-0002); the deploy wedged behind an Ingress
+health check that never goes healthy on this cluster (gitops fix-0375, now
+linted against in gitops service-0376); and `docker-entrypoint.sh` was mode
+100644 in git, so the api container could not exec it at all.
+
+Departures from what this doc groomed:
+- **Two slots from day one**, not "dev first, prod reserved."
+- **ENV=prod in both slots** — it is the schema-ownership switch, not the slot
+  name.
+- The dev slot tracks the same images as prod; a real preview slot needs a
+  `docker.yml` change here. Not ticketed yet.
+
+Still open, neither blocking: `.woodpecker/backend.yml`'s typecheck step fails
+on main (pyright's nodeenv cannot load `libatomic.so.1` in the CI step image —
+pre-existing, surfaced only now); and the backend has no S3 code, so the
+Garage credentials are delivered but unused.
+
 ## Notes (dogfooding)
 
 - Three-repo effort, three numbering schemes; per the tasks-as-files rule
