@@ -32,6 +32,12 @@ RUN groupadd --system app && useradd --system --gid app --home-dir /app app
 
 WORKDIR /app
 COPY --from=builder --chown=app:app /app /app
+# Belt and braces: the entrypoint's executable bit comes from git, and a
+# 100644 mode there produces a container that cannot start at all
+# ("exec: /app/docker-entrypoint.sh: permission denied"). That failure is
+# invisible until something actually uses the ENTRYPOINT — the migrate Job
+# overrides command: and bypasses it — so it first surfaced in k3s.
+RUN chmod +x /app/docker-entrypoint.sh
 
 USER app
 EXPOSE 8000
