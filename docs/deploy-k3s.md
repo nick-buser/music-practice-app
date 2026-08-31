@@ -119,10 +119,19 @@ this laptop by design, so no local check could have caught it either. Fixed
 both ways: git mode `100755`, plus `RUN chmod +x` in the Dockerfile so a lost
 mode bit cannot do this again.
 
-**4. The gate host is unreachable.** `mlserve`, named in `homelab-gitops`'s
-`.tickets/loop.md` §Gates, refuses this laptop's SSH key and has no
-`~/.ssh/config` entry. Gates ran on `dev-workshop`, which needed `kyverno`
-1.19.0 and `yq-go` v4.53.6 installed to become viable.
+**4. The gate host looked unreachable, and wasn't.** `ssh mlserve` — the host
+named in `homelab-gitops`'s `.tickets/loop.md` §Gates — returned
+`nickbuser@mlserve: Permission denied`, so these gates were run on
+`dev-workshop` instead. That was a misdiagnosis: mlserve was healthy and
+already carried helm, kyverno and mikefarah's yq. It just had no
+`~/.ssh/config` entry, so ssh fell back to the local username instead of
+`root`, which the Ansible inventory has specified all along. Fixed in
+`infra-0377` with a three-line `Host` block; `chart-check.sh --all` now runs
+green on the real gate host.
+
+> A `<local-user>@host: Permission denied` is a **client config** symptom, not
+> a host symptom. Check `ansible-inventory --host <name>` for `ansible_user`
+> before concluding a homelab box is down.
 
 **5. `chart-check.sh` reported green on charts it had not checked.** Two
 independent silent failures, both fixed in `service-0376`: with no `kyverno`
