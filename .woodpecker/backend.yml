@@ -28,6 +28,13 @@ steps:
   - name: typecheck
     image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
     commands:
+      # pyright-python downloads its own prebuilt node on first run, and that
+      # binary links against libatomic, which bookworm-slim does not ship. The
+      # step therefore exits 127 with
+      #   node: error while loading shared libraries: libatomic.so.1
+      # and takes `test` down with it as skipped. This is the smallest fix that
+      # keeps the same image as every other step (fix-0003).
+      - apt-get update -qq && apt-get install -y --no-install-recommends libatomic1
       - cd backend
       - uv run pyright
 
