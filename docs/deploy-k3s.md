@@ -173,12 +173,11 @@ Argo picks it up within its 3-minute poll.
 
 ## Known open
 
-- `.woodpecker/backend.yml`'s `typecheck` step fails on main with exit 127:
-  `pyright` downloads its own nodeenv and that node cannot load
-  `libatomic.so.1` in the CI step image. Pre-existing and unrelated to the
-  deploy — it only surfaced now because earlier pipelines never matched
-  `backend.yml`'s path filter. The image builds are a separate workflow and
-  are unaffected.
+- ~~`.woodpecker/backend.yml`'s `typecheck` step fails on main~~ — fixed in
+  `fix-0003` (2026-08-30): `libatomic1` installed in the typecheck step.
+  Pipeline 10 is green with `typecheck` and `test` both passing; the test
+  suite had never actually executed in CI before, since it ran after the
+  failing step.
 - The backend has no S3 code, so the Garage credentials are delivered but
   unused.
 - No preview slot (see "What is deployed").
