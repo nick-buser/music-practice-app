@@ -811,7 +811,7 @@ the newest PR build from *any* branch. Yes / no.
 (substrate: ci); the dev slot rolls to them within one Argo poll and prod
 does not (substrate: deployed).
 
-### OPS2 — Real-Postgres backend tests in CI
+### OPS2 — Real-Postgres backend tests in CI  `[claimed: ci-0001]`
 **Tier:** T1
 **Depends on:** —
 **Why:** The SQLite suite cannot exercise tsvector (SB5), JSONB operators,
