@@ -2,7 +2,7 @@
 
 from app.models.base import Base
 from app.models.chord import SavedChord
-from app.models.idea import Idea, IdeaLink
+from app.models.idea import Idea, IdeaAsset, IdeaLink
 from app.models.provenance import ExtractedProperty, ExtractionRun
 from app.models.session import PracticeSession
 from app.models.user import DEFAULT_USER_ID, User
@@ -13,6 +13,7 @@ __all__ = [
     "ExtractedProperty",
     "ExtractionRun",
     "Idea",
+    "IdeaAsset",
     "IdeaLink",
     "PracticeSession",
     "SavedChord",

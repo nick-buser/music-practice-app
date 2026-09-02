@@ -18,11 +18,19 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, CheckConstraint, DateTime, ForeignKey, String, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    BigInteger,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.links import IdeaLinkKind, IdeaStatus
+from app.links import IdeaAssetRole, IdeaLinkKind, IdeaStatus
 from app.models.base import Base, OwnedMixin, PKMixin, SoftDeleteMixin, TimestampMixin
 
 # JSONB on Postgres (indexable, queryable); plain JSON on SQLite for fast tests.
@@ -83,3 +91,62 @@ class IdeaLink(PKMixin, Base):
     )
     kind: Mapped[IdeaLinkKind] = mapped_column(String, index=True)
     note: Mapped[str | None] = mapped_column(default=None)
+
+
+class IdeaAsset(PKMixin, TimestampMixin, SoftDeleteMixin, Base):
+    """One attachment on an idea at a given revision — docs/sketchbook.md's
+    "Attachments — raw is immortal, derived is recomputable".
+
+    No `OwnedMixin`: ownership lives on `idea_id`'s idea, exactly as
+    `IdeaLink`'s ownership lives on `from_id`'s idea (see that class's
+    docstring above) — every route reaches an asset only after first
+    loading its owner-scoped idea (`app/repositories/ideas.py`), so a
+    duplicate `user_id` column here would be denormalised noise with
+    nothing to check it against. Unlike `IdeaLink` it *does* carry
+    `SoftDeleteMixin`: `DELETE /v1/ideas/{id}/assets/{asset_id}` retires
+    the row but never the bytes it names — the object at `storage_key`
+    stays in Garage forever (a janitor that reaps genuinely-unreferenced
+    objects is explicitly future work per the doc, not this ticket's), so
+    a soft-delete is the only kind of delete this table can have.
+    """
+
+    __tablename__ = "idea_assets"
+    __table_args__ = (
+        CheckConstraint("revision >= 1", name="ck_idea_assets_revision_positive"),
+        CheckConstraint(
+            "role IN ("
+            "'melody','harmony','bass','drums','full','render','score','rpp',"
+            "'reference','image','other')",
+            name="ck_idea_assets_role",
+        ),
+    )
+
+    idea_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("ideas.id", ondelete="CASCADE"), index=True, nullable=False
+    )
+    # A linear per-idea sequence, not a global one — see the doc's
+    # "Versioning" section. Minted by `app/repositories/ideas.py`
+    # (idea's-current-max, or +1 for `new_revision`), never client-supplied.
+    revision: Mapped[int] = mapped_column(default=1)
+    # A real (small) enum, unlike `Idea.kinds`/`Idea.tags` — see
+    # docs/sketchbook.md's `idea_assets` block for the exact vocabulary this
+    # must stay byte-identical to. `String` + `CheckConstraint`, matching
+    # `Idea.status`/`IdeaLink.kind` above and this module's docstring on why
+    # (never a native SQLAlchemy `Enum`).
+    role: Mapped[IdeaAssetRole] = mapped_column(String, index=True)
+    filename: Mapped[str] = mapped_column(String)
+    # Content-addressed — `app.storage.content_key(sha256)` — so identical
+    # bytes reused across revisions or even across ideas share one object.
+    storage_key: Mapped[str] = mapped_column(String, index=True)
+    mime: Mapped[str] = mapped_column(String)
+    bytes: Mapped[int] = mapped_column(BigInteger)
+    sha256: Mapped[str] = mapped_column(String, index=True)
+    # Set ⇒ derived by a named producer (the provenance spine reaches bytes,
+    # not only jsonb properties — the doc's "Design decisions" list); unset
+    # ⇒ raw, human-supplied, never regenerable. This table owns the FK to
+    # `extraction_runs`: PV1 landed that table first, so per the grooming
+    # doc's ownership rule ("whichever of SB2/PV1 lands second"), SB2's
+    # migration (0004) is the one that adds it.
+    run_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("extraction_runs.id", ondelete="CASCADE"), index=True, default=None
+    )

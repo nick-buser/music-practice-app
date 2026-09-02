@@ -59,6 +59,13 @@ class Settings(BaseSettings):
     # common truthy/falsy strings into bool fields with no extra work.
     s3_force_path_style: bool = False
 
+    # Per-upload cap for idea assets (and, later, recordings) — enforced by
+    # counting bytes as `app/routers/idea_assets.py` streams them through
+    # `MediaStoreDep.put_stream`, not by buffering the whole body first (see
+    # that route for why). 200 MB comfortably covers a REAPER bounce or an
+    # `.rpp` bundle without letting an unbounded upload reach Garage.
+    media_max_upload_bytes: int = 200 * 1024 * 1024
+
     @property
     def storage_configured(self) -> bool:
         return bool(

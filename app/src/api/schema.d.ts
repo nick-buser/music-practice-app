@@ -124,6 +124,58 @@ export interface paths {
         patch: operations["update_idea_v1_ideas__idea_id__patch"];
         trace?: never;
     };
+    "/v1/ideas/{idea_id}/assets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Assets */
+        get: operations["list_assets_v1_ideas__idea_id__assets_get"];
+        put?: never;
+        /** Upload Asset */
+        post: operations["upload_asset_v1_ideas__idea_id__assets_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/ideas/{idea_id}/assets/{asset_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Asset */
+        delete: operations["delete_asset_v1_ideas__idea_id__assets__asset_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/ideas/{idea_id}/assets/{asset_id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Asset */
+        get: operations["download_asset_v1_ideas__idea_id__assets__asset_id__content_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/ideas/{idea_id}/links": {
         parameters: {
             query?: never;
@@ -280,6 +332,21 @@ export interface components {
              */
             degree: 5 | 9 | 11 | 13;
         };
+        /** Body_upload_asset_v1_ideas__idea_id__assets_post */
+        Body_upload_asset_v1_ideas__idea_id__assets_post: {
+            /** File */
+            file: string;
+            /**
+             * Newrevision
+             * @default false
+             */
+            newRevision?: boolean;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "melody" | "harmony" | "bass" | "drums" | "full" | "render" | "score" | "rpp" | "reference" | "image" | "other";
+        };
         /** ChordIdentity */
         ChordIdentity: {
             /** Alterations */
@@ -377,6 +444,64 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** IdeaAssetRead */
+        IdeaAssetRead: {
+            /** Bytes */
+            bytes: number;
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /** Filename */
+            filename: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Ideaid
+             * Format: uuid
+             */
+            ideaId: string;
+            /** Mime */
+            mime: string;
+            /** Revision */
+            revision: number;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "melody" | "harmony" | "bass" | "drums" | "full" | "render" | "score" | "rpp" | "reference" | "image" | "other";
+            /** Runid */
+            runId: string | null;
+            /** Sha256 */
+            sha256: string;
+            /** Storagekey */
+            storageKey: string;
+            /**
+             * Updatedat
+             * Format: date-time
+             */
+            updatedAt: string;
+        };
+        /**
+         * IdeaAssetRevisionGroup
+         * @description One revision's attachment set, newest revision first — see the doc:
+         *     "'Save to Sketchbook' from REAPER writes revision n+1, and earlier
+         *     revisions stay." Pre-grouped so the idea page can render "attachments
+         *     by revision" in one pass, the same reasoning `IdeaLinkEdge`
+         *     (`app/schemas/idea.py`) gives for carrying the *other* idea's identity
+         *     rather than making the frontend re-derive a shape the backend already
+         *     knows.
+         */
+        IdeaAssetRevisionGroup: {
+            /** Assets */
+            assets: components["schemas"]["IdeaAssetRead"][];
+            /** Revision */
+            revision: number;
         };
         /** IdeaCreate */
         IdeaCreate: {
@@ -1308,6 +1433,172 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["IdeaRead"];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    list_assets_v1_ideas__idea_id__assets_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                idea_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdeaAssetRevisionGroup"][];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    upload_asset_v1_ideas__idea_id__assets_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "content-length"?: number | null;
+            };
+            path: {
+                idea_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_asset_v1_ideas__idea_id__assets_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdeaAssetRead"];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    delete_asset_v1_ideas__idea_id__assets__asset_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                idea_id: string;
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    download_asset_v1_ideas__idea_id__assets__asset_id__content_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                idea_id: string;
+                asset_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Error (problem+json) */
