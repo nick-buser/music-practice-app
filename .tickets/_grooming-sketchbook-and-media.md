@@ -1106,6 +1106,29 @@ definitions):
   StatsView over real sessions) — outside these four docs but the cheapest
   live-deploy win in the repo; one T1 ticket when Nick wants it.
 
+## Found in flight (proposed, not yet scheduled)
+
+### FX1 — `GET /v1/ideas/{id}/assets/{asset_id}/content` is documented as JSON
+**Tier:** T0 (one decorator argument + a regenerated contract)
+**Depends on:** — (SB2 shipped it)
+**Found:** 2026-09-02, by SB3a, which had to decline implementing
+`downloadAsset` in `api/ideas.ts` because of it.
+**What:** the streaming download route returns real binary at runtime — the
+SB2 deploy check round-tripped 1 MB with a correct `Content-Type` and `ETag`
+— but `openapi.json` records its 200 as
+`{"content": {"application/json": {"schema": {}}}}`. So every generated
+client, `schema.d.ts` included, types the response as JSON `unknown`. Not a
+runtime bug; a contract bug, and it blocks a typed download call site.
+**Fix:** give the route an explicit `responses={200: {"content":
+{"application/octet-stream": {}}}}` (and/or `response_class=StreamingResponse`)
+so FastAPI documents it honestly, then regenerate `openapi.json` +
+`schema.d.ts`.
+**Acceptance criteria:**
+- [ ] `openapi.json`'s 200 for that path names a binary content type, not
+      `application/json` (substrate: unit)
+- [ ] A typed `downloadIdeaAsset` exists in `app/src/api/ideas.ts` and
+      `npm run gen:api:check` passes (substrate: unit)
+
 ## What is already done (so we don't relitigate)
 
 - Both slots deployed and rolling on push (`docs/deploy-k3s.md`); CI green

@@ -9,11 +9,23 @@ import { DrillsView } from './views/DrillsView';
 import { WorldNotationView } from './views/WorldNotationView';
 import { DRILL_BY_ID } from './data/drills';
 import { decodeVoicedId } from './data/chord-catalog';
+import { useIdeas } from './hooks/useIdeas';
 
 export default function App() {
   const [view, setView] = useState<View>('library');
   const [pieceId, setPieceId] = useState<string>('chopin-9-2');
   const [subjectId, setSubjectId] = useState<string>('chopin-9-2');
+
+  // The Sidebar's Sketchbook badge needs a live inbox count from anywhere in
+  // the app, not just while the Sketchbook tab itself is open — so this is a
+  // second, independent `useIdeas` instance from the one `SketchbookLive`
+  // owns for its own stream (same idiom as `useSavedChords` in DrillsView).
+  // `active: true` here means "the app is running", the Sidebar's own
+  // lifetime; it no-ops on the public build exactly like every other call.
+  const sketchbookIdeas = useIdeas(true);
+  const sketchbookCount = sketchbookIdeas.enabled
+    ? sketchbookIdeas.ideas.filter((idea) => idea.status === 'inbox').length
+    : 3; // static mock count, unchanged on the public build
 
   // Track the view the user was on before they started a session, so we can
   // send them back there when they end it (Library for pieces, Technique for
@@ -56,7 +68,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <Sidebar view={view} onSetView={setView} />
+      <Sidebar view={view} onSetView={setView} counts={{ sketchbook: sketchbookCount }} />
       <main className="main">{body}</main>
     </div>
   );

@@ -30,3 +30,15 @@ export type SavedChord = components['schemas']['SavedChordRead'];
 export type SavedChordCreate = components['schemas']['SavedChordCreate'];
 export type PracticeSessionDto = components['schemas']['PracticeSessionRead'];
 export type PracticeSessionCreate = components['schemas']['PracticeSessionCreate'];
+
+// Ideas (Sketchbook) — see docs/sketchbook.md for the object model.
+export type Idea = components['schemas']['IdeaRead'];
+export type IdeaSummary = components['schemas']['IdeaSummary'];
+export type IdeaCreate = components['schemas']['IdeaCreate'];
+export type IdeaUpdate = components['schemas']['IdeaUpdate'];
+export type IdeaStatus = components['schemas']['IdeaRead']['status'];
+export type IdeaAsset = components['schemas']['IdeaAssetRead'];
+export type IdeaAssetRevisionGroup = components['schemas']['IdeaAssetRevisionGroup'];
+export type IdeaAssetRole = components['schemas']['IdeaAssetRead']['role'];
+export type IdeaLinkEdge = components['schemas']['IdeaLinkEdge'];
+export type IdeaLinkCreate = components['schemas']['IdeaLinkCreate'];
