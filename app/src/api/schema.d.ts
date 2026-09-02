@@ -14,6 +14,12 @@ export interface paths {
         /**
          * Healthz
          * @description Liveness — the process is up.
+         *
+         *     Wired to the startup, readiness, AND liveness probes for every api pod, so
+         *     this handler must always return 200 no matter what storage is doing —
+         *     `storage` in the body carries that state instead. `MediaStore.healthcheck()`
+         *     is the contract that makes that safe (never raises, never hangs); this
+         *     handler adds nothing on top that could break it.
          */
         get: operations["healthz_healthz_get"];
         put?: never;
