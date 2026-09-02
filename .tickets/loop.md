@@ -103,10 +103,10 @@ Tier stamps on tickets are routing data, enforced at dispatch.
 
 - Default tier: T1 (sonnet)
 - T0 (haiku): SC6
-- T1 (sonnet): SB4, SB5, SB6, SB8, PV4, PV5, RC1, RC3, RC5, OPS1, OPS2, SC4, SC5, SR7
-- T2 (sonnet, high effort): MD1, SB1, SB2, SB3a, SB3b, SB7, PV1, PV2, PV3, RC2, RC4, RC6, SC2, SC3, SC8, SC9, SR5, SR6, SR8
+- T1 (sonnet): SB4, SB5, SB6, SB8, PV4, PV5, RC1, RC3, RC5, RC7, OPS1, OPS2, SC5, SC7, SR4, SR7
+- T2 (sonnet, high effort): MD1, SB1, SB2, SB3a, SB3b, SB7, PV1, PV2, PV3, RC2, RC4, RC6, SC2, SC3, SC4, SC8, SC9, SR5, SR6, SR8
 - T3 (opus): SC1, SR1, SR2, SR3
-- F (frontier, human-dispatched, never auto-picked): F1, F2
+- F (frontier, human-dispatched, never auto-picked): F1, F2 — both done 2026-09-02 (docs-0006)
 - Legacy tags in `_grooming-k3s-onboarding.md` (all done): S = T1, O = T3, H = H.
 - Never auto-escalated past T3; frontier-class work is human-scheduled.
 
