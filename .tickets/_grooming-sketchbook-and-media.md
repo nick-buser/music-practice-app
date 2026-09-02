@@ -268,7 +268,7 @@ first real bytes-through-Garage path.
       it, `sha256sum` matches; `ssh dev-workshop kubectl -n soundings-dev logs
       deploy/soundings-api` shows no storage errors (substrate: deployed)
 
-### SB3a — Sketchbook UI: live stream, inbox filter, quick capture (text + file)  `[claimed: feat-0007]`
+### SB3a — Sketchbook UI: live stream, inbox filter, quick capture (text + file)  `[merged: feat-0007, PR #15, 2026-09-02 — deployed check PARTIAL: build + data path verified, browser DOM pass outstanding]`
 **Tier:** T2 (replaces a mock with the first live personal-media surface; sets the live/mock split)
 **Depends on:** SB2
 **Why:** The tab exists and persists nothing. The inbox is the product.
