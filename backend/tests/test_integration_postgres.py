@@ -25,8 +25,10 @@ from alembic.config import Config
 from sqlalchemy import Engine, create_engine, inspect, select, text
 from sqlalchemy.orm import Session
 
-from app.models import DEFAULT_USER_ID, Base, ExtractedProperty, SavedChord, User
+from app.models import DEFAULT_USER_ID, Base, ExtractedProperty, IdeaLink, SavedChord, User
+from app.repositories import ideas as ideas_repo
 from app.repositories import provenance as provenance_repo
+from app.schemas.idea import IdeaCreate
 from app.schemas.provenance import RunCreate
 
 IDENTITY = {
@@ -38,16 +40,18 @@ IDENTITY = {
     "voicing": {"type": "block", "inversion": 0, "rootOctave": 4, "doubleRoot": False},
 }
 
-# The tables `migrations/versions/0001_initial.py` and `0002_provenance.py`
-# create/drop — kept in sync with `Base.metadata` by convention, not by
-# import, since the migration round-trip test asserts against the
-# *migration's* behavior, not the ORM's.
+# The tables `migrations/versions/0001_initial.py`, `0002_provenance.py`,
+# and `0003_ideas.py` create/drop — kept in sync with `Base.metadata` by
+# convention, not by import, since the migration round-trip test asserts
+# against the *migration's* behavior, not the ORM's.
 APP_TABLES = {
     "users",
     "saved_chords",
     "practice_sessions",
     "extraction_runs",
     "extracted_properties",
+    "ideas",
+    "idea_links",
 }
 
 
@@ -165,6 +169,43 @@ def test_completed_run_and_properties_insert_without_fk_violation_on_postgres() 
             ).all()
             assert len(props) == 1
             assert props[0].payload["x"] == 1
+    finally:
+        engine.dispose()
+
+
+@pytest.mark.integration
+def test_idea_create_with_mentions_inserts_without_fk_violation_on_postgres() -> None:
+    """The SB1 analogue of the guard above: creating an idea whose body
+    mentions another idea adds the idea row and its `mentions` IdeaLink row
+    to one `Session` and flushes them together, with no `relationship()`
+    between Idea and IdeaLink (see the load-bearing flush in
+    app/repositories/ideas.py::create_idea). SQLite can't catch a
+    regression here either; Postgres raises `ForeignKeyViolation` the
+    instant an IdeaLink's `from_id` is inserted before its idea exists.
+    """
+    engine = create_engine(_postgres_database_url(), future=True)
+    try:
+        _reset_schema(engine)
+        Base.metadata.create_all(engine)
+
+        with Session(engine) as s:
+            s.add(User(id=DEFAULT_USER_ID, display_name="Default User"))
+            s.flush()
+            target = ideas_repo.create_idea(s, DEFAULT_USER_ID, IdeaCreate(body="the target idea"))
+            s.commit()
+            target_handle = target.handle
+
+        with Session(engine) as s:
+            source = ideas_repo.create_idea(
+                s, DEFAULT_USER_ID, IdeaCreate(body=f"builds on [[#{target_handle}]]")
+            )
+            s.commit()
+            source_id = source.id
+
+        with Session(engine) as s:
+            links = s.scalars(select(IdeaLink).where(IdeaLink.from_id == source_id)).all()
+            assert len(links) == 1
+            assert links[0].kind == "mentions"
     finally:
         engine.dispose()
 
