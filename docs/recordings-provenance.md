@@ -54,7 +54,8 @@ escape hatch if takes ever get big enough to care (video).
 
 ```
 recordings {
-  id, user_id, subject_kind, subject_id, session_id?,
+  id, user_id, subject_kind?, subject_id?, session_id?,   -- both subject columns NULL for free practice
+                                                          -- and sketchbook voice captures (an inbox item)
   captured_at, duration_ms, cadence-due bookkeeping,
   + standard mixins (client-mintable UUID, timestamps, soft delete)
 }
@@ -86,10 +87,12 @@ Two tables carry the whole rule:
 
 ```
 extraction_runs {
-  id, recording_id,
+  id, subject_kind, subject_id (str, the house subject form — see below),
+  input_sha256s jsonb,  -- sorted; the server folds it into params before hashing
   extractor,            -- 'beat-tracker', 'pitch-track', 'midi-matcher', ...
   extractor_version,    -- semver of the code that ran
   model_ref?,           -- weights identifier when one is involved
+  executor: worker|client|external,
   params jsonb,         -- canonicalized (sorted keys) before hashing
   params_hash,
   status: queued|running|succeeded|failed, started_at, finished_at, error?
@@ -112,8 +115,9 @@ The rules that make it a contract rather than a schema:
 - **Runs are immutable.** Re-extraction is a *new* run; nothing derived is
   edited in place.
 - **Idempotency is structural**: unique on `(subject_kind, subject_id,
-  extractor, extractor_version, params_hash)`, where `params` always
-  carries the canonicalised `input_sha256s`, so two different inputs of one
+  extractor, extractor_version, params_hash)`, where the **server** folds
+  the sorted `input_sha256s` into `params.inputSha256s` before hashing
+  (clients never include it themselves), so two different inputs of one
   subject never collide. Asking twice for the same extraction is a cache
   hit, not a duplicate.
 - **Superseding is a view, not a delete**: the newest succeeded run per
@@ -146,9 +150,10 @@ The rules that make it a contract rather than a schema:
   properties: [...] }` and inserts the run and its properties in one
   transaction; the same unique key applies and an idempotent hit returns
   the existing run and discards the posted properties; the server
-  allowlists client extractors (`midi-matcher`) and rejects worker-only
-  names. `external` is the same posted-complete shape for imported
-  producers (the REAPER capture sidecar). The contract is about lineage
+  allowlists client extractors (`midi-matcher`, `scorer`,
+  `musicxml-import` — all pure TS) and rejects worker-only names.
+  `external` is the same posted-complete shape for imported producers
+  (`reaper-capture-sidecar`). The contract is about lineage
   and idempotency, not about where the CPU is *(F2 amendment 2026-09-02;
   applies to PV1)*.
 
@@ -157,7 +162,8 @@ The rules that make it a contract rather than a schema:
 Extractors run on the homelab GPU box (`mlserve`), which already hosts
 exactly this shape of service — small FastAPI wrappers under systemd
 (kokoro-tts, faster-whisper, YOLO11, bge-reranker). Audio analysis joins
-the fleet as one more service; the laptop is never in the loop.
+the fleet as one more service; the laptop is never in the loop for audio
+extractors (the browser-side MIDI matcher is the exception, above).
 
 The backend keeps its promise from `backend/README.md` — heavy work is
 **enqueue→poll, never inline**: a `POST` creates the `extraction_run` row
@@ -207,7 +213,8 @@ The design makes that a *pure addition*:
   substrate's `scoreTime` anchor (exact quarter-note positions, defined
   there from day one) and vice versa. No schema changes — a resolver gains
   one lookup. `alignment_map.payload` is `{ scoreId, scoreDocHash, points:
-  [{ q: Fraction, ms }] }`, monotone in both fields.
+  [{ q: Fraction, ms }] }`, monotone in both fields, `ms` on the recording
+  clock.
 - **MIDI tracks of generated exercises get alignment for free**: the
   matcher run emits `alignment_map` from its matched onsets. Audio-only
   takes of repertoire need real score-following/DTW on mlserve — genuinely
@@ -220,8 +227,9 @@ annotations and tempo-vs-target don't need it.
 
 Recordings are personal media and exist **only** in the homelab shape —
 every surface here gates on `backendEnabled`
-([DEPLOYMENT.md](../DEPLOYMENT.md)); the public build shows none of it, per
-the showcase-isolation rule. Bytes live in scoped-key buckets no other
+([DEPLOYMENT.md](../DEPLOYMENT.md)); the public build persists none of it,
+per the showcase-isolation rule (the browser-side matcher still runs there,
+in memory, with no recording created). Bytes live in scoped-key buckets no other
 tenant's key can list. No sharing/export features in v1.
 
 ## Design decisions worth knowing

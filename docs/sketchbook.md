@@ -264,11 +264,12 @@ The vendored five views, mapped onto the existing mock:
 | **Graph** | — | the edge table drawn; needs enough nodes to be worth it |
 
 The mock's lyric/harmony/plan tabs survive as sections of the idea page:
-lyric and plan are body markdown; harmony is an attachment that is either
-an ABC/MusicXML file (foreign, render-only — an `idea_assets` row, or a
-foreign `scores` row) or a native `scores` row linked from the idea
-(editable via the score substrate; never a JSONB column on `idea_assets`,
-which stays a bytes table — F1 amendment 2026-09-02). The static mock
+lyric and plan are body markdown; harmony is a score linked from the idea —
+an ABC/MusicXML file is a *foreign* `scores` row (render-only, annotatable,
+promotable), a hand-entered harmony a *native* `scores` row (editable via
+the score substrate); never a JSONB column on `idea_assets`, whose
+`role: score` is reserved for non-substrate bytes (PDF scans, images of
+manuscript) — F1 amendment 2026-09-02. The static mock
 itself stays as the **public-build showcase** — same pattern as recordings:
 personal media exists only in the homelab shape, gated on `backendEnabled`.
 
