@@ -39,11 +39,56 @@ steps:
       - uv run pyright
 
   - name: test
-    # Default suite: fast SQLite + the openapi-drift guard. The `integration`
-    # (real Postgres via testcontainers) and `contract` suites are opt-in and
-    # need Docker access / more time — wire them with a postgres service when
-    # the agent allows it (see .woodpecker/README.md).
+    # Default suite: fast SQLite + the openapi-drift guard. Deselects
+    # `integration` and `contract` (see addopts in pyproject.toml) — the
+    # real-Postgres `integration` suite runs separately in `test-postgres`
+    # below; `contract` (schemathesis) is still opt-in only.
     image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
     commands:
       - cd backend
       - uv run pytest
+
+  - name: test-postgres
+    # Real-Postgres suite (tests/test_integration_postgres.py): JSONB
+    # round-trip + an Alembic upgrade/downgrade/upgrade round trip against a
+    # live server. The `postgres` service's port can accept TCP connections
+    # before Postgres itself is ready for queries, so wait it out with a
+    # bounded psycopg connect-retry loop first — this image (bookworm-slim)
+    # has no `pg_isready`, and psycopg is already a backend dependency, so
+    # this needs no apt-get.
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/postgres
+    commands:
+      - cd backend
+      - |
+        uv run python -c "
+        import sys
+        import time
+
+        import psycopg
+
+        deadline = time.monotonic() + 30
+        last_err: Exception | None = None
+        while time.monotonic() < deadline:
+            try:
+                psycopg.connect(
+                    'postgresql://postgres:postgres@postgres:5432/postgres',
+                    connect_timeout=2,
+                ).close()
+                break
+            except Exception as exc:
+                last_err = exc
+                time.sleep(1)
+        else:
+            sys.exit(f'postgres service not ready after 30s: {last_err}')
+        "
+      - uv run pytest -q -m integration
+
+services:
+  - name: postgres
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres

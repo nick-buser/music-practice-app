@@ -33,7 +33,6 @@ dev = [
     "pyright>=1.1.380",
     "polyfactory>=2.16",
     # Heavier, opt-in suites (see pytest markers): real Postgres + contract fuzz.
-    "testcontainers[postgres]>=4.7",
     "schemathesis>=3.33",
 ]
 
@@ -94,7 +93,7 @@ reportMissingParameterType = false
 # OpenAPI-contract suites are opt-in (`-m integration`, `-m contract`).
 addopts = "-ra -m 'not integration and not contract'"
 markers = [
-    "integration: exercises a real Postgres (testcontainers; needs Docker)",
+    "integration: exercises a real Postgres (needs DATABASE_URL pointing at one)",
     "contract: property-based OpenAPI fuzzing (schemathesis)",
 ]
 testpaths = ["tests"]
