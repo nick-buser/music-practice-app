@@ -6,8 +6,8 @@ loadData 1
   {"id":"sg1","inSvg":0,"tag":"","class":"","parent":""}
   {"id":"sd1","inSvg":0,"tag":"","class":"","parent":""}
   {"id":"sd2","inSvg":0,"tag":"","class":"","parent":""}
-  {"id":"sec1","inSvg":1,"tag":"g","class":"section systemMilestone","parent":"s1n7hhde:system"}
-  {"id":"m1","inSvg":1,"tag":"g","class":"measure","parent":"s1n7hhde:system"}
+  {"id":"sec1","inSvg":1,"tag":"g","class":"section systemMilestone","parent":"s195t23g:system"}
+  {"id":"m1","inSvg":1,"tag":"g","class":"measure","parent":"s195t23g:system"}
   {"id":"st1_1","inSvg":1,"tag":"g","class":"staff","parent":"m1:measure"}
   {"id":"v1_1","inSvg":1,"tag":"g","class":"layer","parent":"st1_1:staff"}
   {"id":"b1","inSvg":1,"tag":"g","class":"beam","parent":"v1_1:layer"}
@@ -39,86 +39,86 @@ loadData 1
   {"id":"dir1","inSvg":1,"tag":"g","class":"dir","parent":"m1:measure"}
   {"id":"fe1","inSvg":1,"tag":"g","class":"fermata","parent":"m1:measure"}
   {"id":"sdef2","inSvg":0,"tag":"","class":"","parent":""}
-  {"id":"m2","inSvg":1,"tag":"g","class":"measure","parent":"s1n7hhde:system"}
-  {"id":"cl1","inSvg":1,"tag":"g","class":"clef","parent":"l1qiuk7n:layer"}
-  {"id":"n11","inSvg":1,"tag":"g","class":"note","parent":"l1qiuk7n:layer"}
-  {"id":"n12","inSvg":1,"tag":"g","class":"note","parent":"l1qiuk7n:layer"}
-  {"id":"n13","inSvg":1,"tag":"g","class":"note","parent":"ljejoty:layer"}
-  {"id":"ks1","inSvg":1,"tag":"g","class":"keySig","parent":"ljejoty:layer"}
-  {"id":"ms1","inSvg":1,"tag":"g","class":"meterSig","parent":"ljejoty:layer"}
+  {"id":"m2","inSvg":1,"tag":"g","class":"measure","parent":"s195t23g:system"}
+  {"id":"cl1","inSvg":1,"tag":"g","class":"clef","parent":"lekvqur:layer"}
+  {"id":"n11","inSvg":1,"tag":"g","class":"note","parent":"lekvqur:layer"}
+  {"id":"n12","inSvg":1,"tag":"g","class":"note","parent":"lekvqur:layer"}
+  {"id":"n13","inSvg":1,"tag":"g","class":"note","parent":"lx2yfnl:layer"}
+  {"id":"ks1","inSvg":1,"tag":"g","class":"keySig","parent":"lx2yfnl:layer"}
+  {"id":"ms1","inSvg":1,"tag":"g","class":"meterSig","parent":"lx2yfnl:layer"}
 
 === EXP01 Verovio-minted ids present in SVG (not ours)
-  E0A3-jds91l → symbol.undefined
-  E083-jds91l → symbol.undefined
-  E084-jds91l → symbol.undefined
-  E0A4-jds91l → symbol.undefined
-  E050-jds91l → symbol.undefined
-  E062-jds91l → symbol.undefined
-  E262-jds91l → symbol.undefined
-  E260-jds91l → symbol.undefined
-  E4C0-jds91l → symbol.undefined
-  E240-jds91l → symbol.undefined
-  E4E6-jds91l → symbol.undefined
-  E883-jds91l → symbol.undefined
-  E52D-jds91l → symbol.undefined
-  E4A3-jds91l → symbol.undefined
-  E4A5-jds91l → symbol.undefined
-  E242-jds91l → symbol.undefined
-  E4E3-jds91l → symbol.undefined
-  E07C-jds91l → symbol.undefined
-  m1ahqgj0 → g.mdiv pageMilestone
-  s1cdu4cu → g.score pageMilestone
-  s1n7hhde → g.system
-  g1ohsx0y → g.grpSym
-  cd4htd6 → g.clef
-  k1n8hd03 → g.keySig
-  m10twko5 → g.meterSig
-  s1x7sr53 → g.stem
-  s5k5zgv → g.stem
-  dhu1phe → g.dots
-  s18en5sp → g.stem
-  f12dkuqr → g.flag
-  smvbl1f → g.stem
-  f1ovjshg → g.flag
-  a1h43qxe → g.accid
-  n108bhzc → g.tupletNum
-  b31sxd0 → g.tupletBracket
-  s1bm3550 → g.stem
-  f9flnwu → g.flag
-  s1dytn0k → g.stem
-  fs9ukwg → g.flag
-  sdf4mge → g.stem
-  scdgizm → g.stem
-  a1psn4ts → g.artic
-  c12dxosz → g.clef
-  k1t6hbas → g.keySig
-  m1t0nfcx → g.meterSig
-  t1pd9squ → tspan.text
-  t1bfcqeu → tspan.text
-  tqou14o → tspan.text
-  t1fcjx3a → g.tie
-  baji40h → g.barLine
-  sktv0wv → g.staff
-  k1on3wv2 → g.keySig
-  k1qkfqgd → g.keyAccid
-  k1u2rsj4 → g.keyAccid
-  m1sf643g → g.meterSig
-  l1qiuk7n → g.layer
-  sy1brh8 → g.stem
-  s17aoh3c → g.stem
-  s4rq3mm → g.staff
-  k1itprs0 → g.keySig
-  kytaquu → g.keyAccid
-  k1u7xeqp → g.keyAccid
-  m2pezc7 → g.meterSig
-  ljejoty → g.layer
-  kv9l9aj → g.keyAccid
-  d23bwtu → g.dots
-  s1qs1qqt → g.stem
-  beihgda → g.barLine
-  s1b5cvyy → g.systemMilestoneEnd sec1
-  pf0y9sr → g.pageMilestoneEnd s1cdu4cu
-  p7gkorb → g.pageMilestoneEnd m1ahqgj0
+  E0A3-18xmd4i → symbol.undefined
+  E083-18xmd4i → symbol.undefined
+  E084-18xmd4i → symbol.undefined
+  E0A4-18xmd4i → symbol.undefined
+  E050-18xmd4i → symbol.undefined
+  E062-18xmd4i → symbol.undefined
+  E262-18xmd4i → symbol.undefined
+  E260-18xmd4i → symbol.undefined
+  E4C0-18xmd4i → symbol.undefined
+  E240-18xmd4i → symbol.undefined
+  E4E6-18xmd4i → symbol.undefined
+  E883-18xmd4i → symbol.undefined
+  E52D-18xmd4i → symbol.undefined
+  E4A3-18xmd4i → symbol.undefined
+  E4A5-18xmd4i → symbol.undefined
+  E242-18xmd4i → symbol.undefined
+  E4E3-18xmd4i → symbol.undefined
+  E07C-18xmd4i → symbol.undefined
+  m1czsm31 → g.mdiv pageMilestone
+  scm1zey → g.score pageMilestone
+  s195t23g → g.system
+  g1iqspqa → g.grpSym
+  clupsa6 → g.clef
+  ksqf63v → g.keySig
+  mfvhmat → g.meterSig
+  soom0xy → g.stem
+  s1s8808j → g.stem
+  difc9h9 → g.dots
+  s1whr84t → g.stem
+  fxk5fji → g.flag
+  s19oa507 → g.stem
+  fqg613n → g.flag
+  ah3nkpy → g.accid
+  nhaibg5 → g.tupletNum
+  b1edrfu4 → g.tupletBracket
+  sej1mt8 → g.stem
+  fcjewcf → g.flag
+  sqxduqy → g.stem
+  f12fdydb → g.flag
+  st9n3bs → g.stem
+  sayetb7 → g.stem
+  a1s1tu0b → g.artic
+  cq4mm4u → g.clef
+  k1xq4uke → g.keySig
+  m9c3exr → g.meterSig
+  tum112q → tspan.text
+  tjk3xwj → tspan.text
+  teyi88a → tspan.text
+  tr9x9oa → g.tie
+  bin53zu → g.barLine
+  s1ocq8un → g.staff
+  kcddxym → g.keySig
+  kxix9mn → g.keyAccid
+  kmy5bay → g.keyAccid
+  mz1tad7 → g.meterSig
+  lekvqur → g.layer
+  s2290s3 → g.stem
+  siie1y4 → g.stem
+  s1xy67jn → g.staff
+  k1ue4g9i → g.keySig
+  kak79t5 → g.keyAccid
+  k26w8hp → g.keyAccid
+  m8bqv1h → g.meterSig
+  lx2yfnl → g.layer
+  k1hk3n6 → g.keyAccid
+  dkm5y55 → g.dots
+  s1hsrwnb → g.stem
+  b1og2exr → g.barLine
+  s1w6eqm1 → g.systemMilestoneEnd sec1
+  p1onv16v → g.pageMilestoneEnd scm1zey
+  pmz105 → g.pageMilestoneEnd m1czsm31
 
 === EXP01 measure g attrs
   id="m1" class="measure"
@@ -377,30 +377,30 @@ loadData 1
   {"n":"rightMarginAccid","default":0.5,"description":"The right margin for accid in MEI units","max":2,"min":0,"title":"Right margin accid","type":"double"}
 
 === EXP05 ABC — same toolkit, two loads
-  {"first":["measure:m1wy951y","note:n1q4wi7b","note:nu59llr","note:n1uothmw","note:nkqnk4q","measure:m1hotj4k","note:n1sk2h5h","note:n1ft7g2l","note:noai7v4","note:nvi86dy"]}
-  {"second":["measure:m1pvizgu","note:nd0na1f","note:n4dnj4e","note:n15j67ve","note:n1kycl15","measure:m12fx8in","note:n1osyv81","note:n1prvrck","note:nuridhk","note:n1syv2e9"]}
+  {"first":["measure:m1onay0x","note:n1tw7z90","note:ngqurtd","note:n1bfxzfv","note:n1vxvbiw","measure:mevttr","note:n8y0bog","note:n1s1ca9s","note:n1nexgkf","note:n1mfeesp"]}
+  {"second":["measure:m1fyja3w","note:n1smitin","note:n12wrqob","note:n4y9zfl","note:nx3toht","measure:m3syuw8","note:n18mcobl","note:njnrvjg","note:noky8ep","note:nlxij4c"]}
   {"identical":false}
 
 === EXP05 ABC — fresh toolkit instance
-  {"third":["measure:m19bu6b2","note:n1031o60","note:n1nf0yo2","note:n1qqfv7k","note:n1gvoobm","measure:m3r7wbg","note:nhjzgs6","note:ne0d061","note:n1o6em7e","note:n1obsmmz"]}
+  {"third":["measure:m1xjtlxl","note:n4cdufa","note:na3afwh","note:n1xwp86f","note:n8zeqyk","measure:m18x1dbs","note:nlc0l1j","note:n1kpzcvi","note:n1c286mu","note:n1v65g9j"]}
   {"identicalToFirst":false}
 
 === EXP05 MusicXML — same toolkit, two loads
-  {"first":["measure:mftgkf7","note:ngqy3u8","note:nth693z","note:n77jo12"]}
-  {"second":["measure:m2jktp6","note:n15pvqw4","note:n1fi3ymn","note:n148o9kp"]}
+  {"first":["measure:mt1su5y","note:n1n9wwo5","note:ngaoupc","note:n1ga7rkc"]}
+  {"second":["measure:m1cymvhe","note:n14mu5h4","note:n1s5ccg","note:naynj4t"]}
   {"identical":false}
 
 === EXP05 MusicXML — fresh toolkit instance
-  {"third":["measure:m130b9x6","note:no6dnzh","note:n1g47wnx","note:ncknb6o"]}
+  {"third":["measure:m6f12dt","note:n1yhe15v","note:n1c308o6","note:n11f1ext"]}
   {"identicalToFirst":false}
 
 === EXP05 MEI(no ids) — same toolkit, two loads
-  {"first":["measure:m1c8k37k","note:n1la6g7","note:necjfir","rest:r9xq7de"]}
-  {"second":["measure:m1t5vhf8","note:nshk8cr","note:n1n8nhp6","rest:rfpiqpz"]}
+  {"first":["measure:m1deoqm8","note:n1fn75io","note:n62ai98","rest:r1fjugs5"]}
+  {"second":["measure:my35con","note:np6ipvl","note:n1g09f3s","rest:r3kefjs"]}
   {"identical":false}
 
 === EXP05 MEI(no ids) — fresh toolkit instance
-  {"third":["measure:m1sjg3cn","note:n1v5j4ch","note:n1tw1pzk","rest:r1x2035f"]}
+  {"third":["measure:m1gymibh","note:n1ezzcde","note:nhj8iig","rest:r168zr83"]}
   {"identicalToFirst":false}
 
 === EXP05 ABC — xmlIdSeed=42 twice, fresh instance seed 42, seed 43
@@ -461,11 +461,11 @@ loadData 1
 loadData 1
 
 === EXP06 ids present in full vs measureRange 5-8 render
-  {"id":"m1jf0qdz","full":true,"part":false}
   {"id":"m1","full":true,"part":false}
+  {"id":"m182tq9c","full":true,"part":false}
   {"id":"n1a","full":true,"part":false}
   {"id":"n1b","full":true,"part":false}
-  {"id":"m1pduaqo","full":true,"part":false}
+  {"id":"m1js20z0","full":true,"part":false}
   {"id":"n1c","full":true,"part":false}
   {"id":"m2","full":true,"part":false}
   {"id":"n2a","full":true,"part":false}
@@ -541,9 +541,9 @@ loadData 1
    </meiHead>
    <music>
       <body>
-         <mdiv xml:id="m1eljr0v">
-            <score xml:id="s1oq1gh0">
-               <scoreDef xml:id="s17o9eg2">
+         <mdiv xml:id="m1inmv9d">
+            <score xml:id="s9r8wgx">
+               <scoreDef xml:id="sjycr99">
                   <staffGrp xml:id="sg1" bar.thru="true" symbol="brace">
                      <staffDef xml:id="sd1" n="1" lines="5" clef.shape="G" clef.line="2" keysig="0" meter.count="4" meter.unit="4" />
                      <staffDef xml:id="sd2" n="2" lines="5" clef.shape="F" clef.line="4" keysig="0" meter.count="4" meter.unit="4" />
@@ -551,23 +551,23 @@ loadData 1
                </scoreDef>
                <section xml:id="sec1">
                   <measure xml:id="m1" n="1">
-                     <staff xml:id="s5hy1db" n="1">
+                     <staff xml:id="s4sj305" n="1">
                         <layer xml:id="v1" n="1">
                            <note xml:id="n1" dur="4" oct="4" pname="c" artic="stacc" />
                            <note xml:id="n2" dur="4" oct="4" pname="c" />
                            <chord xml:id="c1" dur="2">
                               <note xml:id="n3" oct="4" pname="e" />
-                              <note xml:id="n1ozp08c" oct="4" pname="g" />
+                              <note xml:id="n1x7m0gk" oct="4" pname="g" />
                            </chord>
                         </layer>
                      </staff>
-                     <staff xml:id="sf21vxr" n="2">
-                        <layer xml:id="l1m049iz" n="1">
-                           <rest xml:id="rzxbsur" dur="1" />
+                     <staff xml:id="sk2p3zy" n="2">
+                        <layer xml:id="l10tghj5" n="1">
+                           <rest xml:id="r1isf16e" dur="1" />
                         </layer>
                      </staff>
-                     <slur xml:id="sprz6e9" startid="#n1" endid="#n3" />
-                     <tie xml:id="t15fgvoc" startid="#n1" endid="#n2" />
+                     <slur xml:id="sxcdog" startid="#n1" endid="#n3" />
+                     <tie xml:id="t78brd3" startid="#n1" endid="#n2" />
                   </measure>
                </section>
             </score>
@@ -578,25 +578,25 @@ loadData 1
 
 
 === EXP07 getMEI options tried
-  {"basic":2346}
+  {"basic":2344}
   {"removeIds":{"len":1981,"hasN1":true,"anyIds":3}}
-  {"scoreBasedFalse":2621}
+  {"scoreBasedFalse":2615}
 reload 1
 
 === EXP07 getMEI byte-identical across two loads of the same input?
   {"identical":false}
 
 === EXP07 differing lines
-  {"i":14,"a":"<mdiv xml:id=\"m1eljr0v\">","b":"<mdiv xml:id=\"m1d2mfvr\">"}
-  {"i":15,"a":"<score xml:id=\"s1oq1gh0\">","b":"<score xml:id=\"s1c9uprn\">"}
-  {"i":16,"a":"<scoreDef xml:id=\"s17o9eg2\">","b":"<scoreDef xml:id=\"sgskiko\">"}
-  {"i":24,"a":"<staff xml:id=\"s5hy1db\" n=\"1\">","b":"<staff xml:id=\"s1dwq2de\" n=\"1\">"}
-  {"i":30,"a":"<note xml:id=\"n1ozp08c\" oct=\"4\" pname=\"g\" />","b":"<note xml:id=\"n12slf4e\" oct=\"4\" pname=\"g\" />"}
-  {"i":34,"a":"<staff xml:id=\"sf21vxr\" n=\"2\">","b":"<staff xml:id=\"s2ik3zd\" n=\"2\">"}
-  {"i":35,"a":"<layer xml:id=\"l1m049iz\" n=\"1\">","b":"<layer xml:id=\"l1ewzwr4\" n=\"1\">"}
-  {"i":36,"a":"<rest xml:id=\"rzxbsur\" dur=\"1\" />","b":"<rest xml:id=\"rgr4c7y\" dur=\"1\" />"}
-  {"i":39,"a":"<slur xml:id=\"sprz6e9\" startid=\"#n1\" endid=\"#n3\" />","b":"<slur xml:id=\"sekx69h\" startid=\"#n1\" endid=\"#n3\" />"}
-  {"i":40,"a":"<tie xml:id=\"t15fgvoc\" startid=\"#n1\" endid=\"#n2\" />","b":"<tie xml:id=\"t1cgij9k\" startid=\"#n1\" endid=\"#n2\" />"}
+  {"i":14,"a":"<mdiv xml:id=\"m1inmv9d\">","b":"<mdiv xml:id=\"makih9q\">"}
+  {"i":15,"a":"<score xml:id=\"s9r8wgx\">","b":"<score xml:id=\"skhsfvc\">"}
+  {"i":16,"a":"<scoreDef xml:id=\"sjycr99\">","b":"<scoreDef xml:id=\"s1cy6w3s\">"}
+  {"i":24,"a":"<staff xml:id=\"s4sj305\" n=\"1\">","b":"<staff xml:id=\"saxxkfp\" n=\"1\">"}
+  {"i":30,"a":"<note xml:id=\"n1x7m0gk\" oct=\"4\" pname=\"g\" />","b":"<note xml:id=\"nm5nnqn\" oct=\"4\" pname=\"g\" />"}
+  {"i":34,"a":"<staff xml:id=\"sk2p3zy\" n=\"2\">","b":"<staff xml:id=\"s173xd1e\" n=\"2\">"}
+  {"i":35,"a":"<layer xml:id=\"l10tghj5\" n=\"1\">","b":"<layer xml:id=\"l1tku1xu\" n=\"1\">"}
+  {"i":36,"a":"<rest xml:id=\"r1isf16e\" dur=\"1\" />","b":"<rest xml:id=\"r1ae2f2k\" dur=\"1\" />"}
+  {"i":39,"a":"<slur xml:id=\"sxcdog\" startid=\"#n1\" endid=\"#n3\" />","b":"<slur xml:id=\"s5z458s\" startid=\"#n1\" endid=\"#n3\" />"}
+  {"i":40,"a":"<tie xml:id=\"t78brd3\" startid=\"#n1\" endid=\"#n2\" />","b":"<tie xml:id=\"t1q6au6o\" startid=\"#n1\" endid=\"#n2\" />"}
 
 ##### exp08-duplicate-ids.mjs
 loadData 1
@@ -632,7 +632,7 @@ loadData 6/8 1
 loadData beam/tuplet 1
 
 === EXP09 explicit beams: beam ids + tuplet ids in SVG
-  ["tuplet#t1 parent=layer#l68j3h3","tupletNum#n1jghgw3 parent=tuplet#t1","beam#b1 parent=tuplet#t1","beam#b2 parent=layer#l68j3h3","tuplet#t2 parent=beam#b2","tupletNum#n1xq8qhc parent=tuplet#t2","beam#b3 parent=layer#l68j3h3"]
+  ["tuplet#t1 parent=layer#lkpkoyw","tupletNum#n1amd5gs parent=tuplet#t1","beam#b1 parent=tuplet#t1","beam#b2 parent=layer#lkpkoyw","tuplet#t2 parent=beam#b2","tupletNum#nw95oy parent=tuplet#t2","beam#b3 parent=layer#lkpkoyw"]
 
 === EXP09 timemap qstamps under beam/tuplet nesting
   ["0:a1","0.3333333333333333:a2","0.6666666666666666:a3","1:a4","1.3333333333333333:a5","1.6666666666666667:a6","2:a7","2.5:a8","3:a9","3.5:a10","4:"]
@@ -652,30 +652,30 @@ loadData 1
 
 === EXP10 subtree of chord c1
   <g id=c1 class=chord>
-    <g id=d64znh1 class=dots>
-    <g id=s6l9z78 class=stem>
-      <g id=f17tzhhm class=flag>
+    <g id=d1d2r3ju class=dots>
+    <g id=s1ic5gfg class=stem>
+      <g id=fiwx85y class=flag>
     <g id=n1 class=note>
       <g class=notehead>
-      <g id=a6fypte class=accid>
+      <g id=a1abcx0 class=accid>
     <g id=n2 class=note>
       <g class=notehead>
 
 === EXP10 subtree of note n3 (dotted? no — 16th with staccato)
   <g id=n3 class=note>
     <g class=notehead>
-    <g id=s19svdde class=stem>
-      <g id=f1sjwv14 class=flag>
-    <g id=axq4hn class=artic>
+    <g id=s1d13hdz class=stem>
+      <g id=fp0o06n class=flag>
+    <g id=a1j42d5k class=artic>
 
 === EXP10 subtree of beam b1
   <g id=b1 class=beam>
     <g id=n4 class=note>
       <g class=notehead>
-      <g id=s1oo920c class=stem>
+      <g id=s1jh4vyz class=stem>
     <g id=n5 class=note>
       <g class=notehead>
-      <g id=swn17ze class=stem>
+      <g id=s1ll4p8o class=stem>
 
 === EXP10 subtree of rest r1 / mRest mr1
   <g id=r1 class=rest>
@@ -684,51 +684,51 @@ loadData 1
   <g id=mr1 class=mRest>
 
 === EXP10 leaf glyph → closest("[id]") (dedup)
-  path in <g class=undefined> → closest('[id]') = E084-z2zq3r (undefined)
-  path in <g class=undefined> → closest('[id]') = E0A4-z2zq3r (undefined)
-  path in <g class=undefined> → closest('[id]') = E050-z2zq3r (undefined)
-  path in <g class=undefined> → closest('[id]') = E062-z2zq3r (undefined)
-  path in <g class=undefined> → closest('[id]') = E262-z2zq3r (undefined)
-  path in <g class=undefined> → closest('[id]') = E240-z2zq3r (undefined)
-  path in <g class=undefined> → closest('[id]') = E4A3-z2zq3r (undefined)
-  path in <g class=undefined> → closest('[id]') = E242-z2zq3r (undefined)
-  path in <g class=undefined> → closest('[id]') = E4E4-z2zq3r (undefined)
-  path in <g class=undefined> → closest('[id]') = E4E3-z2zq3r (undefined)
-  path in <g class=system> → closest('[id]') = s1lkqxzu (system)
-  path in <g class=grpSym> → closest('[id]') = gont18q (grpSym)
-  path in <g class=staff> → closest('[id]') = s1mv9yo1 (staff)
-  use[#E050-z2zq3r] in <g class=clef> → closest('[id]') = c7gj9gd (clef)
-  use[#E084-z2zq3r] in <g class=meterSig> → closest('[id]') = m1h3dvqc (meterSig)
-  path in <g class=ledgerLines below> → closest('[id]') = s1mv9yo1 (staff)
-  path in <g class=stem> → closest('[id]') = s6l9z78 (stem)
-  use[#E240-z2zq3r] in <g class=flag> → closest('[id]') = f17tzhhm (flag)
-  use[#E0A4-z2zq3r] in <g class=notehead> → closest('[id]') = n1 (note)
-  use[#E262-z2zq3r] in <g class=accid> → closest('[id]') = a6fypte (accid)
-  use[#E0A4-z2zq3r] in <g class=notehead> → closest('[id]') = n2 (note)
-  use[#E0A4-z2zq3r] in <g class=notehead> → closest('[id]') = n3 (note)
-  path in <g class=stem> → closest('[id]') = s19svdde (stem)
-  use[#E242-z2zq3r] in <g class=flag> → closest('[id]') = f1sjwv14 (flag)
-  use[#E4A3-z2zq3r] in <g class=artic> → closest('[id]') = axq4hn (artic)
+  path in <g class=undefined> → closest('[id]') = E084-1ewqwhs (undefined)
+  path in <g class=undefined> → closest('[id]') = E0A4-1ewqwhs (undefined)
+  path in <g class=undefined> → closest('[id]') = E050-1ewqwhs (undefined)
+  path in <g class=undefined> → closest('[id]') = E062-1ewqwhs (undefined)
+  path in <g class=undefined> → closest('[id]') = E262-1ewqwhs (undefined)
+  path in <g class=undefined> → closest('[id]') = E240-1ewqwhs (undefined)
+  path in <g class=undefined> → closest('[id]') = E4A3-1ewqwhs (undefined)
+  path in <g class=undefined> → closest('[id]') = E242-1ewqwhs (undefined)
+  path in <g class=undefined> → closest('[id]') = E4E4-1ewqwhs (undefined)
+  path in <g class=undefined> → closest('[id]') = E4E3-1ewqwhs (undefined)
+  path in <g class=system> → closest('[id]') = s190vfho (system)
+  path in <g class=grpSym> → closest('[id]') = g1j14sj (grpSym)
+  path in <g class=staff> → closest('[id]') = s1xvy1jn (staff)
+  use[#E050-1ewqwhs] in <g class=clef> → closest('[id]') = c5nwaf0 (clef)
+  use[#E084-1ewqwhs] in <g class=meterSig> → closest('[id]') = m121uw95 (meterSig)
+  path in <g class=ledgerLines below> → closest('[id]') = s1xvy1jn (staff)
+  path in <g class=stem> → closest('[id]') = s1ic5gfg (stem)
+  use[#E240-1ewqwhs] in <g class=flag> → closest('[id]') = fiwx85y (flag)
+  use[#E0A4-1ewqwhs] in <g class=notehead> → closest('[id]') = n1 (note)
+  use[#E262-1ewqwhs] in <g class=accid> → closest('[id]') = a1abcx0 (accid)
+  use[#E0A4-1ewqwhs] in <g class=notehead> → closest('[id]') = n2 (note)
+  use[#E0A4-1ewqwhs] in <g class=notehead> → closest('[id]') = n3 (note)
+  path in <g class=stem> → closest('[id]') = s1d13hdz (stem)
+  use[#E242-1ewqwhs] in <g class=flag> → closest('[id]') = fp0o06n (flag)
+  use[#E4A3-1ewqwhs] in <g class=artic> → closest('[id]') = a1j42d5k (artic)
   polygon in <g class=beam> → closest('[id]') = b1 (beam)
-  use[#E0A4-z2zq3r] in <g class=notehead> → closest('[id]') = n4 (note)
-  path in <g class=stem> → closest('[id]') = s1oo920c (stem)
-  use[#E0A4-z2zq3r] in <g class=notehead> → closest('[id]') = n5 (note)
-  path in <g class=stem> → closest('[id]') = swn17ze (stem)
-  use[#E0A4-z2zq3r] in <g class=notehead> → closest('[id]') = n6 (note)
-  path in <g class=stem> → closest('[id]') = sib268b (stem)
-  path in <g class=staff> → closest('[id]') = sizpuut (staff)
-  use[#E062-z2zq3r] in <g class=clef> → closest('[id]') = c13glla1 (clef)
-  use[#E084-z2zq3r] in <g class=meterSig> → closest('[id]') = m7ig6pa (meterSig)
-  use[#E4E4-z2zq3r] in <g class=rest> → closest('[id]') = r1 (rest)
-  use[#E4E3-z2zq3r] in <g class=mRest> → closest('[id]') = mr1 (mRest)
-  path in <g class=barLine> → closest('[id]') = bkv08vv (barLine)
+  use[#E0A4-1ewqwhs] in <g class=notehead> → closest('[id]') = n4 (note)
+  path in <g class=stem> → closest('[id]') = s1jh4vyz (stem)
+  use[#E0A4-1ewqwhs] in <g class=notehead> → closest('[id]') = n5 (note)
+  path in <g class=stem> → closest('[id]') = s1ll4p8o (stem)
+  use[#E0A4-1ewqwhs] in <g class=notehead> → closest('[id]') = n6 (note)
+  path in <g class=stem> → closest('[id]') = smp3997 (stem)
+  path in <g class=staff> → closest('[id]') = s1bjtb47 (staff)
+  use[#E062-1ewqwhs] in <g class=clef> → closest('[id]') = c1woflz2 (clef)
+  use[#E084-1ewqwhs] in <g class=meterSig> → closest('[id]') = mfmsazd (meterSig)
+  use[#E4E4-1ewqwhs] in <g class=rest> → closest('[id]') = r1 (rest)
+  use[#E4E3-1ewqwhs] in <g class=mRest> → closest('[id]') = mr1 (mRest)
+  path in <g class=barLine> → closest('[id]') = be1ynjd (barLine)
 
 ##### exp11-ties-timemap-midi.mjs
 
 #### case attrTie load 1
 
 === EXP11 attrTie tie <g> ids in SVG
-  ["t1fqw2a0"]
+  ["tk4sfqm"]
 
 === EXP11 attrTie timemap
   {"measureOn":"m1","on":["a1"],"qstamp":0,"tempo":120,"tstamp":0}
@@ -765,12 +765,12 @@ loadData 1
   ["tie2"]
 
 === EXP11 acrossBar timemap
-  {"measureOn":"m1","qstamp":0,"restsOn":["rw0j19t"],"tempo":120,"tstamp":0}
-  {"on":["c1"],"qstamp":2,"restsOff":["rw0j19t"],"tstamp":1000}
+  {"measureOn":"m1","qstamp":0,"restsOn":["r11ipauf"],"tempo":120,"tstamp":0}
+  {"on":["c1"],"qstamp":2,"restsOff":["r11ipauf"],"tstamp":1000}
   {"measureOn":"m2","off":["c1"],"on":["c2"],"qstamp":4,"tstamp":2000}
-  {"off":["c2"],"qstamp":5,"restsOn":["rbsgor4"],"tstamp":2500}
-  {"qstamp":6,"restsOff":["rbsgor4"],"restsOn":["r1xabqfp"],"tstamp":3000}
-  {"qstamp":8,"restsOff":["r1xabqfp"],"tstamp":4000}
+  {"off":["c2"],"qstamp":5,"restsOn":["r1e6sbtl"],"tstamp":2500}
+  {"qstamp":6,"restsOff":["r1e6sbtl"],"restsOn":["rnv8rk5"],"tstamp":3000}
+  {"qstamp":8,"restsOff":["rnv8rk5"],"tstamp":4000}
 
 === EXP11 acrossBar MIDI note-ons/offs (tick:pitch)
   {"division":120,"tracks":[{"ons":[],"offs":[]},{"ons":["240:60"],"offs":["600:60"]},{"ons":[],"offs":[]}]}
@@ -800,7 +800,7 @@ loadData 1
 #### case chainThree load 1
 
 === EXP11 chainThree tie <g> ids in SVG
-  ["tzamy5p","tycdd1n"]
+  ["t1t0bejl","t1uvr19a"]
 
 === EXP11 chainThree timemap
   {"measureOn":"m1","on":["e1"],"qstamp":0,"tempo":120,"tstamp":0}
@@ -918,26 +918,26 @@ load 1
   <g id="m1" class="measure">
 
 === EXP14 default: glyph symbol ids
-  ["E0A3-1wkqi5","E084-1wkqi5","E0A2-1wkqi5","E0A4-1wkqi5"]
+  ["E0A3-1vv68n4","E084-1vv68n4","E0A2-1vv68n4","E0A4-1vv68n4"]
 
 === EXP14 svgHtml5:true — note/measure lines (id → data-id?)
   <g data-class="lineDash" class="lineDash" data-related="#n1">
-  <g data-id="m1b16uqe" data-class="mdiv" class="mdiv pageMilestone" />
+  <g data-id="m1m05th5" data-class="mdiv" class="mdiv pageMilestone" />
 
 === EXP14 svgAdditionalAttribute — measure/note/staff lines
   <g id="m1" class="measure" data-n="1">
   <g id="n1" class="note" data-pname="c" data-oct="4" data-dur="4">
-  <g id="s16spqw4" class="staff" data-n="1">
+  <g id="s6tz9wb" class="staff" data-n="1">
 
 === EXP14 svgBoundingBoxes — what gets emitted
-  <g id="bbox-m1o0tgal" class="mdiv bounding-box" />
+  <g id="bbox-mn8fj5y" class="mdiv bounding-box" />
   0 bbox rects
 
 === EXP14 svgViewBox — <svg> open tag
   <svg viewBox="0 0 223 144" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:mei="http://www.music-encoding.org/ns/mei" overflow="visible">
 
 === EXP14 glyph symbol id across instances
-  {"s1":"E0A3-1gwx7m6","s2":"E0A3-17e722q","same":false}
+  {"s1":"E0A3-wkrt4x","s2":"E0A3-1waywcm","same":false}
 
 ##### exp14b-svghtml5.mjs
 
@@ -962,18 +962,18 @@ load 1
   {"id":"mx-r1","inSvg":true}
 
 === EXP15 MusicXML: note/measure ids Verovio produced
-  ["measure:mx-m1","note:mx-n1","note:mx-n2","beam:b1uhouz3","note:mx-n3","note:mx-n4","rest:mx-r1"]
+  ["measure:mx-m1","note:mx-n1","note:mx-n2","beam:b1hcau2w","note:mx-n3","note:mx-n4","rest:mx-r1"]
 
 === EXP15 MusicXML F4 in G major → pitch (MusicXML has no explicit alter here)
   {"pitch":65}
 
 === EXP15 MusicXML → getMEI (note lines)
   <staffDef xml:id="P1" n="1" lines="5" ppq="2">
-  <keySig xml:id="k11y8424" sig="1s" />
+  <keySig xml:id="k11tk39r" sig="1s" />
   <measure xml:id="mx-m1" n="1">
   <note xml:id="mx-n1" dur.ppq="2" dur="4" oct="4" pname="c" />
   <note xml:id="mx-n2" dur.ppq="2" dur="4" oct="4" pname="f" />
-  <beam xml:id="b1uhouz3">
+  <beam xml:id="b1hcau2w">
   <note xml:id="mx-n3" dur.ppq="1" dur="8" oct="4" pname="e" />
   <note xml:id="mx-n4" dur.ppq="1" dur="8" oct="4" pname="d" />
   <rest xml:id="mx-r1" dur.ppq="2" dur="4" />
@@ -1136,18 +1136,18 @@ load elemKey 1
 === EXP19 noMeiHead
   {"loadData":1,"log":""}
   {"notes":["h1"],"staves":1,"measures":1}
-  ["0/0:h1 [mb8ek5z]","4/2000:"]
+  ["0/0:h1 [m18defnv]","4/2000:"]
 
 ##### exp20-svg-snapshot-determinism.mjs
 
 === EXP20 no seed, same instance, two loads
   {"identical":false,"differingLines":45}
-  {"i":3,"a":"<symbol id=\"E084-6zb91v\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">","b":"<symbol id=\"E084-1dati4p\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">"}
-  {"i":6,"a":"<symbol id=\"E0A4-6zb91v\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">","b":"<symbol id=\"E0A4-1dati4p\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">"}
-  {"i":9,"a":"<symbol id=\"E050-6zb91v\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">","b":"<symbol id=\"E050-1dati4p\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">"}
-  {"i":12,"a":"<symbol id=\"E062-6zb91v\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">","b":"<symbol id=\"E062-1dati4p\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">"}
-  {"i":15,"a":"<symbol id=\"E262-6zb91v\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">","b":"<symbol id=\"E262-1dati4p\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">"}
-  {"i":18,"a":"<symbol id=\"E240-6zb91v\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">","b":"<symbol id=\"E240-1dati4p\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">"}
+  {"i":3,"a":"<symbol id=\"E084-smshf5\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">","b":"<symbol id=\"E084-1vnf6ak\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">"}
+  {"i":6,"a":"<symbol id=\"E0A4-smshf5\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">","b":"<symbol id=\"E0A4-1vnf6ak\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">"}
+  {"i":9,"a":"<symbol id=\"E050-smshf5\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">","b":"<symbol id=\"E050-1vnf6ak\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">"}
+  {"i":12,"a":"<symbol id=\"E062-smshf5\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">","b":"<symbol id=\"E062-1vnf6ak\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">"}
+  {"i":15,"a":"<symbol id=\"E262-smshf5\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">","b":"<symbol id=\"E262-1vnf6ak\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">"}
+  {"i":18,"a":"<symbol id=\"E240-smshf5\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">","b":"<symbol id=\"E240-1vnf6ak\" viewBox=\"0 0 1000 1000\" overflow=\"inherit\">"}
 
 === EXP20 xmlIdSeed=7, two fresh instances
   {"identical":true,"differingLines":0}
@@ -1190,8 +1190,76 @@ load elemKey 1
   {"identical":true}
 
 === EXP21 32-bar timing — breaks:none (app default)
-  {"loadMs":15,"svgMs":72,"timemapMs":7,"svgKB":354,"pages":1,"width":"4975px","height":"194px","timemapEntries":257}
+  {"loadMs":11,"svgMs":73,"timemapMs":5,"svgKB":354,"pages":1,"width":"4975px","height":"194px","timemapEntries":257}
 
 === EXP21 32-bar timing — breaks:auto pageWidth 2100 tall page
-  {"loadMs":48,"svgMs":44,"timemapMs":6,"svgKB":363,"pages":1,"width":"840px","height":"1186px","timemapEntries":257}
+  {"loadMs":40,"svgMs":46,"timemapMs":4,"svgKB":363,"pages":1,"width":"840px","height":"1186px","timemapEntries":257}
+
+##### exp22-critic-followups.mjs
+
+=== EXP22-A select-first: measureRange 5-8 first entry / getTimeForElement n5a
+  {"measureOn":"m5","on":["n5a"],"qstamp":0,"tempo":120,"tstamp":0} 0
+  {start:m5,end:m8} first entry {"measureOn":"m5","on":["n5a"],"qstamp":0,"tempo":120,"tstamp":0}
+  full-timemap-first then select: first entry {"measureOn":"m5","on":["n5a"],"qstamp":16,"tempo":120,"tstamp":8000}
+
+=== EXP22-B cautionary accidental (G major, F#): paren glyphs in the whole SVG, accid groups, our accid id kept, pitch
+  childCautionOnly parenGlyphUses 0 accidGroups 1 ourAccidId true pitch 66
+  childCautionParen parenGlyphUses 2 accidGroups 1 ourAccidId true pitch 66
+[Warning] Having both @accid or @accid.ges and <accid> child will cause problems
+
+  noteGesPlusChild parenGlyphUses 0 accidGroups 2 ourAccidId true pitch 66
+  plainWritten parenGlyphUses 0 accidGroups 1 ourAccidId false pitch 66
+[Warning] Unsupported value 'x' for data.ACCIDENTAL.GESTURAL
+
+
+=== EXP22-C accid.ges vocabulary → MIDI pitch (F##=67, Abb=67)
+  c1 65
+  c2 67
+  c3 67
+  c4 67
+
+=== EXP22-D select({start,end}) return value / rendered measures
+  {"start":"m5","end":"m8"} returns 1 renders ["m5","m6","m7","m8"]
+[Warning] Selection could not be made
+
+  {"start":"n5a","end":"n8c"} returns 1 renders ["m1","m2","m3","m4","m5","m6","m7","m8"]
+[Warning] Selection end 'zzz' could not be found
+
+  {"start":"m5","end":"zzz"} returns 1 renders ["m5","m6","m7","m8"]
+[Warning] Selection could not be made
+
+  {"start":"m9","end":"m10"} returns 1 renders ["m1","m2","m3","m4","m5","m6","m7","m8"]
+
+=== EXP22-E tempo: midi.bpm=90 + mm.dots → timemap tempo; attribute-only <tempo> text content
+  timemap tempo 90 | attr-only tempo <g> has tspan text? false | snippet id="t1" class="tempo"> <text x="784" y="495" font-size="0px" /> </g> <g id="b1pblp6d" class="barLine"> <path d="M2936 540 L2936 1260" stroke="currentColor" stro
+  scoreDef midi.bpm=72 + tempo midi.bpm=90 → timemap tempo 90 | text tempo has tspan text? true
+
+=== EXP22-F breaks:encoded — systems with <sb/> every 4 bars / with no <sb/> (fallback)
+  with sb: systems 2 pages 1 sb id in svg true
+[Warning] Requesting layout with encoded breaks but nothing provided in the data
+
+  no sb:   systems 2 pages 1
+[Warning] Unable to match @tie of note 'g1', skipping it
+
+
+=== EXP22-G cross-layer tie: attribute form tie groups / element form tie groups (and our id kept?)
+  attribute form 0 | element form 1 id tieX present true
+
+=== EXP22-H pickup measure: qstamp of measure 1 with LH <mRest> vs LH <rest dur="4">
+  <mRest xml:id="hm"/> → measure m1 at qstamp 4
+  <rest xml:id="hr" dur="4"/> → measure m1 at qstamp 1
+
+=== EXP22-I one-member <beam>: beam polygon present / flag present inside it
+  polygon true flag false
+[Warning] Hairpin with @xml:id hp1 will not get rendered as it has identical values in @startid and @endid
+
+[Warning] Hairpin 'hp1' is ignored, since start 'j1' does not occur temporally before end 'j1'.
+
+
+=== EXP22-J hairpin startid===endid: group content vs a real hairpin
+  hp1 same → id="hp1" class="hairpin" /> 
+  hp2 real → id="hp2" class="hairpin"> <polyline stroke="currentColor" stroke-width="18" stroke-linecap="square" stroke-linejoin="mit
+
+=== EXP22-K <mRest> ids in timemap with includeRests:true
+  kmr mentioned false | kmr2 false | m2 measureOn present true
 

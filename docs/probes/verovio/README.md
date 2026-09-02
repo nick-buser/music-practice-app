@@ -1,6 +1,7 @@
 # Verovio 4.5.1 behaviour probes (F1 evidence)
 
-Twenty-one small Node scripts that pin how the installed Verovio toolkit
+Twenty-five small Node scripts (`exp01`–`exp21` from the review, `exp22`
+from the critic pass) that pin how the installed Verovio toolkit
 (`app/node_modules/verovio`, 4.5.1) actually behaves on MEI input: id
 passthrough, timemap contents, ties, beaming, tempo units, key-signature
 handling, hit-testing, snapshot determinism, `select()`, foreign-score id
