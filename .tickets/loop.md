@@ -35,7 +35,7 @@ push is their gate; the PR body must say "image build verified in CI only".
 | unit | `cd app && npm run test` · `cd backend && uv run pytest -q` | always available; prefer it. SQLite-only on the backend — Postgres-only paths are `ci` |
 | ci | Woodpecker API for the pushed SHA (`woodpecker` skill): `backend`, `frontend`, `docker` workflows | needs the push pipeline green for the current `main` SHA — check the *push* build, not the last PR build |
 | deployed | `curl -fsS https://soundings-dev.k8s.bittern-chameleon.dev/api/healthz`; pod-side via `ssh dev-workshop kubectl -n soundings-dev …` | the dev slot rolls ~3–5 min after a merge to main (same images as prod until OPS1) |
-| local (e2e) | `ls ~/Library/Caches/ms-playwright` | Playwright browsers are **not installed** here and must not be installed (disk rule) — treat as down on this laptop |
+| local (e2e) | `node -e "require('playwright-core')"` from `app/` + `ls /Applications/Google\ Chrome.app` | **UP since 2026-09-02.** Playwright's *bundled* browsers are still not installed and must not be (disk rule), but `@playwright/test`/`playwright-core` 1.56.1 are already in `app/node_modules`, and `chromium.launch({ channel: 'chrome' })` drives the installed Google Chrome with **zero downloads** — verified: dev slot 200, Chrome 152, disk unchanged. Drive deployed-UI criteria with a scratchpad script resolving `playwright-core` against `app/package.json`. `npm run test:e2e` itself still fails until `playwright.config.ts` sets `channel: 'chrome'` (see FX2). |
 | hardware | none — attended: a real MIDI keyboard / mic in desktop Chrome | never an admission input: lines tagged `hardware` are verify notes, not gates |
 | H | human ratification = the PR merge | F tickets only; never auto-picked |
 

@@ -268,7 +268,7 @@ first real bytes-through-Garage path.
       it, `sha256sum` matches; `ssh dev-workshop kubectl -n soundings-dev logs
       deploy/soundings-api` shows no storage errors (substrate: deployed)
 
-### SB3a — Sketchbook UI: live stream, inbox filter, quick capture (text + file)  `[merged: feat-0007, PR #15, 2026-09-02 — deployed check PARTIAL: build + data path verified, browser DOM pass outstanding]`
+### SB3a — Sketchbook UI: live stream, inbox filter, quick capture (text + file)  `[merged: feat-0007, PR #15, 2026-09-02 — deployed check MET in a real browser]`
 **Tier:** T2 (replaces a mock with the first live personal-media surface; sets the live/mock split)
 **Depends on:** SB2
 **Why:** The tab exists and persists nothing. The inbox is the product.
@@ -1107,6 +1107,29 @@ definitions):
   live-deploy win in the repo; one T1 ticket when Nick wants it.
 
 ## Found in flight (proposed, not yet scheduled)
+
+### FX2 — Point the e2e suite at the installed Chrome so it can actually run here
+**Tier:** T0 (one line in `app/playwright.config.ts`, plus a comment)
+**Depends on:** —
+**Found:** 2026-09-02, while closing SB3a's deployed criterion.
+**Why:** `app/e2e/` has five real specs that have never run on this laptop,
+because `playwright.config.ts` uses `devices['Desktop Chrome']` with no
+`channel`, so Playwright looks for a *bundled* chromium that is deliberately
+not installed (disk rule). But `@playwright/test`/`playwright-core` 1.56.1
+are already in `app/node_modules`, and `channel: 'chrome'` drives the
+installed Google Chrome with zero downloads — proven while verifying SB3a
+(dev slot 200, Chrome 152, disk unchanged). One line turns a permanently-dead
+substrate into a live one, and `stats-and-sketchbook.spec.ts` is exactly the
+spec that guards the mock markup no other gate here can check.
+**Scope:** `projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'], channel: 'chrome' } }]`,
+with a comment explaining why the channel is pinned (and that CI, which does
+install browsers, is unaffected). Update the config's header comment, which
+currently only documents the download path.
+**Acceptance criteria:**
+- [ ] `cd app && npm run test:e2e` runs the existing specs to completion on
+      this laptop with no browser download (substrate: local (e2e))
+- [ ] `.tickets/loop.md`'s `local (e2e)` row is updated to say the suite runs
+      (substrate: unit — a docs diff)
 
 ### FX1 — `GET /v1/ideas/{id}/assets/{asset_id}/content` is documented as JSON
 **Tier:** T0 (one decorator argument + a regenerated contract)
