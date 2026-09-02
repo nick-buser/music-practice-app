@@ -2,6 +2,11 @@
 title: ticket-loop config
 ---
 
+## Runner
+
+in-session — `/loop /ticket-loop`; the session plays harness and dispatches
+implementation to per-tier subagents. No out-of-process driver.
+
 ## Gates
 
 Frontend (run when `app/**` or `backend/openapi.json` changed):
@@ -23,15 +28,33 @@ Dockerfiles and `.woodpecker/*.yml` have **no local gate** — this laptop has
 no container runtime by design (never install one). The Woodpecker build on
 push is their gate; the PR body must say "image build verified in CI only".
 
+## Substrates
+
+| Substrate | Probe | Notes |
+|---|---|---|
+| unit | `cd app && npm run test` · `cd backend && uv run pytest -q` | always available; prefer it. SQLite-only on the backend — Postgres-only paths are `ci` |
+| ci | Woodpecker API for the pushed SHA (`woodpecker` skill): `backend`, `frontend`, `docker` workflows | needs the push pipeline green for the current `main` SHA — check the *push* build, not the last PR build |
+| deployed | `curl -fsS https://soundings-dev.k8s.bittern-chameleon.dev/api/healthz`; pod-side via `ssh dev-workshop kubectl -n soundings-dev …` | the dev slot rolls ~3–5 min after a merge to main (same images as prod until OPS1) |
+| local (e2e) | `ls ~/Library/Caches/ms-playwright` | Playwright browsers are **not installed** here and must not be installed (disk rule) — treat as down on this laptop |
+
+The laptop cannot reach Garage (no S3 hostname by design): every
+Garage-touching criterion is `deployed`.
+
 ## Verify
 
 - Frontend-visible changes: `cd app && npm run dev` and drive the affected
-  view (verify skill). Playwright e2e (`app/e2e/`) where a spec covers it.
+  view (verify skill). Playwright e2e (`app/e2e/`) only where the substrate
+  is up.
 - Backend runtime: `uv run pytest` covers the SQLite path locally; the
-  Postgres path is CI/deploy-verified only — say so in the PR body.
+  Postgres path is `ci` (OPS2) / deploy-verified — say so in the PR body.
 - Deployed-surface verification (post-gitops): from dev-workshop
-  (`ssh dev-workshop kubectl …`), per feat-0002; laptop browser checks use
-  the tailnet host-mapping pattern from the homelab-access skill.
+  (`ssh dev-workshop kubectl …`), per `docs/deploy-k3s.md`; laptop browser
+  checks use the tailnet host-mapping pattern from the homelab-access skill.
+
+## Merge policy
+
+Gates ratify — the loop merges its own green PRs; bookkeeping commits
+straight to main. Exceptions: none.
 
 ## Constraints
 
@@ -42,14 +65,21 @@ push is their gate; the PR body must say "image build verified in CI only".
 - **Showcase isolation (sev-0 rule):** never couple homelab CI/CD to the
   Cloudflare Pages build (`.github/workflows/deploy-frontend.yml` and
   `app/wrangler.jsonc` are out of scope for every ticket in this queue).
-  The public build must keep `VITE_API_BASE_URL` unset.
+  The public build must keep `VITE_API_BASE_URL` unset, and every
+  backend-facing surface gates on `backendEnabled` (`config.test.ts`).
 - **Disk discipline:** no Docker, no embedded-DB test clusters, no
-  non-trivial downloads on this laptop. Heavy work belongs on the homelab.
+  browser binaries, no non-trivial downloads on this laptop. Heavy work
+  belongs on the homelab.
+- **Contract chain:** any backend schema change regenerates
+  `backend/openapi.json` (`uv run python scripts/export_openapi.py`) and
+  `app/src/api/schema.d.ts` (`npm run gen:api`) in the same PR.
 - **Cross-repo tickets** (a `**Repo:**` other than this one) are claimed in
   the owning repo per its own conventions — homelab_infra_and_planning
   enforces worktrees and has its own numbering; homelab-gitops follows the
   litholens chart layout. Gates for those tickets come from that repo, not
   this file. Record the claimed branch back in this repo's grooming doc.
+  This loop cannot dep-check them: consumers carry a `deployed` criterion
+  against the service so admission blocks honestly.
 - **Landing (progress-or-death, global CLAUDE.md 2026-07-11):** gates
   ratify; humans steer post-hoc. Code changes go branch → PR (for the
   record/review trail) → merged by the loop itself (gitea MCP merge —
@@ -63,11 +93,24 @@ push is their gate; the PR body must say "image build verified in CI only".
   denial) does the step become human-only — then it must not idle the
   loop: post the exact command in the ticket Notes, push-notify, and
   terminate if nothing else is eligible.
-- **Delegation:** implementation may be delegated to subagents routed by the
-  ticket's tier tag (S → sonnet-class, O → opus-class, default → session
-  model); gates always run in the orchestrating session — never trust a
-  subagent's self-reported gate result.
+- **Delegation:** implementation is dispatched to a subagent at the
+  ticket's tier (§Model routing); gates always run in the orchestrating
+  session — never trust a subagent's self-reported gate result.
+
+## Model routing
+
+Tier stamps on tickets are routing data, enforced at dispatch.
+
+- Default tier: T1 (sonnet)
+- T0 (haiku): SC6
+- T1 (sonnet): SB4, SB5, SB6, SB8, PV4, PV5, RC1, RC3, RC5, OPS1, OPS2, SC4, SC5, SR7
+- T2 (sonnet, high effort): MD1, SB1, SB2, SB3a, SB3b, SB7, PV1, PV2, PV3, RC2, RC4, RC6, SC2, SC3, SC8, SC9, SR5, SR6, SR8
+- T3 (opus): SC1, SR1, SR2, SR3
+- F (frontier, human-dispatched, never auto-picked): F1, F2
+- Legacy tags in `_grooming-k3s-onboarding.md` (all done): S = T1, O = T3, H = H.
+- Never auto-escalated past T3; frontier-class work is human-scheduled.
 
 ## Queue
 
-- .tickets/_grooming-k3s-onboarding.md
+- .tickets/_grooming-sketchbook-and-media.md
+- .tickets/_grooming-k3s-onboarding.md (done — kept for the record)
