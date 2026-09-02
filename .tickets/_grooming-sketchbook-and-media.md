@@ -150,6 +150,7 @@ the F decisions when it runs dry.
 
 ### MD1 — Garage media store: settings, content-addressed keys, streaming upload with sha256, health probe
 **Tier:** T2 (storage pattern-setter; the donor for SB2 and RC1)
+**Depends on:** —
 **Why:** Two workstreams need bytes in Garage and neither can start until the
 backend can talk to it. The credentials are already in the pod, unused.
 **Scope / surfaces / files:**
@@ -193,6 +194,7 @@ backend can talk to it. The credentials are already in the pod, unused.
 
 ### SB1 — `ideas` + `idea_links` schema, handles, CRUD, `[[#n]]` link extraction
 **Tier:** T2 (first non-trivial domain object; sets the pattern for every table after it)
+**Depends on:** —
 **Why:** The object the whole workstream is about. Nothing persists today.
 **Scope / surfaces / files:**
 - `backend/app/models/idea.py`: `Idea` (`handle` int, `title?`, `body` text
@@ -212,7 +214,9 @@ backend can talk to it. The credentials are already in the pod, unused.
   required — inbox capture), get (includes links in/out with the other
   idea's handle+title), patch, delete (soft). `/v1/ideas/{id}/links`: post
   (typed edge to another idea by id) and delete.
-- Migration `0002_ideas`; `openapi.json` + `schema.d.ts` regenerated.
+- Migration `<next>_ideas` (number and `down_revision` from `alembic heads`
+  at claim time — every migration in this doc); `openapi.json` +
+  `schema.d.ts` regenerated.
 - Derived maturity (idea / sketch / composition) is **not** stored.
 **Acceptance criteria:**
 - [ ] Two creates for the same user get handles 1 and 2; a soft-deleted
@@ -231,12 +235,14 @@ backend can talk to it. The credentials are already in the pod, unused.
 
 ### SB2 — `idea_assets`: upload, revisions, `run_id`, streaming download
 **Tier:** T2 (first tenant of MD1)
+**Depends on:** MD1, SB1
 **Why:** Attachments are what make an idea more than a note; this is the
 first real bytes-through-Garage path.
 **Scope / surfaces / files:**
 - `backend/app/models/idea.py`: `IdeaAsset` (`idea_id`, `revision` int ≥ 1,
   `role` enum per the doc, `filename`, `storage_key`, `mime`, `bytes`,
-  `sha256`, `run_id?` uuid — plain column now, FK added in PV1; mixins).
+  `sha256`, `run_id?` uuid — FK to `extraction_runs.id` added here if PV1
+  has already landed, else by PV1's migration; mixins).
 - `POST /v1/ideas/{id}/assets` multipart (`file`, `role`, optional
   `new_revision` bool): streams through `MediaStoreDep.put_stream`; default
   revision = the idea's current max (1 if none); `new_revision=true` bumps
@@ -247,7 +253,7 @@ first real bytes-through-Garage path.
   immortal; a janitor is future work).
 - Upload size cap via settings (`media_max_upload_bytes`, default 200 MB) →
   413 problem+json.
-- Migration `0003_idea_assets`; contract regenerated.
+- Migration `<next>_idea_assets`; contract regenerated.
 **Acceptance criteria:**
 - [ ] Upload → row has the sha256 of the bytes sent, `revision` 1; a second
       upload with `new_revision=true` gets `revision` 2 and the first row is
@@ -264,6 +270,7 @@ first real bytes-through-Garage path.
 
 ### SB3a — Sketchbook UI: live stream, inbox filter, quick capture (text + file)
 **Tier:** T2 (replaces a mock with the first live personal-media surface; sets the live/mock split)
+**Depends on:** SB2
 **Why:** The tab exists and persists nothing. The inbox is the product.
 **Scope / surfaces / files:**
 - `app/src/api/ideas.ts` (list/create/get/patch/delete/links/assets over
@@ -301,6 +308,7 @@ first real bytes-through-Garage path.
 
 ### SB3b — Idea page: body editor with `[[#n]]` links, attachments by revision, status/kinds/tags editing
 **Tier:** T2
+**Depends on:** SB3a
 **Why:** The stream is for capture; the idea page is where structure arrives
 later.
 **Scope / surfaces / files:**
@@ -331,6 +339,7 @@ later.
 
 ### SB4 — Ideas become subjects: `SubjectKind` gains `'idea'`, "Practice this" from an idea
 **Tier:** T1
+**Depends on:** SB3b
 **Why:** The decisive argument for living in Soundings: one timeline. A
 practice session can sit in front of a sketch.
 **Scope / surfaces / files:**
@@ -355,11 +364,12 @@ practice session can sit in front of a sketch.
 
 ### SB5 — Search: Postgres full-text + filter grammar, search box on the stream
 **Tier:** T1
+**Depends on:** SB1 (OPS2 for its `ci` criterion)
 **Why:** Small and high value once there are more ideas than fit on a screen.
 **Scope / surfaces / files:**
 - `backend/app/search.py`: pure `parse_query(q) -> ParsedQuery` for
   `tag:x kind:y key:z status:s` tokens plus free text (unit-tested).
-- Migration `0004_ideas_search`: Postgres-only generated `search_tsv`
+- Migration `<next>_ideas_search`: Postgres-only generated `search_tsv`
   tsvector column over title/body/tags + GIN index (guarded by
   `op.get_bind().dialect.name == 'postgresql'`); model declares the column
   with a SQLite no-op variant.
@@ -380,6 +390,7 @@ practice session can sit in front of a sketch.
 
 ### SB6 — Export bundle: manifest schema, round-trip test, directory and zip sinks
 **Tier:** T1
+**Depends on:** SB2
 **Why:** The ten-year guarantee. Manifest first, then sinks.
 **Scope / surfaces / files:**
 - `backend/app/export/manifest.py`: pydantic `IdeaManifest`
@@ -404,6 +415,7 @@ practice session can sit in front of a sketch.
 
 ### SB7 — Web MIDI quick capture → `.mid` attachment
 **Tier:** T2 (first Web MIDI code; shared later by assessment and E1 step entry)
+**Depends on:** SB3a
 **Why:** Ten seconds of noodling into the inbox, no DAW. This is the capture
 path the studio machine cannot replace.
 **Scope / surfaces / files:**
@@ -420,8 +432,9 @@ path the studio machine cannot replace.
 - `app/src/midi/smf.ts`: pure Standard MIDI File type-0 encoder
   (`{ tempoBpm = 120, ppq = 480, markers?: [{ tick, text }], meta?:
   [{ text }] }`, variable-length deltas) — unit-tested against known byte
-  sequences; no new dependency. SR7 passes the locked attempt tempo, a
-  `bar1` marker and the clock-anchor text meta.
+  sequences; no new dependency. `tempoBpm` is quarter-note bpm (SMF
+  semantics); SR6 passes the locked attempt tempo converted to quarter
+  terms, a `bar1` marker and the clock-anchor text meta.
 - `SketchbookLive` capture box: "Record MIDI" button → arm → first note
   starts the clock → stop button or 10 s silence ends → uploads
   `capture-<timestamp>.mid` as `role: melody` on a new inbox idea (or on
@@ -442,6 +455,7 @@ path the studio machine cannot replace.
 
 ### SB8 — `POST /v1/ideas/inbox`: receiver for the REAPER sidecar  `[not seeded: REAPER service-0005 is unclaimed — the sidecar schema it owns does not exist yet]`
 **Tier:** T1
+**Depends on:** SB2, PV1 (and the REAPER sidecar schema)
 **Why:** The inbound seam. The doc pins this endpoint's pydantic schema to
 the REAPER repo's sidecar schema and version.
 **Scope / surfaces / files:** multipart `file` + `sidecar` JSON; validate
@@ -461,6 +475,7 @@ repo proposes the v1 schema and the REAPER ticket adopts it.
 
 ### PV1 — Provenance tables keyed by subject, canonical params hash, run + property API
 **Tier:** T2 (the contract every machine-derived datum lands through)
+**Depends on:** —
 **Why:** "Every derived datum names its producer." Nothing derived may exist
 before these tables do; SB2 already reserves `run_id`.
 **Scope / surfaces / files:**
@@ -477,10 +492,24 @@ before these tables do; SB2 already reserves `run_id`.
   `ExtractedProperty` (`run_id` FK, `kind`, `time_range?` JSON, `payload`
   JSON, `confidence?`).
 - `backend/app/provenance.py`: `canonical_params_hash(params)` = sha256 of
-  sorted-keys compact JSON; `latest_properties(db, subject)` = newest
-  succeeded run per `(extractor, kind)`.
-- Migration `0005_provenance` also adds the FK `idea_assets.run_id →
-  extraction_runs.id`.
+  sorted-keys compact JSON, computed after the server folds the sorted
+  `input_sha256s` into `params.inputSha256s` (clients never include it);
+  `latest_properties(db, subject)` = newest succeeded run per `(extractor,
+  kind)`.
+- `subject_id` stores the full subject string exactly as
+  `practice_sessions.subject_id` does (`kind:<uuid>` for uuid-backed kinds
+  — idea, score, exercise, recording — and the bare bundled id for
+  `piece`/`scale`); `subject_kind` is the kind denormalised for filtering;
+  in `/v1/subjects/{kind}/{id}/…` `{id}` is the bare id and the server
+  composes the string. PV3/RC5/SR7 pass the composed string.
+- `backend/app/config.py`: `client_extractors: list[str] = ['midi-matcher',
+  'scorer', 'musicxml-import', 'reaper-capture-sidecar']` (CSV-splittable
+  like `cors_origins`) — the allow-list for `executor: 'client' |
+  'external'` completed-run bodies.
+- Migration `<next>_provenance` (number and `down_revision` from `alembic
+  heads` at claim time). The FK `idea_assets.run_id → extraction_runs.id`
+  is owned by whichever of SB2 / PV1 lands *second*: if `idea_assets`
+  already exists this migration adds it; otherwise SB2's migration adds it.
 - Routes: `POST /v1/runs` accepts either an **enqueue** body (`executor:
   'worker'`, row created `queued`) or a **completed-run** body (`executor:
   'client' | 'external'`, `status: 'succeeded' | 'failed'`, `properties`
@@ -509,6 +538,7 @@ before these tables do; SB2 already reserves `run_id`.
 
 ### PV2 — Job worker: queued runs → extractor registry → properties, embedded in the api process
 **Tier:** T2 (the app's first background execution path)
+**Depends on:** PV1
 **Why:** Enqueue→poll, never inline. The thinnest thing that works: a loop
 over queued rows, no broker.
 **Scope / surfaces / files:**
@@ -542,6 +572,7 @@ over queued rows, no broker.
 
 ### PV3 — `midi-features` extractor + auto-enqueue on MIDI asset upload + properties panel
 **Tier:** T2 (first real extractor; the key-guess has judgment)
+**Depends on:** PV2, SB2
 **Why:** First use of the provenance contract on real data; makes the
 inbox self-describing seconds after capture.
 **Scope / surfaces / files:**
@@ -570,6 +601,7 @@ inbox self-describing seconds after capture.
 ### PV4 — `midi-render` FluidSynth service on mlserve  `[cross-repo: homelab_infra_and_planning]`
 **Repo:** homelab_infra_and_planning (claimed there with its numbering and worktree rule; that repo's gates apply)
 **Tier:** T1 (mirrors the four existing mlserve services)
+**Depends on:** — (cross-repo)
 **Why:** The audition preview that makes the stream playable.
 **Scope / surfaces / files:**
 - `ansible/files/mlserve/midi_render.py`: FastAPI, `POST /render`
@@ -592,6 +624,7 @@ inbox self-describing seconds after capture.
 
 ### PV5 — `midi-render` extractor: preview renders as `role: render` assets, play button on the stream
 **Tier:** T1 (mirrors PV3's extractor shape)
+**Depends on:** PV3, PV4 (`deployed`)
 **Why:** Closes the loop: capture → key guess → playable preview.
 **Scope / surfaces / files:**
 - `backend/app/config.py`: `midi_render_url` (optional; unset → extractor
@@ -618,11 +651,14 @@ inbox self-describing seconds after capture.
 
 ### RC1 — `recordings` + `recording_tracks` schema, CRUD, track upload and streaming
 **Tier:** T1 (mirrors SB1/SB2 on the same store)
+**Depends on:** MD1
 **Why:** The tables the capture UI, the extractors, and tempo-vs-target
 all hang on.
 **Scope / surfaces / files:**
-- `backend/app/models/recording.py`: `Recording` (`subject_kind`,
-  `subject_id` str — matches `practice_sessions.subject_id`, `session_id?`
+- `backend/app/models/recording.py`: `Recording` (`subject_kind?`,
+  `subject_id?` str — both NULL for free practice and sketchbook voice
+  captures; otherwise the same string as `practice_sessions.subject_id`
+  and PV1, ideas included, `session_id?`
   FK, `captured_at`, `duration_ms?`, `notes?`, mixins) and `RecordingTrack`
   (`recording_id`, `kind` enum `audio|midi`, `storage_key`, `mime`,
   `bytes`, `sha256`, `offset_ms` int NOT NULL DEFAULT 0 — track start
@@ -633,19 +669,21 @@ all hang on.
   (newest first), `GET /v1/recordings/{id}`, `PATCH` (notes,
   duration), `DELETE` (soft), `POST /v1/recordings/{id}/tracks` multipart,
   `GET .../tracks/{id}/content` streaming.
-- Migration `0006_recordings`; contract regenerated.
+- Migration `<next>_recordings`; contract regenerated.
 **Acceptance criteria:**
 - [ ] Create + upload an audio track → sha256 matches, listing by subject
       returns it newest first, content streams back byte-identical —
       `tests/test_recordings.py` (substrate: unit)
 - [ ] A MIDI-only recording with `offset_ms: 250` round-trips through the
-      API and the track row carries the offset (substrate: unit)
+      API and the track row carries the offset; a recording with no subject
+      round-trips and lists when `?subjectKind=` is absent (substrate: unit)
 - [ ] Gates green; contract regenerated (substrate: unit)
 - [ ] After merge, migrate Job green on both slots and a `curl` round trip
       on the dev slot succeeds (substrate: deployed)
 
 ### RC2 — Capture UI: MediaRecorder in SessionView, takes list with playback
 **Tier:** T2 (first `getUserMedia` surface)
+**Depends on:** RC1
 **Why:** The "recording" badge in SessionView finally becomes real.
 **Scope / surfaces / files:**
 - `app/src/media/recorder.ts`: `useAudioRecorder()` over `getUserMedia` +
@@ -671,6 +709,7 @@ all hang on.
 
 ### RC3 — Cadence setting and due state
 **Tier:** T1
+**Depends on:** RC1
 **Why:** "Record this weekly" — the periodic half of the workstream, no
 scheduler.
 **Scope / surfaces / files:**
@@ -691,6 +730,7 @@ scheduler.
 ### RC4 — Audio-feature service on mlserve: beat tracking, loudness, waveform peaks  `[cross-repo: homelab_infra_and_planning]`
 **Repo:** homelab_infra_and_planning
 **Tier:** T2 (the service shell is a mirror; the analysis code is first-of-kind)
+**Depends on:** — (cross-repo)
 **Why:** The extractors behind tempo-vs-target; the laptop never processes
 media.
 **Scope / surfaces / files:**
@@ -709,6 +749,7 @@ media.
 
 ### RC5 — `beat-tracker`, `loudness`, `waveform-peaks` extractors in the worker, auto-enqueued on audio upload
 **Tier:** T1 (mirrors PV5)
+**Depends on:** PV2, RC1, RC4 (`deployed`)
 **Why:** Lands the properties the recording view consumes.
 **Scope / surfaces / files:** `backend/app/config.py` `audio_features_url`;
 `backend/app/jobs/extractors/audio_features.py` registering three extractors
@@ -725,6 +766,7 @@ three for `audio` tracks with subject = the recording.
 
 ### RC6 — Recording view: waveform, playback cursor, tempo-vs-target with lineage
 **Tier:** T2
+**Depends on:** RC5
 **Why:** The headline feature of the workstream — a view over properties,
 not stored data.
 **Scope / surfaces / files:**
@@ -751,6 +793,7 @@ not stored data.
 
 ### OPS1 — Preview slot: PR image builds tagged `dev-<sha8>` tracked by the dev slot  `[not seeded: Decision needed]`
 **Tier:** T1 (app repo: `.woodpecker/docker.yml`) + T0 (gitops: two annotations)
+**Depends on:** — (Decision needed)
 **Why:** Today every merge rolls **prod** immediately, and the loop can only
 check a `deployed` criterion after that. If PR builds shipped to the dev
 slot, the loop could verify on dev *before* merging, and prod would only
@@ -770,6 +813,7 @@ does not (substrate: deployed).
 
 ### OPS2 — Real-Postgres backend tests in CI
 **Tier:** T1
+**Depends on:** —
 **Why:** The SQLite suite cannot exercise tsvector (SB5), JSONB operators,
 `SKIP LOCKED` (PV2), or the Alembic migrations themselves — today those are
 proven only by the migrate Job in prod. `.woodpecker/README.md` already
@@ -803,6 +847,7 @@ re-runnable via `sh docs/probes/verovio/run-all.sh`.
 
 ### SC1 — ScoreDoc schema + validity + `toMei()` + `timeline()` + `renderScoreDoc` + snapshot tests
 **Tier:** T3 (pattern-setter; the contract everything consumes)
+**Depends on:** —
 **Why:** Every semantic element id becomes the identity in the row, the MEI
 `xml:id`, the SVG `<g>`, the anchor and the verdict. The F1 review found
 that Verovio validates nothing, beams nothing, applies no key signature to
@@ -814,42 +859,62 @@ shape, §Score-time, §Validity, §Rendering pipeline):
   union on `kind`, `ElementId` pattern, closed `ScoreMeta`, cardinalities)
   and `validateScoreDoc(doc): Issue[]` with refinements 1–7.
 - `app/src/score/ids.ts`: `IdSource`, `seededIdSource(rng)`,
-  `randomIdSource()`, kind prefixes, derived-id helpers (`-tie`, `-a<i>`,
-  `-fing`, `-beam`, `-s<n>`).
+  `randomIdSource()`, kind prefixes, derived-id helpers (the full list in
+  §Identity: `-tie`, `-a<i>`, `-fing`, `-acc`, `-beam`, `-s<n>`, `-sb`,
+  `-tempo`, `-sdef`, and the fixed document-level ids), and
+  `cloneScoreDoc(doc, ids): { doc, idMap }` (re-mints every id including
+  spanner endpoints and direction targets, sets `meta.derivedFrom`).
 - `app/src/score/fraction.ts`: exact rational arithmetic (reduce, add, mul,
   cmp, `durationOf`).
-- `app/src/score/timeline.ts`: `timeline(doc)`, `soundingEvents(doc)`,
-  `msAt`, `effectiveAttrs`, `beatUnit(timeSig)` — `lib/time.ts beatsPerBar`
-  becomes a re-export of it.
+- `app/src/score/timeline.ts`: `timeline(doc)`, `soundingEvents(doc)`
+  (per-pitch `tiedDuration`), `msAt`, `tempoMap`/`msAtMap`,
+  `effectiveAttrs`, `beatUnit(timeSig)` — `lib/time.ts beatsPerBar(meter)`
+  becomes a wrapper (parse the string into a `TimeSig`, return `count ×
+  4/unit ÷ durationOf(beatUnit)`); its signature and `time.test.ts` are
+  unchanged.
 - `app/src/score/pitch.ts`: `midiOf`, `accidentalState()`, `spellMidi`,
   `transposePitch` (the key/spelling tables come from `theory/keys.ts`,
   which SR1 extracts; until then `pitch.ts` may hold a private copy with a
   TODO naming SR1).
-- `app/src/score/mei.ts`: `toMei(doc)` — `meiHead` always; initial
-  `<scoreDef>` with key/meter/`midi.bpm`; `<scoreDef>` re-declarations on
-  change measures; `<staff xml:id="${m}-s${n}">` + `<layer n>`; `accid` /
-  `accid.ges` per `accidentalState`; `<accid func="caution">` for
-  `courtesy`; `<tie xml:id startid endid>` in the start measure; spanners
-  and dynamics hoisted after the staves; `<tempo midi.bpm mm mm.unit
-  mm.dots tstamp="1">`; `groupBeams` with the meter table, tuplet-outer
-  nesting, derived beam ids; `<mRest>`; `metcon="false"` for `pickup`;
-  `<sb/>` for `systemBreak`; stable attribute order.
-- `app/src/lib/canonical-json.ts`: RFC 8785 `canonicalJson`; `scoreDocHash`.
+- `app/src/score/mei.ts`: `toMei(doc)` — `meiHead` always; the initial
+  `<scoreDef>` in the doc's stated MEI form (key/mode/meter/`midi.bpm`,
+  `staffGrp`, `staffDef`); `<scoreDef xml:id="${m}-sdef">` re-declarations
+  on change measures; `<staff xml:id="${m}-s${n}">` + `<layer
+  xml:id="${voice.id}" n>`; `accid` / `accid.ges` per `accidentalState()`
+  (gestural vocabulary `s|ss|f|ff`); `courtesy` as a child `<accid
+  xml:id="${note.id}-acc" … func="caution" enclose="paren">` with no
+  accidental attributes on the note; `<tie xml:id startid endid>` in the
+  start measure; spanners and dynamics hoisted after the staves;
+  `<tempo xml:id="${m}-tempo" midi.bpm mm mm.unit mm.dots tstamp="1">` with
+  the composed text + SMuFL glyph content; `groupBeams` with the meter
+  table, onset assignment, two-or-more rule, tuplet-outer nesting, derived
+  beam ids; `<mRest>`; `metcon="false"` for `pickup` and `complement`;
+  `<sb xml:id="${m}-sb"/>` for `systemBreak`; stable attribute order.
+- `app/src/lib/canonical-json.ts`: RFC 8785 `canonicalJson` (sync);
+  `scoreDocHash` (async over `crypto.subtle.digest`).
 - `app/src/score/migrate.ts`: the `migrateScoreDoc` chain (v1 identity).
-- `app/src/verovio/toolkit.ts`: `renderScoreDoc(doc, { widthPx, measureIds? })`
-  — `resetOptions()` first, `inputFrom: 'mei'`, `breaks: 'encoded'`,
-  `pageWidth` from `widthPx`, tall page + `adjustPageHeight`, `xmlIdSeed`
-  set before every load, never `svgHtml5`, `includeRests: true`, asserts
-  one page, `measureIds` → `select({ start, end })`; the ABC helpers gain
-  `resetOptions()`; foreign renders gain `xmlIdChecksum: true` and
-  `svgAdditionalAttribute: ['measure@n']`. Verovio tests run under the
+- `app/src/verovio/toolkit.ts`: `renderScoreDoc(doc, { widthPx, measureIds? }):
+  Promise<{ svg, timemap, mei }>` — `resetOptions()` first, `inputFrom:
+  'mei'`, `breaks: 'encoded'`, `pageWidth` from `widthPx`, `pageHeight:
+  60000` + `adjustPageHeight`, `xmlIdSeed: 1` set before every load, never
+  `svgHtml5`, `includeRests: true`, asserts one page, `measureIds` →
+  `select({ start, end })` + `redoLayout()` with the rendered `g.measure`
+  ids asserted equal to the requested range; `TimemapEntry` gains
+  `measureOn?`, `restsOn?`, `restsOff?`; the ABC helpers gain
+  `resetOptions()` (behaviour otherwise unchanged); foreign renders gain
+  `xmlIdChecksum: true` and `svgAdditionalAttribute: ['measure@n']` (SC7
+  consumes this entry; it does not re-do it). Verovio tests run under the
   vitest `node` environment (the WASM toolkit loads there; `docs/probes/`
   proves it).
 - Fixtures under `app/src/score/__fixtures__/`: an 8-bar grand-staff
   exercise with beams, chords, slurs, a hairpin, dynamics, a tie across a
-  barline, a triplet, a key change and a tempo mark; a pickup fixture; a
-  6/8 fixture; G-major and F-major spelling fixtures; one negative fixture
-  per refinement.
+  barline, a triplet, a key change, a mid-exercise tempo change and a
+  `systemBreak`; a pickup + complement fixture; a 6/8 fixture; a 5/8
+  fixture with `grouping`; G-major and F-major spelling fixtures, each
+  containing one double-sharp and one double-flat note and one cautionary
+  accidental; a windowed-render fixture; one negative fixture per
+  refinement (including `MeasureRest` in a pickup, `measures[0].tempo`, a
+  meter outside the closed set, a ♪♬♪ triplet that must *pass*).
 **Acceptance criteria:**
 - [ ] `toMei()` is byte-identical across two runs and matches the committed
       MEI snapshot for every fixture — `cd app && npm run test` `mei.test.ts`
@@ -857,27 +922,45 @@ shape, §Score-time, §Validity, §Rendering pipeline):
 - [ ] `renderScoreDoc` SVG is byte-identical across two calls on one shared
       toolkit and across two fresh toolkits for every fixture —
       `render.test.ts` (substrate: unit)
-- [ ] For every fixture, every ScoreDoc element id appears exactly once as
-      an SVG `<g id>`; the timemap's `on` ids are exactly the non-tie-stop
-      notehead ids; `timeline()` onsets equal Verovio `qstamp` within 1e-6
-      for every note (substrate: unit)
+- [ ] For every fixture, every ScoreDoc element id except `StaffDef.id`
+      appears exactly once as an SVG `<g id>` and no `sd…` id appears at all
+      (spanning continuations carry `class="… id-X spanning"` and no `id`);
+      the union of the timemap's `on` ids equals the set of all Note and
+      ChordNote ids — tie-stops included (`exp11`); `soundingEvents(doc)`
+      returns exactly the tie-start Note/Chord ids; `MeasureRest` ids never
+      appear in the timemap (`exp22` K); `timeline()` onsets equal Verovio
+      `qstamp` within 1e-6 for every note and every `<rest>` in `restsOn`;
+      the windowed fixture's first timemap entry has `tstamp 0` and the
+      cursor offset equals `msAt(onsetOf(window.start))` —
+      `timeline.test.ts` (substrate: unit)
 - [ ] `getMIDIValuesForElement(id).pitch === midiOf(note.pitch)` for every
-      note in the G-major and F-major fixtures — the `accid.ges` rule
-      (substrate: unit)
+      note in the G-major and F-major fixtures, double accidentals and the
+      cautionary note included — the `accid.ges` rule; the cautionary note
+      renders exactly two paren glyphs and one accid group with our id —
+      `pitch.test.ts` (substrate: unit)
 - [ ] `validateScoreDoc` rejects each negative fixture (overfull voice,
-      dangling tie, duplicate id, nested tuplet, one-note chord, wrong staff
-      count, courtesy on a written accidental, digit-leading id) with the
-      expected issue code, and `renderScoreDoc` throws on an invalid doc
-      (substrate: unit)
+      dangling tie, orphan tie-stop, duplicate id, `MeasureRest` in a
+      pickup, `measures[0].tempo`, courtesy on a written accidental, a
+      same-endpoint hairpin, a meter outside the set) with the expected
+      `IssueCode`, reports the structural fixtures (nested tuplet, one-note
+      chord, wrong staff count, digit-leading id) as `schema`, accepts the
+      ♪♬♪ triplet, and `renderScoreDoc` throws on an invalid doc —
+      `schema.test.ts` (substrate: unit)
 - [ ] `seededIdSource` with one seed mints the same sequence twice; every
-      minted and derived id matches the `ElementId` pattern and is an XML
-      NCName (substrate: unit)
+      minted id matches the stored pattern exactly, every derived id the
+      `-suffix` form, and all are XML NCNames; `cloneScoreDoc` output
+      validates, shares no id with its source and remaps every
+      `startId`/`endId`/`at` — `ids.test.ts` (substrate: unit)
 - [ ] `canonicalJson` matches the RFC 8785 test vectors; `scoreDocHash`
-      ignores `revision` (substrate: unit)
-- [ ] The legacy ABC paths are untouched: existing vitest suites pass
-      unchanged; gates green (typecheck, vitest, build) (substrate: unit)
-- [ ] `sh docs/probes/verovio/run-all.sh` output is unchanged (Verovio
-      still 4.5.1) — recorded in the PR body (substrate: unit)
+      ignores `revision` — `canonical-json.test.ts` (substrate: unit)
+- [ ] The legacy ABC paths are behaviourally unchanged (only
+      `resetOptions()` added): existing vitest suites pass unchanged; gates
+      green (typecheck, vitest, build) (substrate: unit)
+- [ ] `sh docs/probes/verovio/run-all.sh` re-run: the `verovio 4.5.1-…`
+      version line is unchanged and every diff against the committed
+      `results.txt` is confined to Verovio-minted ids and `*Ms` timings —
+      stated in the PR body; `results.txt` is not rewritten (`git checkout`
+      it afterwards) (substrate: unit — node script)
 
 | Label | Title | Tier | Depends on |
 |---|---|---|---|
@@ -886,7 +969,7 @@ shape, §Score-time, §Validity, §Rendering pipeline):
 | SC4 | Scores + layers + annotations persistence: `scores` table (both tiers; native columns), versioned `PUT` (409), contract ownership (Anchor as a Pydantic union with the anchor×target check; opaque body/doc envelopes), layers/annotations API under `/v1/targets/{kind}/{id}`, reachability-through-target, migration, `ApiAnnotationStore`; `SubjectKind` gains `'score'` (`score:<uuid>`) | T2 | SC1 |
 | SC5 | Client wiring: annotation tools (text, highlight, symbol) over SC3 persisted via SC4; orphan gutter and re-anchor | T1 | SC3, SC4 |
 | SC6 | Section heatmap → virtual system layer over `piece` targets (`measureIndex` anchors parsed once from `Section.range`, `heat` bodies); `heatmap.ts` injection retired | T0 | SC3 |
-| SC7 | Foreign score import: `POST /v1/scores/import` over `MediaStoreDep`, `GET /v1/scores/{id}/content`, `xmlIdChecksum` + `svgAdditionalAttribute` renders, `render` key on foreign `elements` anchors, `stale-render` status | T1 | SC4, MD1 |
+| SC7 | Foreign score import: `POST /v1/scores/import` over `MediaStoreDep`, `GET /v1/scores/{id}/content`, foreign scores rendered through SC1's foreign `renderToSvg` entry, `render` key on foreign `elements` anchors, `stale-render` status | T1 | SC4, MD1 |
 | SC8 | MusicXML → ScoreDoc importer (native subset, fresh ids, `meta.provenance`) + `POST /v1/scores/{id}/promote` (new row, `derived_from`, annotation copy rules) | T2 | SC1, SC7 |
 | SC9 | E1 structured entry: `Command` catalogue + pure `apply` with inverse, cursor + overwrite semantics, id-stable undo/redo, paste re-mint, duration palette, MIDI step entry over SB7's hook, fork-on-edit for generated scores | T2 | SC2, SB7 |
 | RC7 | Time-anchored user annotations in `RecordingView` on the recording clock over SC3/SC4 | T1 | SC5, RC6 |
@@ -901,6 +984,7 @@ transitively parked MIDI assessment behind the mlserve audio deploy.
 
 ### SR1 — Taxonomy v2 module + scorer + level presets + spec normalizer + `theory/keys.ts` + boundary fixtures
 **Tier:** T3 (pattern-setter; the shared contract of all three engines)
+**Depends on:** SC1
 **Why:** The doc's own words: get the taxonomy wrong and every exercise
 downstream is miscalibrated in a way no test suite catches. F2 re-cut the
 ladders and wrote the feature condition for every rung; this ticket turns
@@ -912,53 +996,78 @@ definitions):
 - `app/src/theory/keys.ts`: `keySignatureMap`, `MAJOR_KEY_ACCIDENTALS`,
   `RELATIVE_MAJOR`, `normalizeAlter` extracted from `chord-identity.ts`
   (which re-imports them, tests unchanged), plus `diatonicPitches(key,
-  mode, lo, hi)`; no new `@tonaljs` package.
-- `app/src/generation/taxonomy.ts`: `TAXONOMY` (15 dimensions with group,
-  `perHand`, rung keys/labels/descriptions), `LEVELS` (the preset table
-  with tempo band, shortest-value floor, bars, harmonic rhythm, count-in,
-  anacrusis and hands rules), `COUPLING` (the implication table),
-  `normalizeSpec(spec) → EffectiveSpec | SpecUnsatisfiable`, `levelFor(dim,
-  rung)`, `Spec`/`DimKey`/`RungVector` types, `taxonomyVersion = '2.0.0'`.
+  mode, lo, hi)`, `fifthsOf({ tonic, alter, mode })` and `keySigOf(fifths,
+  mode)`; no new `@tonaljs` package.
+- `app/src/generation/taxonomy.ts`: `DimId` (15) / `DimKey` (19) /
+  `DIM_KEYS` / `RungVector`; `TAXONOMY: Record<DimId, …>` (explicit
+  `group`, `perHand`, rung keys/labels/descriptions); `KEY_RUNG` lookup by
+  `(fifths, mode)`; `LEVELS` (`Partial<RungVector>` ceilings with the D
+  column split and G/I/Q duplicated per hand, plus tempo band in beat bpm,
+  shortest-value floor, bars, harmonic rhythm, count-in, anacrusis and
+  hands rules); `COUPLING: CouplingRule[]` with ids; `normalizeSpec(spec) →
+  EffectiveSpec | SpecUnsatisfiable | SpecInvalid` (derived dimensions from
+  `spec.key`/`meter`/`hands`, floor-raising / ceiling-lowering / null
+  consequents, fixed iteration order, relaxation trace with rule ids);
+  `expandPreset(level, focus)` with the `max(ceiling − 1, closed floor)`
+  rule; `levelFor(dim, rung)` = the lowest qualifying level; `Spec` type;
+  `taxonomyVersion = '2.0.0'`.
 - `app/src/generation/scorer.ts`: `score(doc): FeatureVector | { scorable:
-  false, reason }` — shared definitions (onset via `soundingEvents`, beat
-  grid via `beatUnit`, staff steps, ledger lines, written accidentals via
-  `accidentalState`, syncopated/held-through onsets, runs, 4-bar windows,
-  the hand model, per-voice aggregation, exact rationals), per-dimension
-  features and rung mapping from table (B), owners and the ceiling check
-  per owning unit, the null rule, note tags, `exposure`, tempo features,
-  the overall scalar; `checkCeilings(vector, spec)` and
-  `occurrenceFloor(vector, spec)` for SR2's verify step;
-  `scorerVersion = '1.0.0'`.
-- `app/src/generation/__fixtures__/<dim>/<rungKey>.at.json`: for every
-  (dimension, boundary) a pair of minimal ScoreDocs differing in one
-  feature across the threshold, each with a hand-written `expect`
-  `{ taxonomyVersion, rung, features }` and the hand computation in the PR
-  description. The Nick-authored reference corpus (one exercise per level)
-  is an H step listed in Notes, not a gate.
+  false, reason }` — every shared definition of §Operational definitions
+  (onset via `soundingEvents`, beat grid and beat strength via `beatUnit`,
+  Δ staff-step spans, ledger-line count, written accidentals via
+  `accidentalState`, syncopation features, runs, phrase grid, 4-bar
+  windows, the hand model, rung selection, per-voice aggregation, exact
+  rationals), the per-dimension features and rung mappings from the
+  per-dimension table (including the LH pattern classifier and
+  `restInBeamGroup` via the substrate's `groupBeams`), owners and the
+  ceiling check per owning unit, `perMeasure` semantics for every owner,
+  the null rule, note tags for all 15 dimensions, `measuresAtMax`, tempo
+  features (`bpmBeat`, `bpmQuarter`, `shortestValueMs`), the overall
+  scalar; `checkCeilings(vector, spec)` and `occurrenceFloor(vector, spec)`
+  for SR2's verify step; `scorerVersion = '1.0.0'`.
+- `app/src/generation/__fixtures__/<dimId>/<rungSlug>.at.json` and
+  `<rungSlug>.below.json` (`rungSlug` = the part of the rung key after the
+  slash), one pair per boundary: minimal ScoreDocs differing in one feature
+  across the threshold, each with a hand-written `expect` `{
+  taxonomyVersion, dim: DimKey, rung, features }` (exercise-level
+  aggregates) and the hand computation in the PR description. The
+  Nick-authored reference corpus (one exercise per level) is an H step
+  listed in Notes, not a gate.
 **Acceptance criteria:**
 - [ ] Every boundary fixture pair scores as its hand-written `expect`
       says — `cd app && npm run test` `scorer.test.ts` (substrate: unit)
 - [ ] The two syncopation spellings (a half on beat 2 vs two tied quarters)
-      score identically; a 6/8 bar of six eighths scores V2; RH C4–G4 in
-      treble scores G1; a held LH whole-note under RH quarters scores H3;
-      a courtesy accidental does not raise `pitch.accidentals` (substrate: unit)
+      score identically; a 6/8 bar of six eighths scores V2 and a 2/2 bar
+      of eighths V4; RH C4–G4 in treble scores G1 and B5 G2; a held LH
+      whole-note under RH quarters scores H3 and an alternating-hands bar
+      H2; a held LH fifth per bar scores P2 and D2; a V chord with G♯ in
+      A minor scores A2; a courtesy accidental does not raise
+      `pitch.accidentals`; parallel 6ths in both hands do not trigger I5 —
+      `scorer.test.ts` (substrate: unit)
 - [ ] `normalizeSpec({ key: A minor, accidentals: A1 comfort })` raises
-      accidentals to A2 with a trace entry naming the rule;
+      accidentals to A2 with a trace entry naming `minor-accid`;
       `{ accidentals: A1 focus, key minor }` returns `SpecUnsatisfiable`
-      naming the rule (substrate: unit)
+      naming the rule; a disagreeing `dims['pitch.key']` is `SpecInvalid`;
+      `expandPreset(L6, ['hands.lh_pattern'])` produces no relaxation entry
+      — `normalize.test.ts` (substrate: unit)
 - [ ] Preset invariants: ceilings non-decreasing per dimension across
-      L1–L10; at least one ceiling or parameter strictly increases per
-      step; no null, model-gated or V7 ceiling; every level satisfies the
-      coupling table under `normalizeSpec` with no relaxation (substrate: unit)
+      L1–L10 (an absent cell counts as 0); at least one ceiling or parameter
+      strictly increases per step; no explicit null, model-gated or V7
+      ceiling; every level's full ceiling vector is a fixpoint of the
+      coupling closure; for every level and every dimension with ceiling
+      ≥ 2 as the sole focus, `normalizeSpec` returns `EffectiveSpec` and
+      never `SpecUnsatisfiable` — `levels.test.ts` (substrate: unit)
 - [ ] Null rule: an RH-only fixture scores `hands.lh_pattern` and every
-      `.lh` dimension as `null`, passes an L1 ceiling check, and is
-      excluded from the overall scalar (substrate: unit)
+      `.lh` key as `null`, passes an L1 ceiling check, and is excluded from
+      the overall scalar — `scorer.test.ts` (substrate: unit)
 - [ ] `noteTags` names, for a fixture with a leap target, a syncopated
-      onset, a written accidental and a shift, exactly the expected
-      dimensions on exactly the expected notehead ids (substrate: unit)
+      onset, a written accidental, a shift and a second voice, exactly the
+      expected dimensions on exactly the expected notehead ids; every
+      dimension at rung ≥ 2 in that fixture has `active > 0` —
+      `scorer.test.ts` (substrate: unit)
 - [ ] `taxonomyVersion` and `scorerVersion` are stamped on every vector; a
-      fixture whose `expect.taxonomyVersion` differs fails the suite
-      (substrate: unit)
+      fixture whose `expect.taxonomyVersion` differs fails the suite —
+      `scorer.test.ts` (substrate: unit)
 - [ ] `chord-identity.ts` tests unchanged after the extraction; gates green
       (typecheck, vitest, build) (substrate: unit)
 
@@ -967,9 +1076,9 @@ definitions):
 | SR2 | Generator thin slice: `Spec` schema, harmonic skeleton with A-gated chord pools, rhythm-per-phrase from a cell vocabulary, motif/pattern-tile realization, legality pass (spelling via `pitch.ts`, tie-vs-value, courtesy), verify (validity + ceilings + occurrence floor + tempo band + coherence C1–C6), candidate ranking, recipe with per-candidate PRNG streams, relaxation stages and the failure type; `hands: 'rh' \| 'lh'` single line at L1–L2; recipe fixtures pin exact output | T3 | SR1 |
 | SR3 | Generator breadth: hands together H2–H7, LH pattern classes P1–P7, rhythm grammars to V6, compound meters, expression decoration (C7), anacrusis, 12/16/24-bar forms | T3 | SR2 |
 | SR4 | Printable set: N recipes with sequential sub-seeds at A4/Letter width, `breaks: 'encoded'`, short-code header, recipe-URL footer, `@media print` | T1 | SR5 |
-| SR5 | Exercise player view: preview → count-in → play → self-report lifecycle; `useMetronome` clock contract (count-in, `onGridStart`, output latency, latency trim, grouping); `subjectFromExercise` + `Subject.score`; recipe URL; nav entry; public build ephemeral; `config.test.ts` | T2 | SR2, SC1 |
-| SR6 | Web MIDI capture (SB7 recorder, `origin: 'external'`) + offline matcher (monotone DP, resync model, IOI windows, verdict schema, hesitation kinds) + attribution (window, priors, note tags, cascade, per-phrase credit) + verdicts as a virtual layer; works on the public build | T2 | SR5, SB7, SC3 |
-| SR7 | `exercises` / `attempts` persistence + API (`exercises.score_id` → `scores`; `attempts` without soft delete + `void`; `capture` JSON; `exposure`); MIDI attempt uploaded as a recording track (RC1); matcher run posted as a completed client run (PV1); observation projection with uuid5 ids; `SubjectKind` gains `'exercise'` | T1 | SR6, PV1, RC1, SC4 |
+| SR5 | Exercise player view: preview → count-in → play → self-report lifecycle; `useMetronome` clock contract (count-in, `onGridStart`, output latency, latency trim, grouping, accent schedule for 5/8 and 7/8); `subjectFromExercise` + `Subject.score` (adds a `renderScoreDoc` branch to `Score.tsx` only; no changes to `SessionScore.tsx` — the `bar`/`beat` guides are SC2-gated); recipe URL; nav entry; public build ephemeral; `config.test.ts` | T2 | SR2, SC1 |
+| SR6 | Web MIDI capture (SB7 recorder, `origin: 'external'`) + SMF encode via SB7's `smf.ts` (quarter-bpm tempo meta, `bar1` marker, clock-anchor meta) so `inputSha256s` exists on the public build + offline matcher (monotone DP, resync model, IOI windows, verdict schema, hesitation kinds) + attribution (window, priors, note tags, cascade, per-phrase credit) + verdicts as a virtual layer; works on the public build | T2 | SR5, SB7, SC3 |
+| SR7 | `exercises` / `attempts` persistence + API (`POST /v1/exercises` writing the `scores` and `exercises` rows in one transaction; `attempts` without soft delete + `void`; `capture` JSON; `exposure`; `POST /v1/ability`); uploads SR6's SMF as the `midi` track of a recording (RC1); matcher run posted as a completed client run (PV1); observation projection with uuid5 ids; `SubjectKind` gains `'exercise'` | T1 | SR6, PV1, RC1, SC4 |
 | SR8 | Calibrator v1: continuous θ, graded per-dimension evidence, `nEff` decay, placement, session policy, never-repeat, override, replay; `ability_snapshots` + `GET /v1/ability`; in-memory on the public build | T2 | SR7 |
 
 ---
@@ -1022,7 +1131,8 @@ they gate only the third and fourth spines.
 1. **OPS2** (CI Postgres) — cheap, and every migration after it is proven
    by a round trip instead of by prod.
 2. **MD1 → SB1 → SB2** — the media pattern-setter and its first tenant.
-   **PV1 → PV2** can run in parallel with SB1/SB2 (no shared files).
+   **PV1 → PV2** can run in parallel with SB1/SB2 (the only shared touch is
+   the `idea_assets.run_id` FK, owned by whichever lands second).
 3. **SB3a → SB3b → PV3** — the inbox is usable and self-describing.
 4. **RC1 → RC2 → RC3** (mirrors of SB2/SB3) and **SB4, SB5, SB6, SB7** in
    any order.
@@ -1038,9 +1148,12 @@ they gate only the third and fourth spines.
 7. **OPS1** — decide, then it is a two-hour ticket.
 
 Loop-eligibility now: OPS2, MD1, PV1, SC1 immediately; SR1 after SC1; SB1
-after MD1 is merged; everything else as its deps land. When the runnable
-set is exhausted the loop terminates and reports the two cross-repo
-deploys and the unseeded provisional rows as what feeds the next run.
+after MD1 is merged; everything else as its deps land — the `**Depends
+on:**` line on each ticket is authoritative; this sentence is a summary.
+Lines tagged `hardware` are verify notes, never admission inputs. When the
+runnable set is exhausted the loop terminates and reports the two
+cross-repo deploys and the unseeded provisional rows as what feeds the
+next run.
 
 ## Notes (dogfooding)
 
