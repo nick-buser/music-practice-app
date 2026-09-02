@@ -29,25 +29,15 @@ required for these validation workflows.
 
 ## Extending
 
-**Real-Postgres backend tests** — add a service and point the suite at it (the
-test harness uses `DATABASE_URL` if already set, else SQLite):
-
-```yaml
-  - name: test-postgres
-    image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
-    environment:
-      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/postgres
-    commands:
-      - cd backend
-      - uv run pytest
-services:
-  - name: postgres
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-```
+**Real-Postgres backend tests** — implemented: `backend.yml` runs a
+`postgres:16` service plus a `test-postgres` step. The step waits for the
+service to accept connections (a bounded psycopg connect-retry loop — this
+image has no `pg_isready`) and then runs `uv run pytest -q -m integration`.
+`backend/tests/test_integration_postgres.py` reads `DATABASE_URL` from the
+step's environment and covers what SQLite can't: JSONB round-tripping, and an
+Alembic `upgrade head` → `downgrade base` → `upgrade head` round trip. Locally,
+with `DATABASE_URL` unset (or pointed at SQLite), the suite skips rather than
+trying to start anything — there's no Postgres on this laptop.
 
 **Deploy the public frontend to Cloudflare Pages** — a separate workflow gated on
 the default branch, using Woodpecker secrets `cloudflare_api_token` /
