@@ -22,10 +22,12 @@ from pathlib import Path
 import pytest
 from alembic import command
 from alembic.config import Config
-from sqlalchemy import Engine, create_engine, inspect, text
+from sqlalchemy import Engine, create_engine, inspect, select, text
 from sqlalchemy.orm import Session
 
-from app.models import DEFAULT_USER_ID, Base, SavedChord, User
+from app.models import DEFAULT_USER_ID, Base, ExtractedProperty, SavedChord, User
+from app.repositories import provenance as provenance_repo
+from app.schemas.provenance import RunCreate
 
 IDENTITY = {
     "root": {"letter": "C", "accidental": "natural"},
@@ -36,10 +38,17 @@ IDENTITY = {
     "voicing": {"type": "block", "inversion": 0, "rootOctave": 4, "doubleRoot": False},
 }
 
-# The tables `migrations/versions/0001_initial.py` creates/drops — kept in
-# sync with `Base.metadata` by convention, not by import, since the migration
-# round-trip test asserts against the *migration's* behavior, not the ORM's.
-APP_TABLES = {"users", "saved_chords", "practice_sessions"}
+# The tables `migrations/versions/0001_initial.py` and `0002_provenance.py`
+# create/drop — kept in sync with `Base.metadata` by convention, not by
+# import, since the migration round-trip test asserts against the
+# *migration's* behavior, not the ORM's.
+APP_TABLES = {
+    "users",
+    "saved_chords",
+    "practice_sessions",
+    "extraction_runs",
+    "extracted_properties",
+}
 
 
 def _postgres_database_url() -> str:
@@ -105,6 +114,57 @@ def test_jsonb_and_defaults_roundtrip_on_postgres() -> None:
             got = s.get(SavedChord, chord_id)
             assert got is not None
             assert got.identity["voicing"]["rootOctave"] == 4  # JSONB round-trips
+    finally:
+        engine.dispose()
+
+
+@pytest.mark.integration
+def test_completed_run_and_properties_insert_without_fk_violation_on_postgres() -> None:
+    """Exercises the exact shape OPS2 found broken (2026-09-02): a run and
+    its properties added to one `Session` and flushed together, with no
+    `relationship()` between `ExtractionRun` and `ExtractedProperty` (see the
+    load-bearing flush comment in `app/repositories/provenance.py`). SQLite
+    can't catch a regression here (`PRAGMA foreign_keys` is off by default,
+    so `tests/test_provenance.py` would pass even if the flush were removed);
+    Postgres enforces the FK and raises `ForeignKeyViolation` the instant a
+    property's `run_id` is inserted before its run exists. This is the one
+    test that actually proves the insert order, not just the row values.
+    """
+    engine = create_engine(_postgres_database_url(), future=True)
+    try:
+        _reset_schema(engine)
+        Base.metadata.create_all(engine)
+
+        with Session(engine) as s:
+            s.add(User(id=DEFAULT_USER_ID, display_name="Default User"))
+            s.flush()
+
+            data = RunCreate.model_validate(
+                {
+                    "subjectKind": "piece",
+                    "subjectId": "pg-ordering-guard",
+                    "extractor": "scorer",
+                    "extractorVersion": "1.0.0",
+                    "executor": "client",
+                    "params": {},
+                    "inputSha256s": ["h1"],
+                    "status": "succeeded",
+                    "properties": [{"kind": "tempo_curve", "payload": {"x": 1}}],
+                }
+            )
+            run, created = provenance_repo.get_or_create_completed_run(
+                s, DEFAULT_USER_ID, data, "succeeded", data.properties, None
+            )
+            s.commit()
+            assert created
+            run_id = run.id
+
+        with Session(engine) as s:
+            props = s.scalars(
+                select(ExtractedProperty).where(ExtractedProperty.run_id == run_id)
+            ).all()
+            assert len(props) == 1
+            assert props[0].payload["x"] == 1
     finally:
         engine.dispose()
 
