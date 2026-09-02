@@ -192,7 +192,7 @@ backend can talk to it. The credentials are already in the pod, unused.
 
 ## Sketchbook
 
-### SB1 — `ideas` + `idea_links` schema, handles, CRUD, `[[#n]]` link extraction
+### SB1 — `ideas` + `idea_links` schema, handles, CRUD, `[[#n]]` link extraction  `[claimed: feat-0005]`
 **Tier:** T2 (first non-trivial domain object; sets the pattern for every table after it)
 **Depends on:** —
 **Why:** The object the whole workstream is about. Nothing persists today.
@@ -473,7 +473,7 @@ repo proposes the v1 schema and the REAPER ticket adopts it.
 
 ## Provenance and jobs
 
-### PV1 — Provenance tables keyed by subject, canonical params hash, run + property API  `[claimed: feat-0004]`
+### PV1 — Provenance tables keyed by subject, canonical params hash, run + property API  `[merged: feat-0004, PR #12, 2026-09-02 — migrate Job green on both slots]`
 **Tier:** T2 (the contract every machine-derived datum lands through)
 **Depends on:** —
 **Why:** "Every derived datum names its producer." Nothing derived may exist
@@ -1157,6 +1157,15 @@ next run.
 
 ## Notes (dogfooding)
 
+- **`to_camel` mangles digit-to-letter boundaries (found by PV1, 2026-09-02).**
+  `CamelModel`'s alias generator renders `input_sha256s` as `inputSha256S`,
+  not `inputSha256s` — it capitalises after a digit run. A field whose wire
+  name the docs spell with digits followed by letters therefore needs an
+  explicit `Field(alias=...)`, or the API silently drops that field and uses
+  its default. In PV1 that would have zeroed the input hashes feeding the
+  params hash, i.e. broken run identity, and it surfaced only because two
+  tests asserted idempotency. The docs' contracts are full of
+  `sha256`/`mp3`/`utf8`-shaped names, so check every new schema field.
 - **FK insert ordering is a Postgres-only failure (found by OPS2, 2026-09-02).**
   There is no `relationship()` anywhere in `app/models/`; the FK is a bare
   column constraint on `OwnedMixin`. SQLAlchemy's unit of work orders
