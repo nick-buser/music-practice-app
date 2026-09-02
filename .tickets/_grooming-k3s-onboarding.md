@@ -1,6 +1,6 @@
 ---
 title: Homelab k3s onboarding (grooming)
-status: open
+status: done
 ---
 
 ## Context
