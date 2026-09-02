@@ -89,6 +89,12 @@ def test_jsonb_and_defaults_roundtrip_on_postgres() -> None:
 
         with Session(engine) as s:
             s.add(User(id=DEFAULT_USER_ID, display_name="Default User"))
+            # No `relationship()` ties User <-> SavedChord (the FK is a bare
+            # column constraint), so the unit of work has no ordering hint
+            # between the two inserts. SQLite never enforces the FK either
+            # way, but Postgres does — flush the user row first so it exists
+            # before the chord insert is emitted.
+            s.flush()
             chord = SavedChord(user_id=DEFAULT_USER_ID, label="C7", identity=IDENTITY)
             s.add(chord)
             s.commit()
