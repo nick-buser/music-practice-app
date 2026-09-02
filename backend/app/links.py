@@ -4,13 +4,13 @@ by design — turning text into candidate handles never needs a DB session,
 so this stays trivially unit-testable and is reusable from the repository
 layer (`app/repositories/ideas.py`) with no I/O of its own.
 
-Also carries the two small vocabularies `Idea`/`IdeaLink` enforce with a
-`CheckConstraint` rather than a SQLAlchemy `Enum` (`app/models/idea.py`) —
-model and schema both import them from here, exactly as
-`app/models/provenance.py` and `app/schemas/provenance.py` both import
-`Executor`/`RunStatus` from `app/provenance.py`. Schemas never import from
-`app/models/` in this codebase, so a shared non-model module is where a
-type used by both has to live.
+Also carries the three small vocabularies `Idea`/`IdeaLink`/`IdeaAsset`
+enforce with a `CheckConstraint` rather than a SQLAlchemy `Enum`
+(`app/models/idea.py`) — model and schema both import them from here,
+exactly as `app/models/provenance.py` and `app/schemas/provenance.py` both
+import `Executor`/`RunStatus` from `app/provenance.py`. Schemas never
+import from `app/models/` in this codebase, so a shared non-model module is
+where a type used by both has to live.
 """
 
 from __future__ import annotations
@@ -32,6 +32,25 @@ IdeaLinkKind = Literal[
     "incorporated_into",
     "responds_to",
     "mentions",
+]
+
+# docs/sketchbook.md's "Attachments" section, the `idea_assets` block's
+# `role:` line, verbatim: `role: melody|harmony|bass|drums|full|render|
+# score|rpp|reference|image|other`. `render`/`score` are reserved for
+# machine-produced and non-substrate (PDF scan, manuscript photo) bytes
+# respectively — see that doc's F1-amendment paragraph on `role: score`.
+IdeaAssetRole = Literal[
+    "melody",
+    "harmony",
+    "bass",
+    "drums",
+    "full",
+    "render",
+    "score",
+    "rpp",
+    "reference",
+    "image",
+    "other",
 ]
 
 # Literal double brackets, a `#`, one or more digits, literal double
