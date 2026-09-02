@@ -9,6 +9,15 @@ export type View = 'library' | 'piece' | 'session' | 'stats' | 'sketchbook' | 'd
 interface Props {
   view: View;
   onSetView: (v: View) => void;
+  /**
+   * Overrides for NAV's compiled-in counts, keyed by view id — e.g. the
+   * Sketchbook badge becomes the live inbox count once a backend is
+   * configured (docs/sketchbook.md: "The sidebar count on the Sketchbook
+   * nav item becomes the inbox count"). NAV is a module-level const and
+   * can't read live state itself, so App.tsx computes the live number and
+   * threads it in here; omitted entries fall back to NAV's static count.
+   */
+  counts?: Partial<Record<View, number>>;
 }
 
 const NAV: Array<{ id: View; icon: string; label: string; count: number | null }> = [
@@ -27,7 +36,7 @@ const INSTR_DOT: Record<string, string> = {
   compose: 'surface',
 };
 
-export function Sidebar({ view, onSetView }: Props) {
+export function Sidebar({ view, onSetView, counts }: Props) {
   return (
     <aside className="side">
       <div className="brand">
@@ -36,19 +45,22 @@ export function Sidebar({ view, onSetView }: Props) {
 
       <div className="nav">
         <div className="nav-label">— Practice</div>
-        {NAV.map((it) => (
-          <a
-            key={it.id}
-            className={view === it.id ? 'active' : ''}
-            onClick={() => onSetView(it.id)}
-          >
-            <span className="ico"><Icon name={it.icon} /></span>
-            {it.label}
-            {it.count !== null && (
-              <span className="count">{String(it.count).padStart(2, '0')}</span>
-            )}
-          </a>
-        ))}
+        {NAV.map((it) => {
+          const count = counts?.[it.id] ?? it.count;
+          return (
+            <a
+              key={it.id}
+              className={view === it.id ? 'active' : ''}
+              onClick={() => onSetView(it.id)}
+            >
+              <span className="ico"><Icon name={it.icon} /></span>
+              {it.label}
+              {count !== null && (
+                <span className="count">{String(count).padStart(2, '0')}</span>
+              )}
+            </a>
+          );
+        })}
 
         <div className="nav-label">— Instruments</div>
         {INSTRUMENTS.map((ins) => (
