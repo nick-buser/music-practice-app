@@ -148,7 +148,7 @@ the F decisions when it runs dry.
 
 ## Media plumbing
 
-### MD1 — Garage media store: settings, content-addressed keys, streaming upload with sha256, health probe  `[claimed: feat-0003]`
+### MD1 — Garage media store: settings, content-addressed keys, streaming upload with sha256, health probe  `[merged: feat-0003, PR #11, 2026-09-02 — deployed check green on both slots]`
 **Tier:** T2 (storage pattern-setter; the donor for SB2 and RC1)
 **Depends on:** —
 **Why:** Two workstreams need bytes in Garage and neither can start until the
@@ -473,7 +473,7 @@ repo proposes the v1 schema and the REAPER ticket adopts it.
 
 ## Provenance and jobs
 
-### PV1 — Provenance tables keyed by subject, canonical params hash, run + property API
+### PV1 — Provenance tables keyed by subject, canonical params hash, run + property API  `[claimed: feat-0004]`
 **Tier:** T2 (the contract every machine-derived datum lands through)
 **Depends on:** —
 **Why:** "Every derived datum names its producer." Nothing derived may exist
