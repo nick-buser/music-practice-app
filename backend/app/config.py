@@ -28,6 +28,32 @@ class Settings(BaseSettings):
     # the app runs fine with no collector in front of it.
     otel_exporter_otlp_endpoint: str | None = None
 
+    # Garage (S3-compatible) object storage for media — recordings, idea
+    # assets. All optional: unset means `storage_configured` is False and
+    # `app.deps.get_media_store` falls back to `MemoryMediaStore`, so dev/test
+    # stay usable with no S3 endpoint in reach (this laptop included — it
+    # can't route to Garage at all). These names are read straight off the
+    # deployed Helm chart's `config:`/`secretKeyRef` — match them exactly, or
+    # a fully-configured cluster silently reports "unconfigured".
+    s3_endpoint: str | None = None
+    s3_region: str | None = None
+    s3_bucket: str | None = None
+    s3_access_key_id: str | None = None
+    s3_secret_access_key: str | None = None
+    # Arrives from the chart as the string "true"; pydantic-settings parses
+    # common truthy/falsy strings into bool fields with no extra work.
+    s3_force_path_style: bool = False
+
+    @property
+    def storage_configured(self) -> bool:
+        return bool(
+            self.s3_endpoint
+            and self.s3_region
+            and self.s3_bucket
+            and self.s3_access_key_id
+            and self.s3_secret_access_key
+        )
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def _split_csv(cls, v: object) -> object:

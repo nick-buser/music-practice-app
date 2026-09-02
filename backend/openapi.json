@@ -612,7 +612,7 @@
   "paths": {
     "/healthz": {
       "get": {
-        "description": "Liveness \u2014 the process is up.",
+        "description": "Liveness \u2014 the process is up.\n\nWired to the startup, readiness, AND liveness probes for every api pod, so\nthis handler must always return 200 no matter what storage is doing \u2014\n`storage` in the body carries that state instead. `MediaStore.healthcheck()`\nis the contract that makes that safe (never raises, never hangs); this\nhandler adds nothing on top that could break it.",
         "operationId": "healthz_healthz_get",
         "responses": {
           "200": {
