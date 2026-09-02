@@ -233,7 +233,7 @@ backend can talk to it. The credentials are already in the pod, unused.
       `POST /api/v1/ideas {"body":"hello"}` on the dev slot returns 201 with
       `handle: 1` (substrate: deployed)
 
-### SB2 — `idea_assets`: upload, revisions, `run_id`, streaming download  `[claimed: feat-0006 — PV1 landed first, so this migration owns the run_id FK]`
+### SB2 — `idea_assets`: upload, revisions, `run_id`, streaming download  `[merged: feat-0006, PR #14, 2026-09-02 — 1MB round-trip through Garage verified; owns the run_id FK]`
 **Tier:** T2 (first tenant of MD1)
 **Depends on:** MD1, SB1
 **Why:** Attachments are what make an idea more than a note; this is the
@@ -268,7 +268,7 @@ first real bytes-through-Garage path.
       it, `sha256sum` matches; `ssh dev-workshop kubectl -n soundings-dev logs
       deploy/soundings-api` shows no storage errors (substrate: deployed)
 
-### SB3a — Sketchbook UI: live stream, inbox filter, quick capture (text + file)
+### SB3a — Sketchbook UI: live stream, inbox filter, quick capture (text + file)  `[claimed: feat-0007]`
 **Tier:** T2 (replaces a mock with the first live personal-media surface; sets the live/mock split)
 **Depends on:** SB2
 **Why:** The tab exists and persists nothing. The inbox is the product.
