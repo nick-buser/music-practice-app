@@ -811,7 +811,7 @@ the newest PR build from *any* branch. Yes / no.
 (substrate: ci); the dev slot rolls to them within one Argo poll and prod
 does not (substrate: deployed).
 
-### OPS2 — Real-Postgres backend tests in CI  `[claimed: ci-0001]`
+### OPS2 — Real-Postgres backend tests in CI  `[merged: ci-0001, PR #10, 2026-09-02]`
 **Tier:** T1
 **Depends on:** —
 **Why:** The SQLite suite cannot exercise tsvector (SB5), JSONB operators,
@@ -1156,6 +1156,18 @@ cross-repo deploys and the unseeded provisional rows as what feeds the
 next run.
 
 ## Notes (dogfooding)
+
+- **FK insert ordering is a Postgres-only failure (found by OPS2, 2026-09-02).**
+  There is no `relationship()` anywhere in `app/models/`; the FK is a bare
+  column constraint on `OwnedMixin`. SQLAlchemy's unit of work orders
+  cross-mapper inserts from ORM relationship dependencies, not column-level
+  foreign keys, so a parent and child added to one Session and committed
+  together have no guaranteed insert order. SQLite has `PRAGMA foreign_keys`
+  OFF and never enforces it; Postgres does. **SB1, PV1 and RC1 all add
+  FK-carrying child tables** — any test of theirs that creates parent and
+  child in a single `commit()` will pass locally and fail in the
+  `test-postgres` step. Flush parents first, or give the models real
+  relationships. Only the `integration` suite can catch this.
 
 - Four docs, one grooming doc: the stable-label prefixes (`SB`, `PV`, …)
   are what keep cross-references readable; "Ticket 23" would not have.
