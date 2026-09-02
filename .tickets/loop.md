@@ -36,6 +36,8 @@ push is their gate; the PR body must say "image build verified in CI only".
 | ci | Woodpecker API for the pushed SHA (`woodpecker` skill): `backend`, `frontend`, `docker` workflows | needs the push pipeline green for the current `main` SHA — check the *push* build, not the last PR build |
 | deployed | `curl -fsS https://soundings-dev.k8s.bittern-chameleon.dev/api/healthz`; pod-side via `ssh dev-workshop kubectl -n soundings-dev …` | the dev slot rolls ~3–5 min after a merge to main (same images as prod until OPS1) |
 | local (e2e) | `ls ~/Library/Caches/ms-playwright` | Playwright browsers are **not installed** here and must not be installed (disk rule) — treat as down on this laptop |
+| hardware | none — attended: a real MIDI keyboard / mic in desktop Chrome | never an admission input: lines tagged `hardware` are verify notes, not gates |
+| H | human ratification = the PR merge | F tickets only; never auto-picked |
 
 The laptop cannot reach Garage (no S3 hostname by design): every
 Garage-touching criterion is `deployed`.
@@ -73,6 +75,10 @@ straight to main. Exceptions: none.
 - **Contract chain:** any backend schema change regenerates
   `backend/openapi.json` (`uv run python scripts/export_openapi.py`) and
   `app/src/api/schema.d.ts` (`npm run gen:api`) in the same PR.
+- **Alembic:** one linear chain; a new revision's number and
+  `down_revision` come from `alembic heads` on `main` at PR time (grooming
+  docs say `<next>_<name>`, never a fixed number); rebase and renumber on
+  conflict.
 - **Cross-repo tickets** (a `**Repo:**` other than this one) are claimed in
   the owning repo per its own conventions — homelab_infra_and_planning
   enforces worktrees and has its own numbering; homelab-gitops follows the
@@ -103,10 +109,10 @@ Tier stamps on tickets are routing data, enforced at dispatch.
 
 - Default tier: T1 (sonnet)
 - T0 (haiku): SC6
-- T1 (sonnet): SB4, SB5, SB6, SB8, PV4, PV5, RC1, RC3, RC5, OPS1, OPS2, SC4, SC5, SR7
-- T2 (sonnet, high effort): MD1, SB1, SB2, SB3a, SB3b, SB7, PV1, PV2, PV3, RC2, RC4, RC6, SC2, SC3, SC8, SC9, SR5, SR6, SR8
+- T1 (sonnet): SB4, SB5, SB6, SB8, PV4, PV5, RC1, RC3, RC5, RC7, OPS1, OPS2, SC5, SC7, SR4, SR7
+- T2 (sonnet, high effort): MD1, SB1, SB2, SB3a, SB3b, SB7, PV1, PV2, PV3, RC2, RC4, RC6, SC2, SC3, SC4, SC8, SC9, SR5, SR6, SR8
 - T3 (opus): SC1, SR1, SR2, SR3
-- F (frontier, human-dispatched, never auto-picked): F1, F2
+- F (frontier, human-dispatched, never auto-picked): F1, F2 — reviewed 2026-09-02 (docs-0006; done at merge)
 - Legacy tags in `_grooming-k3s-onboarding.md` (all done): S = T1, O = T3, H = H.
 - Never auto-escalated past T3; frontier-class work is human-scheduled.
 

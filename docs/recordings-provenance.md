@@ -54,15 +54,25 @@ escape hatch if takes ever get big enough to care (video).
 
 ```
 recordings {
-  id, user_id, subject_kind, subject_id, session_id?,
+  id, user_id, subject_kind?, subject_id?, session_id?,   -- both subject columns NULL for free practice
+                                                          -- and sketchbook voice captures (an inbox item)
   captured_at, duration_ms, cadence-due bookkeeping,
   + standard mixins (client-mintable UUID, timestamps, soft delete)
 }
 recording_tracks {
   id, recording_id, kind: audio|midi,
-  storage_key, mime, bytes, sha256
+  storage_key, mime, bytes, sha256,
+  offset_ms             -- track start − recordings.captured_at (F1 amendment 2026-09-02):
+                        -- audio = MediaRecorder start; MIDI = first count-in click or first event
 }
 ```
+
+**The recording clock** is the recording's own timeline: t = 0 is
+`captured_at`; every track carries its `offset_ms`, so a track-local time
+converts by adding it. `timeRange` anchors and every property `time_range`
+are on the recording clock — otherwise an audio take and a MIDI take of the
+same attempt disagree by an unknown offset the moment two tracks exist. A
+recording may be MIDI-only (a sight-reading attempt is one).
 
 `sha256` on every track: integrity, dedup, and the root of the provenance
 chain — every extraction names inputs whose hashes pin what it actually saw.
@@ -77,10 +87,12 @@ Two tables carry the whole rule:
 
 ```
 extraction_runs {
-  id, recording_id,
+  id, subject_kind, subject_id (str, the house subject form — see below),
+  input_sha256s jsonb,  -- sorted; the server folds it into params before hashing
   extractor,            -- 'beat-tracker', 'pitch-track', 'midi-matcher', ...
   extractor_version,    -- semver of the code that ran
   model_ref?,           -- weights identifier when one is involved
+  executor: worker|client|external,
   params jsonb,         -- canonicalized (sorted keys) before hashing
   params_hash,
   status: queued|running|succeeded|failed, started_at, finished_at, error?
@@ -102,9 +114,12 @@ The rules that make it a contract rather than a schema:
   v0.3 · Jul 12 take."
 - **Runs are immutable.** Re-extraction is a *new* run; nothing derived is
   edited in place.
-- **Idempotency is structural**: unique on `(recording_id, extractor,
-  extractor_version, params_hash)`. Asking twice for the same extraction is
-  a cache hit, not a duplicate.
+- **Idempotency is structural**: unique on `(subject_kind, subject_id,
+  extractor, extractor_version, params_hash)`, where the **server** folds
+  the sorted `input_sha256s` into `params.inputSha256s` before hashing
+  (clients never include it themselves), so two different inputs of one
+  subject never collide. Asking twice for the same extraction is a cache
+  hit, not a duplicate.
 - **Superseding is a view, not a delete**: the newest succeeded run per
   `(extractor, kind)` is the default read; older runs remain for
   comparison and time-travel. Rows are cheap; trust is not.
@@ -114,18 +129,41 @@ The rules that make it a contract rather than a schema:
   serve recordings, sketchbook idea assets (MIDI features, rendered
   previews), and whatever comes next. A derived *file* (a FluidSynth or
   REAPER render) is an asset row carrying a `run_id`, the same lineage as a
-  jsonb property.
+  jsonb property. `subject_id` is a **string** in the house subject form
+  (`recording:<uuid>`, `idea:<uuid>`, `score:<uuid>`, `exercise:<uuid>`),
+  matching `practice_sessions.subject_id` — never a uuid column *(F1
+  amendment 2026-09-02; applies to PV1)*.
 - **The MIDI matcher is an extractor.** Sight-reading verdicts are
-  extracted properties of a MIDI track with the expected ScoreDoc in
-  `params` — one contract for every machine-derived datum in the app, and
-  verdicts get recomputed for free when the matcher improves.
+  extracted properties (`attempt_verdicts`, plus `alignment_map`) of the
+  attempt's recording — `input_sha256s = [midiTrack.sha256, scoreDocHash]`,
+  `params = { exerciseId, scoreDocHash, matcher settings }`, never the
+  ScoreDoc body — one contract for every machine-derived datum in the app.
+  Verdicts are **recomputable** when the matcher improves (a new run), not
+  recomputed for free: the matcher runs in the browser (next bullet), so
+  recompute is client-driven, lazily on open or in bulk *(F2 amendment)*.
+- **Producers may be browser-side or external.** `extraction_runs` carries
+  `executor: 'worker' | 'client' | 'external'`. Worker runs are enqueued and
+  executed by the job worker. Client runs are executed by pure-TS
+  extractors in the browser and **posted complete**: `POST /v1/runs`
+  accepts `{ subjectKind, subjectId, extractor, extractorVersion, params,
+  inputSha256s, executor: 'client', status: 'succeeded' | 'failed', error?,
+  properties: [...] }` and inserts the run and its properties in one
+  transaction; the same unique key applies and an idempotent hit returns
+  the existing run and discards the posted properties; the server
+  allowlists client extractors (`midi-matcher`, `scorer`,
+  `musicxml-import` — all pure TS) and rejects worker-only names.
+  `external` is the same posted-complete shape for imported producers
+  (`reaper-capture-sidecar`). The contract is about lineage
+  and idempotency, not about where the CPU is *(F2 amendment 2026-09-02;
+  applies to PV1)*.
 
 ## Extraction: mlserve, behind the job boundary
 
 Extractors run on the homelab GPU box (`mlserve`), which already hosts
 exactly this shape of service — small FastAPI wrappers under systemd
 (kokoro-tts, faster-whisper, YOLO11, bge-reranker). Audio analysis joins
-the fleet as one more service; the laptop is never in the loop.
+the fleet as one more service; the laptop is never in the loop for audio
+extractors (the browser-side MIDI matcher is the exception, above).
 
 The backend keeps its promise from `backend/README.md` — heavy work is
 **enqueue→poll, never inline**: a `POST` creates the `extraction_run` row
@@ -142,16 +180,21 @@ v1 extractor set, chosen for the tempo-vs-target product goal:
 | `loudness` | `loudness` | LUFS-ish envelope; dynamics over time |
 | `waveform-peaks` | `waveform_peaks` | so the client draws waveforms without downloading audio |
 | `pitch-track` | `pitch_track` | basic-pitch/CREPE class; deferred-able if scope needs cutting |
-| `midi-matcher` | `attempt_verdicts` | CPU-only, defined in the sight-reading doc |
+| `midi-matcher` | `attempt_verdicts`, `alignment_map` | pure TS in the browser (`app/src/midi/matcher.ts`), posted as a completed client run; defined in the sight-reading doc |
 
 ## Annotation layers on recordings
 
 The annotation/layer model is the substrate doc's, verbatim — the only
-difference is the anchor: `{ kind: 'timeRange', startMs, endMs }` against a
-recording instead of element ids against a score. Text notes at timestamps,
-highlighted passages, and system layers land through the same tables, the
-same toggle UI, and the same authorship rule: human annotations carry a
-user, machine annotations carry a `runId` into the provenance tables.
+difference is the anchor: `{ kind: 'timeRange', startMs, endMs, trackId? }`
+on the recording clock against a recording instead of element ids against
+a score. Text notes at timestamps and highlighted passages are user
+annotation rows through the same tables and toggle UI. Machine marks —
+tempo curves, loudness, verdicts — are **virtual system layers**:
+projected at read time from the newest succeeded run's property, never
+written to `annotations`, so supersession is the provenance rule and a
+recompute never doubles rows *(F1 amendment 2026-09-02)*. Human marks carry
+a user; machine marks carry the `runId` of the property they were projected
+from.
 
 **Tempo-vs-target** — the headline feature of this workstream — is a
 *view*, not stored data: the `tempo_curve` property plotted against the
@@ -166,12 +209,16 @@ The design makes that a *pure addition*:
 
 - An **alignment is just another extraction run** producing an
   `alignment_map` property (score-time ↔ audio-time correspondence).
-- When an alignment exists, `timeRange` anchors project onto score anchors
-  and vice versa. No schema changes, no new annotation kinds — a resolver
-  gains one lookup.
-- **MIDI tracks of generated exercises get alignment nearly free** (the
-  expected onset grid is known); audio-only takes of repertoire need real
-  score-following/DTW on mlserve — genuinely hard, explicitly deferred.
+- When an alignment exists, `timeRange` anchors project onto the
+  substrate's `scoreTime` anchor (exact quarter-note positions, defined
+  there from day one) and vice versa. No schema changes — a resolver gains
+  one lookup. `alignment_map.payload` is `{ scoreId, scoreDocHash, points:
+  [{ q: Fraction, ms }] }`, monotone in both fields, `ms` on the recording
+  clock.
+- **MIDI tracks of generated exercises get alignment for free**: the
+  matcher run emits `alignment_map` from its matched onsets. Audio-only
+  takes of repertoire need real score-following/DTW on mlserve — genuinely
+  hard, explicitly deferred.
 
 v1 ships without alignment, and loses nothing by it: time-anchored
 annotations and tempo-vs-target don't need it.
@@ -180,8 +227,9 @@ annotations and tempo-vs-target don't need it.
 
 Recordings are personal media and exist **only** in the homelab shape —
 every surface here gates on `backendEnabled`
-([DEPLOYMENT.md](../DEPLOYMENT.md)); the public build shows none of it, per
-the showcase-isolation rule. Bytes live in scoped-key buckets no other
+([DEPLOYMENT.md](../DEPLOYMENT.md)); the public build persists none of it,
+per the showcase-isolation rule (the browser-side matcher still runs there,
+in memory, with no recording created). Bytes live in scoped-key buckets no other
 tenant's key can list. No sharing/export features in v1.
 
 ## Design decisions worth knowing

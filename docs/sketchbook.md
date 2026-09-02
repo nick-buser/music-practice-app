@@ -264,8 +264,12 @@ The vendored five views, mapped onto the existing mock:
 | **Graph** | — | the edge table drawn; needs enough nodes to be worth it |
 
 The mock's lyric/harmony/plan tabs survive as sections of the idea page:
-lyric and plan are body markdown; harmony is an attachment that is either
-ABC (foreign, render-only) or ScoreDoc (native, editable). The static mock
+lyric and plan are body markdown; harmony is a score linked from the idea —
+an ABC/MusicXML file is a *foreign* `scores` row (render-only, annotatable,
+promotable), a hand-entered harmony a *native* `scores` row (editable via
+the score substrate); never a JSONB column on `idea_assets`, whose
+`role: score` is reserved for non-substrate bytes (PDF scans, images of
+manuscript) — F1 amendment 2026-09-02. The static mock
 itself stays as the **public-build showcase** — same pattern as recordings:
 personal media exists only in the homelab shape, gated on `backendEnabled`.
 
@@ -295,7 +299,9 @@ personal media exists only in the homelab shape, gated on `backendEnabled`.
 - **Git as a sink** — designed as one export target, not built.
 - **In-browser piano roll / MIDI editor** — the score substrate's E1 path
   is the editor; a MIDI→ScoreDoc quantizing importer is the promotion path
-  and is future work on the importer, like OMR.
+  and is future work on the importer, like OMR — a provenance producer
+  (`midi-quantize`, parameterised) whose output records its run in
+  `meta.provenance` (score-substrate §Two tiers).
 - **Studio-host agent** (proper transport for Open-in-REAPER and renders)
   — after the Windows VM is live and used; zip/folder first.
 - **Embeddings, similarity, LLM-assisted analysis** — the inference LXC
