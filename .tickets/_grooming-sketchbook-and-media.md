@@ -192,7 +192,7 @@ backend can talk to it. The credentials are already in the pod, unused.
 
 ## Sketchbook
 
-### SB1 — `ideas` + `idea_links` schema, handles, CRUD, `[[#n]]` link extraction  `[claimed: feat-0005]`
+### SB1 — `ideas` + `idea_links` schema, handles, CRUD, `[[#n]]` link extraction  `[merged: feat-0005, PR #13, 2026-09-02 — handle 1 live on the dev slot]`
 **Tier:** T2 (first non-trivial domain object; sets the pattern for every table after it)
 **Depends on:** —
 **Why:** The object the whole workstream is about. Nothing persists today.
@@ -233,7 +233,7 @@ backend can talk to it. The credentials are already in the pod, unused.
       `POST /api/v1/ideas {"body":"hello"}` on the dev slot returns 201 with
       `handle: 1` (substrate: deployed)
 
-### SB2 — `idea_assets`: upload, revisions, `run_id`, streaming download
+### SB2 — `idea_assets`: upload, revisions, `run_id`, streaming download  `[claimed: feat-0006 — PV1 landed first, so this migration owns the run_id FK]`
 **Tier:** T2 (first tenant of MD1)
 **Depends on:** MD1, SB1
 **Why:** Attachments are what make an idea more than a note; this is the
