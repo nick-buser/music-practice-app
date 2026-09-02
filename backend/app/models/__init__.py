@@ -2,7 +2,16 @@
 
 from app.models.base import Base
 from app.models.chord import SavedChord
+from app.models.provenance import ExtractedProperty, ExtractionRun
 from app.models.session import PracticeSession
 from app.models.user import DEFAULT_USER_ID, User
 
-__all__ = ["DEFAULT_USER_ID", "Base", "PracticeSession", "SavedChord", "User"]
+__all__ = [
+    "DEFAULT_USER_ID",
+    "Base",
+    "ExtractedProperty",
+    "ExtractionRun",
+    "PracticeSession",
+    "SavedChord",
+    "User",
+]

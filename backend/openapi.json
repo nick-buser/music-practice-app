@@ -95,6 +95,197 @@
         "title": "ChordIdentity",
         "type": "object"
       },
+      "ExtractedPropertyWithRun": {
+        "description": "A property plus the run that produced it \u2014 the lineage badge every\nprovenance read carries (\"tempo curve \u2014 beat-tracker v0.3 \u00b7 Jul 12 take\").",
+        "properties": {
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          },
+          "run": {
+            "$ref": "#/components/schemas/ExtractionRunRead"
+          },
+          "timeRange": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timerange"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "timeRange",
+          "payload",
+          "confidence",
+          "run"
+        ],
+        "title": "ExtractedPropertyWithRun",
+        "type": "object"
+      },
+      "ExtractionRunRead": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "executor": {
+            "enum": [
+              "worker",
+              "client",
+              "external"
+            ],
+            "title": "Executor",
+            "type": "string"
+          },
+          "extractor": {
+            "title": "Extractor",
+            "type": "string"
+          },
+          "extractorVersion": {
+            "title": "Extractorversion",
+            "type": "string"
+          },
+          "finishedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finishedat"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "inputSha256s": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Inputsha256S",
+            "type": "array"
+          },
+          "modelRef": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelref"
+          },
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          },
+          "paramsHash": {
+            "title": "Paramshash",
+            "type": "string"
+          },
+          "startedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Startedat"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "subjectId": {
+            "title": "Subjectid",
+            "type": "string"
+          },
+          "subjectKind": {
+            "title": "Subjectkind",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "title": "Updatedat",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "subjectKind",
+          "subjectId",
+          "inputSha256s",
+          "extractor",
+          "extractorVersion",
+          "modelRef",
+          "executor",
+          "params",
+          "paramsHash",
+          "status",
+          "startedAt",
+          "finishedAt",
+          "error",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "ExtractionRunRead",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -106,6 +297,37 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "Page_ExtractionRunRead_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ExtractionRunRead"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "Page[ExtractionRunRead]",
         "type": "object"
       },
       "Page_PracticeSessionRead_": {
@@ -389,6 +611,48 @@
         "title": "Problem",
         "type": "object"
       },
+      "PropertyIn": {
+        "properties": {
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          },
+          "timeRange": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timerange"
+          }
+        },
+        "required": [
+          "kind",
+          "payload"
+        ],
+        "title": "PropertyIn",
+        "type": "object"
+      },
       "Root": {
         "properties": {
           "accidental": {
@@ -419,6 +683,100 @@
           "accidental"
         ],
         "title": "Root",
+        "type": "object"
+      },
+      "RunCreate": {
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "executor": {
+            "enum": [
+              "worker",
+              "client",
+              "external"
+            ],
+            "title": "Executor",
+            "type": "string"
+          },
+          "extractor": {
+            "title": "Extractor",
+            "type": "string"
+          },
+          "extractorVersion": {
+            "title": "Extractorversion",
+            "type": "string"
+          },
+          "inputSha256s": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Inputsha256S",
+            "type": "array"
+          },
+          "modelRef": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelref"
+          },
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          },
+          "properties": {
+            "items": {
+              "$ref": "#/components/schemas/PropertyIn"
+            },
+            "title": "Properties",
+            "type": "array"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "succeeded",
+                  "failed"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "subjectId": {
+            "title": "Subjectid",
+            "type": "string"
+          },
+          "subjectKind": {
+            "title": "Subjectkind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subjectKind",
+          "subjectId",
+          "extractor",
+          "extractorVersion",
+          "executor"
+        ],
+        "title": "RunCreate",
         "type": "object"
       },
       "SavedChordCreate": {
@@ -976,6 +1334,110 @@
         ]
       }
     },
+    "/v1/runs": {
+      "post": {
+        "operationId": "create_run_v1_runs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractionRunRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Error (problem+json)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Error (problem+json)"
+          }
+        },
+        "summary": "Create Run",
+        "tags": [
+          "provenance"
+        ]
+      }
+    },
+    "/v1/runs/{run_id}": {
+      "get": {
+        "operationId": "get_run_v1_runs__run_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractionRunRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Error (problem+json)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Error (problem+json)"
+          }
+        },
+        "summary": "Get Run",
+        "tags": [
+          "provenance"
+        ]
+      }
+    },
     "/v1/sessions": {
       "get": {
         "operationId": "list_sessions_v1_sessions_get",
@@ -1247,6 +1709,156 @@
         "summary": "Update Session",
         "tags": [
           "sessions"
+        ]
+      }
+    },
+    "/v1/subjects/{kind}/{subject_id}/properties": {
+      "get": {
+        "operationId": "list_subject_properties_v1_subjects__kind___subject_id__properties_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subject_id",
+            "required": true,
+            "schema": {
+              "title": "Subject Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ExtractedPropertyWithRun"
+                  },
+                  "title": "Response List Subject Properties V1 Subjects  Kind   Subject Id  Properties Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Error (problem+json)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Error (problem+json)"
+          }
+        },
+        "summary": "List Subject Properties",
+        "tags": [
+          "provenance"
+        ]
+      }
+    },
+    "/v1/subjects/{kind}/{subject_id}/runs": {
+      "get": {
+        "operationId": "list_subject_runs_v1_subjects__kind___subject_id__runs_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "kind",
+            "required": true,
+            "schema": {
+              "title": "Kind",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subject_id",
+            "required": true,
+            "schema": {
+              "title": "Subject Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 1000000,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_ExtractionRunRead_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Error (problem+json)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Error (problem+json)"
+          }
+        },
+        "summary": "List Subject Runs",
+        "tags": [
+          "provenance"
         ]
       }
     }

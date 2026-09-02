@@ -87,6 +87,40 @@ export interface paths {
         patch: operations["update_chord_v1_chords__chord_id__patch"];
         trace?: never;
     };
+    "/v1/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Run */
+        post: operations["create_run_v1_runs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Run */
+        get: operations["get_run_v1_runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/sessions": {
         parameters: {
             query?: never;
@@ -124,6 +158,40 @@ export interface paths {
         patch: operations["update_session_v1_sessions__session_id__patch"];
         trace?: never;
     };
+    "/v1/subjects/{kind}/{subject_id}/properties": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Subject Properties */
+        get: operations["list_subject_properties_v1_subjects__kind___subject_id__properties_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/subjects/{kind}/{subject_id}/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Subject Runs */
+        get: operations["list_subject_runs_v1_subjects__kind___subject_id__runs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -157,10 +225,98 @@ export interface components {
             seventh?: ("maj7" | "min7" | "dim7") | null;
             voicing: components["schemas"]["Voicing"];
         };
+        /**
+         * ExtractedPropertyWithRun
+         * @description A property plus the run that produced it — the lineage badge every
+         *     provenance read carries ("tempo curve — beat-tracker v0.3 · Jul 12 take").
+         */
+        ExtractedPropertyWithRun: {
+            /** Confidence */
+            confidence: number | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Kind */
+            kind: string;
+            /** Payload */
+            payload: {
+                [key: string]: unknown;
+            };
+            run: components["schemas"]["ExtractionRunRead"];
+            /** Timerange */
+            timeRange: {
+                [key: string]: unknown;
+            } | null;
+        };
+        /** ExtractionRunRead */
+        ExtractionRunRead: {
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /** Error */
+            error: string | null;
+            /**
+             * Executor
+             * @enum {string}
+             */
+            executor: "worker" | "client" | "external";
+            /** Extractor */
+            extractor: string;
+            /** Extractorversion */
+            extractorVersion: string;
+            /** Finishedat */
+            finishedAt: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Inputsha256S */
+            inputSha256s: string[];
+            /** Modelref */
+            modelRef: string | null;
+            /** Params */
+            params: {
+                [key: string]: unknown;
+            };
+            /** Paramshash */
+            paramsHash: string;
+            /** Startedat */
+            startedAt: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "running" | "succeeded" | "failed";
+            /** Subjectid */
+            subjectId: string;
+            /** Subjectkind */
+            subjectKind: string;
+            /**
+             * Updatedat
+             * Format: date-time
+             */
+            updatedAt: string;
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** Page[ExtractionRunRead] */
+        Page_ExtractionRunRead_: {
+            /** Items */
+            items: components["schemas"]["ExtractionRunRead"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /** Total */
+            total: number;
         };
         /** Page[PracticeSessionRead] */
         Page_PracticeSessionRead_: {
@@ -270,6 +426,21 @@ export interface components {
              */
             type?: string;
         };
+        /** PropertyIn */
+        PropertyIn: {
+            /** Confidence */
+            confidence?: number | null;
+            /** Kind */
+            kind: string;
+            /** Payload */
+            payload: {
+                [key: string]: unknown;
+            };
+            /** Timerange */
+            timeRange?: {
+                [key: string]: unknown;
+            } | null;
+        };
         /** Root */
         Root: {
             /**
@@ -282,6 +453,36 @@ export interface components {
              * @enum {string}
              */
             letter: "A" | "B" | "C" | "D" | "E" | "F" | "G";
+        };
+        /** RunCreate */
+        RunCreate: {
+            /** Error */
+            error?: string | null;
+            /**
+             * Executor
+             * @enum {string}
+             */
+            executor: "worker" | "client" | "external";
+            /** Extractor */
+            extractor: string;
+            /** Extractorversion */
+            extractorVersion: string;
+            /** Inputsha256S */
+            inputSha256s?: string[];
+            /** Modelref */
+            modelRef?: string | null;
+            /** Params */
+            params?: {
+                [key: string]: unknown;
+            };
+            /** Properties */
+            properties?: components["schemas"]["PropertyIn"][];
+            /** Status */
+            status?: ("succeeded" | "failed") | null;
+            /** Subjectid */
+            subjectId: string;
+            /** Subjectkind */
+            subjectKind: string;
         };
         /** SavedChordCreate */
         SavedChordCreate: {
@@ -650,6 +851,88 @@ export interface operations {
             };
         };
     };
+    create_run_v1_runs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExtractionRunRead"];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    get_run_v1_runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExtractionRunRead"];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
     list_sessions_v1_sessions_get: {
         parameters: {
             query?: {
@@ -833,6 +1116,91 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PracticeSessionRead"];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    list_subject_properties_v1_subjects__kind___subject_id__properties_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kind: string;
+                subject_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExtractedPropertyWithRun"][];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    list_subject_runs_v1_subjects__kind___subject_id__runs_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                kind: string;
+                subject_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_ExtractionRunRead_"];
                 };
             };
             /** @description Error (problem+json) */

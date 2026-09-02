@@ -24,6 +24,21 @@ class Settings(BaseSettings):
     # CORS for the Vite SPA (comma-separated origins).
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
 
+    # The provenance allow-list (PV1): extractor names a `POST /v1/runs`
+    # completed-run body may declare when `executor` is 'client' | 'external'
+    # (pure-TS/imported producers). A worker-only extractor name posted this
+    # way is a 422, not a silently-accepted row — the allow-list is what
+    # keeps "who's allowed to say they finished a run" config-driven rather
+    # than something the wire schema alone can express.
+    client_extractors: list[str] = Field(
+        default_factory=lambda: [
+            "midi-matcher",
+            "scorer",
+            "musicxml-import",
+            "reaper-capture-sidecar",
+        ]
+    )
+
     # OpenTelemetry → SigNoz. Tracing is wired only when an endpoint is set, so
     # the app runs fine with no collector in front of it.
     otel_exporter_otlp_endpoint: str | None = None
@@ -54,7 +69,7 @@ class Settings(BaseSettings):
             and self.s3_secret_access_key
         )
 
-    @field_validator("cors_origins", mode="before")
+    @field_validator("cors_origins", "client_extractors", mode="before")
     @classmethod
     def _split_csv(cls, v: object) -> object:
         # Accept a comma-separated string (compose-friendly) or a JSON list.
