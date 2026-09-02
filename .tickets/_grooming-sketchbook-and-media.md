@@ -148,7 +148,7 @@ the F decisions when it runs dry.
 
 ## Media plumbing
 
-### MD1 — Garage media store: settings, content-addressed keys, streaming upload with sha256, health probe
+### MD1 — Garage media store: settings, content-addressed keys, streaming upload with sha256, health probe  `[claimed: feat-0003]`
 **Tier:** T2 (storage pattern-setter; the donor for SB2 and RC1)
 **Depends on:** —
 **Why:** Two workstreams need bytes in Garage and neither can start until the
