@@ -87,6 +87,77 @@ export interface paths {
         patch: operations["update_chord_v1_chords__chord_id__patch"];
         trace?: never;
     };
+    "/v1/ideas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Ideas */
+        get: operations["list_ideas_v1_ideas_get"];
+        put?: never;
+        /** Create Idea */
+        post: operations["create_idea_v1_ideas_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/ideas/{idea_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Idea */
+        get: operations["get_idea_v1_ideas__idea_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Idea */
+        delete: operations["delete_idea_v1_ideas__idea_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Idea */
+        patch: operations["update_idea_v1_ideas__idea_id__patch"];
+        trace?: never;
+    };
+    "/v1/ideas/{idea_id}/links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Link */
+        post: operations["create_link_v1_ideas__idea_id__links_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/ideas/{idea_id}/links/{link_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Link */
+        delete: operations["delete_link_v1_ideas__idea_id__links__link_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/runs": {
         parameters: {
             query?: never;
@@ -307,10 +378,210 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** IdeaCreate */
+        IdeaCreate: {
+            /**
+             * Body
+             * @default
+             */
+            body?: string;
+            /** Bpm */
+            bpm?: number | null;
+            /** Capturedat */
+            capturedAt?: string | null;
+            /** Id */
+            id?: string | null;
+            /** Key */
+            key?: string | null;
+            /** Kinds */
+            kinds?: string[];
+            /** Meter */
+            meter?: string | null;
+            /**
+             * Status
+             * @default inbox
+             * @enum {string}
+             */
+            status?: "inbox" | "active" | "shelved" | "done";
+            /** Tags */
+            tags?: string[];
+            /** Title */
+            title?: string | null;
+        };
+        /** IdeaLinkCreate */
+        IdeaLinkCreate: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "derived_from" | "variant_of" | "resembles" | "might_fit_with" | "inspired_by" | "incorporated_into" | "responds_to" | "mentions";
+            /** Note */
+            note?: string | null;
+            /**
+             * Toid
+             * Format: uuid
+             */
+            toId: string;
+        };
+        /**
+         * IdeaLinkEdge
+         * @description One edge as seen from an idea's own page — see the module docstring
+         *     for why this carries the *other* idea's identity, not `from_id`/`to_id`.
+         */
+        IdeaLinkEdge: {
+            /** Handle */
+            handle: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Ideaid
+             * Format: uuid
+             */
+            ideaId: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "derived_from" | "variant_of" | "resembles" | "might_fit_with" | "inspired_by" | "incorporated_into" | "responds_to" | "mentions";
+            /** Note */
+            note: string | null;
+            /** Title */
+            title: string | null;
+        };
+        /** IdeaRead */
+        IdeaRead: {
+            /** Body */
+            body: string;
+            /** Bpm */
+            bpm: number | null;
+            /**
+             * Capturedat
+             * Format: date-time
+             */
+            capturedAt: string;
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /** Handle */
+            handle: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Key */
+            key: string | null;
+            /** Kinds */
+            kinds: string[];
+            /** Linksin */
+            linksIn: components["schemas"]["IdeaLinkEdge"][];
+            /** Linksout */
+            linksOut: components["schemas"]["IdeaLinkEdge"][];
+            /** Meter */
+            meter: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "inbox" | "active" | "shelved" | "done";
+            /** Tags */
+            tags: string[];
+            /** Title */
+            title: string | null;
+            /**
+             * Updatedat
+             * Format: date-time
+             */
+            updatedAt: string;
+        };
+        /**
+         * IdeaSummary
+         * @description The list-view shape — no links, so `GET /v1/ideas` stays one query
+         *     per page rather than N+1 (see `IdeaRead` for the single-idea shape that
+         *     does carry them).
+         */
+        IdeaSummary: {
+            /** Body */
+            body: string;
+            /** Bpm */
+            bpm: number | null;
+            /**
+             * Capturedat
+             * Format: date-time
+             */
+            capturedAt: string;
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /** Handle */
+            handle: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Key */
+            key: string | null;
+            /** Kinds */
+            kinds: string[];
+            /** Meter */
+            meter: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "inbox" | "active" | "shelved" | "done";
+            /** Tags */
+            tags: string[];
+            /** Title */
+            title: string | null;
+            /**
+             * Updatedat
+             * Format: date-time
+             */
+            updatedAt: string;
+        };
+        /** IdeaUpdate */
+        IdeaUpdate: {
+            /** Body */
+            body?: string | null;
+            /** Bpm */
+            bpm?: number | null;
+            /** Key */
+            key?: string | null;
+            /** Kinds */
+            kinds?: string[] | null;
+            /** Meter */
+            meter?: string | null;
+            /** Status */
+            status?: ("inbox" | "active" | "shelved" | "done") | null;
+            /** Tags */
+            tags?: string[] | null;
+            /** Title */
+            title?: string | null;
+        };
         /** Page[ExtractionRunRead] */
         Page_ExtractionRunRead_: {
             /** Items */
             items: components["schemas"]["ExtractionRunRead"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /** Total */
+            total: number;
+        };
+        /** Page[IdeaSummary] */
+        Page_IdeaSummary_: {
+            /** Items */
+            items: components["schemas"]["IdeaSummary"][];
             /** Limit */
             limit: number;
             /** Offset */
@@ -830,6 +1101,297 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["SavedChordRead"];
                 };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    list_ideas_v1_ideas_get: {
+        parameters: {
+            query?: {
+                status?: ("inbox" | "active" | "shelved" | "done") | null;
+                kind?: string | null;
+                tag?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_IdeaSummary_"];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    create_idea_v1_ideas_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IdeaCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdeaRead"];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    get_idea_v1_ideas__idea_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                idea_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdeaRead"];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    delete_idea_v1_ideas__idea_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                idea_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    update_idea_v1_ideas__idea_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                idea_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IdeaUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdeaRead"];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    create_link_v1_ideas__idea_id__links_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                idea_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IdeaLinkCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdeaLinkEdge"];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    delete_link_v1_ideas__idea_id__links__link_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                idea_id: string;
+                link_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Error (problem+json) */
             404: {
