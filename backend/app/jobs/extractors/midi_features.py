@@ -29,12 +29,18 @@ from app.jobs.registry import AssetOut, ExtractorContext, PropertyOut, register
 # textbook key-finding algorithm correlates a piece's pitch-class
 # distribution against. Index 0 is the tonic; index i is the profile's
 # weight for the pitch class i semitones above the tonic.
+# `fmt: off` because each profile is conceptually ONE 12-element vector
+# indexed by semitone, and the magic trailing comma makes `ruff format`
+# explode it to a float per line — 24 lines that read as a list of unrelated
+# numbers rather than a table you can compare row-to-row against Krumhansl's.
+# fmt: off
 _MAJOR_PROFILE: tuple[float, ...] = (
     6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88,
 )
 _MINOR_PROFILE: tuple[float, ...] = (
     6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17,
 )
+# fmt: on
 
 # Sharps only, matching the grooming doc's own lineage-badge example
 # ("key guess: F♯ minor …") — flats are an equally valid spelling but this
@@ -249,9 +255,7 @@ class MidiFeatures:
 
     def run(self, ctx: ExtractorContext) -> list[PropertyOut | AssetOut]:
         if not ctx.run.input_sha256s:
-            raise ValueError(
-                "midi-features requires at least one input (the .mid asset's sha256)"
-            )
+            raise ValueError("midi-features requires at least one input (the .mid asset's sha256)")
         # The upload path (`app/routers/idea_assets.py`) always enqueues
         # exactly this one input — the asset's own sha256 — so `[0]` is
         # unambiguous; a run posted with more than one input would be a
