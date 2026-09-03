@@ -1131,7 +1131,7 @@ currently only documents the download path.
 - [ ] `.tickets/loop.md`'s `local (e2e)` row is updated to say the suite runs
       (substrate: unit — a docs diff)
 
-### FX1 — `GET /v1/ideas/{id}/assets/{asset_id}/content` is documented as JSON  `[claimed: fix-0005]`
+### FX1 — `GET /v1/ideas/{id}/assets/{asset_id}/content` is documented as JSON  `[merged: fix-0005, PR #17, 2026-09-02 — contract now application/octet-stream; typed downloadIdeaAsset landed]`
 **Tier:** T0 (one decorator argument + a regenerated contract)
 **Depends on:** — (SB2 shipped it)
 **Found:** 2026-09-02, by SB3a, which had to decline implementing
