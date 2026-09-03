@@ -13,6 +13,12 @@ from collections.abc import Iterator
 
 os.environ.setdefault("ENV", "test")
 os.environ.setdefault("DATABASE_URL", "sqlite+pysqlite:///:memory:")
+# PV2: never let the embedded job-worker thread run against the shared
+# in-memory SQLite connection while assertions are mid-flight — the whole
+# suite uses `SessionLocal`/`engine` directly and expects to own their
+# state. tests/test_worker.py drives `run_once`/the lifespan gate directly
+# instead of relying on the background poller.
+os.environ.setdefault("WORKER_EMBEDDED", "false")
 
 import pytest
 from fastapi.testclient import TestClient

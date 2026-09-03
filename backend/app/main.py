@@ -7,6 +7,7 @@ versioned routers.
 
 from __future__ import annotations
 
+import threading
 import uuid
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -19,6 +20,7 @@ from starlette.middleware.base import RequestResponseEndpoint
 from app.config import settings
 from app.db import SessionLocal, engine
 from app.errors import install_error_handlers
+from app.jobs.worker import run_forever
 from app.logging import configure_logging
 from app.models import Base
 from app.observability import configure_observability
@@ -37,6 +39,15 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
         Base.metadata.create_all(engine)
     with SessionLocal() as session:
         ensure_default_user(session)
+    if settings.worker_embedded:
+        # Daemon: never blocks process shutdown (no join on exit — the
+        # thread just dies with the interpreter), and a crash inside
+        # `run_forever` ends this thread alone, not the request-serving
+        # process. Safe as *the* worker today because exactly one api
+        # replica runs in-cluster (PV2); a separate worker Deployment is
+        # later gitops work, if ever needed — see app/jobs/worker.py.
+        threading.Thread(target=run_forever, name="job-worker", daemon=True).start()
+        log.info("worker_thread_started", poll_seconds=settings.worker_poll_seconds)
     log.info("startup", env=settings.env, service=settings.service_name)
     yield
     engine.dispose()
