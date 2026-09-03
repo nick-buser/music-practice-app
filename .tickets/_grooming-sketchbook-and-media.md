@@ -845,7 +845,7 @@ current; their acceptance criteria are written when SC1 has landed and the
 schema is concrete). Every "verified 4.5.1" behaviour SC1 relies on is
 re-runnable via `sh docs/probes/verovio/run-all.sh`.
 
-### SC1 — ScoreDoc schema + validity + `toMei()` + `timeline()` + `renderScoreDoc` + snapshot tests
+### SC1 — ScoreDoc schema + validity + `toMei()` + `timeline()` + `renderScoreDoc` + snapshot tests  `[claimed: feat-0018]`
 **Tier:** T3 (pattern-setter; the contract everything consumes)
 **Depends on:** —
 **Why:** Every semantic element id becomes the identity in the row, the MEI
