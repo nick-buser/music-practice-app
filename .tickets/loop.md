@@ -19,8 +19,16 @@ Frontend (run when `app/**` or `backend/openapi.json` changed):
 Backend (run when `backend/**` changed):
 
 - cd backend && uv run ruff check .
+- cd backend && uv run ruff format --check .
 - cd backend && uv run pyright
 - cd backend && uv run pytest -q
+
+**These lists mirror `.woodpecker/backend.yml` and `.woodpecker/frontend.yml`
+step-for-step. Keep them in sync — a gate CI runs and this file omits is a
+ticket that passes locally and reddens `main`.** That happened once
+(2026-09-03, PV3/feat-0010): CI's `lint` step runs `ruff check .` *and*
+`ruff format --check .`, this file listed only the first, and the merge went
+red. Fixed in fix-0006.
 
 Docs/tickets-only diffs: no gates beyond a clean `git status` after commit.
 
@@ -35,7 +43,7 @@ push is their gate; the PR body must say "image build verified in CI only".
 | unit | `cd app && npm run test` · `cd backend && uv run pytest -q` | always available; prefer it. SQLite-only on the backend — Postgres-only paths are `ci` |
 | ci | Woodpecker API for the pushed SHA (`woodpecker` skill): `backend`, `frontend`, `docker` workflows | needs the push pipeline green for the current `main` SHA — check the *push* build, not the last PR build |
 | deployed | `curl -fsS https://soundings-dev.k8s.bittern-chameleon.dev/api/healthz`; pod-side via `ssh dev-workshop kubectl -n soundings-dev …` | the dev slot rolls ~3–5 min after a merge to main (same images as prod until OPS1) |
-| local (e2e) | `node -e "require('playwright-core')"` from `app/` + `ls /Applications/Google\ Chrome.app` | **UP since 2026-09-02.** Playwright's *bundled* browsers are still not installed and must not be (disk rule), but `@playwright/test`/`playwright-core` 1.56.1 are already in `app/node_modules`, and `chromium.launch({ channel: 'chrome' })` drives the installed Google Chrome with **zero downloads** — verified: dev slot 200, Chrome 152, disk unchanged. Drive deployed-UI criteria with a scratchpad script resolving `playwright-core` against `app/package.json`. `npm run test:e2e` works on this laptop against the installed Google Chrome with no downloads, because `playwright.config.ts` pins `channel: 'chrome'` (FX2, fix-0004). Cost: **~60s warm** for all 34 tests; the first run of a cold cache takes ~16m (Vite dep optimization + Verovio WASM), so do not judge it on one cold sample. Cheap enough to run on any ticket touching `app/src/views/**` or `app/src/styles/**`. |
+| local (e2e) | `node -e "require('playwright-core')"` from `app/` + `ls /Applications/Google\ Chrome.app` | **UP since 2026-09-02.** Playwright's *bundled* browsers are still not installed and must not be (disk rule), but `@playwright/test`/`playwright-core` 1.56.1 are already in `app/node_modules`, and `chromium.launch({ channel: 'chrome' })` drives the installed Google Chrome with **zero downloads** — verified: dev slot 200, Chrome 152, disk unchanged. Drive deployed-UI criteria with a scratchpad script resolving `playwright-core` against `app/package.json`. `npm run test:e2e` works on this laptop against the installed Google Chrome with no downloads, because `playwright.config.ts` pins `channel: 'chrome'` (FX2, fix-0004). Cost depends entirely on whether a dev server is already up with a warm Vite cache: **~60s warm**, **11-17 min cold** (Vite dep optimization + Verovio WASM compilation on first load). Measured three times: 16.5m cold, 59.4s warm (server still running from the previous run), 11.0m cold again. Budget the cold number unless you know a dev server is live. Cheap enough to run on any ticket touching `app/src/views/**` or `app/src/styles/**`. |
 | hardware | none — attended: a real MIDI keyboard / mic in desktop Chrome | never an admission input: lines tagged `hardware` are verify notes, not gates |
 | H | human ratification = the PR merge | F tickets only; never auto-picked |
 
@@ -57,6 +65,14 @@ Garage-touching criterion is `deployed`.
 
 Gates ratify — the loop merges its own green PRs; bookkeeping commits
 straight to main. Exceptions: none.
+
+**Green means CI too. Never merge a PR whose pipeline has not finished.**
+Local gates and CI are not the same set (they drifted once — see Gates
+above), so a locally-green branch can be red on the server. Poll the
+pipelines for the branch SHA and merge only when every one has succeeded;
+`pending`/`running` is not a licence to merge. (2026-09-03: PV3's #20 was
+merged while branch pipelines #43/#44 had *already failed*, putting a red
+commit on `main` that fix-0006 had to clean up.)
 
 ## Constraints
 
