@@ -79,3 +79,24 @@ class RecordingSummary(CamelModel):
 
 class RecordingRead(RecordingSummary):
     tracks: list[RecordingTrackRead]
+
+
+class RecordingCadenceUpdate(CamelModel):
+    """The `PUT .../{subject_kind}/{subject_id}` body — RC3. `None` is "off"
+    (see `RecordingCadence`'s docstring in `app/models/recording.py` for why
+    that, and not `0` or a DELETE, is the one representation); a set value
+    is bounded the same way `RecordingCreate.duration_ms` bounds its field —
+    a sane domain limit (≤ 10 years) keeps an absurd value a 422, not a
+    silently-accepted row nothing will ever hit.
+    """
+
+    interval_days: int | None = Field(default=None, ge=1, le=3650)
+
+
+class RecordingCadenceRead(CamelModel):
+    id: uuid.UUID
+    subject_kind: str
+    subject_id: str
+    interval_days: int | None
+    created_at: datetime
+    updated_at: datetime

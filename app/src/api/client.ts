@@ -54,3 +54,9 @@ export type RecordingSummary = components['schemas']['RecordingSummary'];
 export type RecordingCreate = components['schemas']['RecordingCreate'];
 export type RecordingTrack = components['schemas']['RecordingTrackRead'];
 export type RecordingTrackKind = components['schemas']['RecordingTrackRead']['kind'];
+
+// Recording cadences (RC3) — "record this weekly": how often a subject
+// wants a fresh take, plus the due chip computed from it and the subject's
+// latest recording (`data/cadence.ts`'s `dueState`).
+export type RecordingCadence = components['schemas']['RecordingCadenceRead'];
+export type RecordingCadenceUpdate = components['schemas']['RecordingCadenceUpdate'];

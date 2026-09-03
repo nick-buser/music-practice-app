@@ -1465,6 +1465,74 @@
         "title": "PropertyIn",
         "type": "object"
       },
+      "RecordingCadenceRead": {
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "intervalDays": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intervaldays"
+          },
+          "subjectId": {
+            "title": "Subjectid",
+            "type": "string"
+          },
+          "subjectKind": {
+            "title": "Subjectkind",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "title": "Updatedat",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "subjectKind",
+          "subjectId",
+          "intervalDays",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "RecordingCadenceRead",
+        "type": "object"
+      },
+      "RecordingCadenceUpdate": {
+        "description": "The `PUT .../{subject_kind}/{subject_id}` body \u2014 RC3. `None` is \"off\"\n(see `RecordingCadence`'s docstring in `app/models/recording.py` for why\nthat, and not `0` or a DELETE, is the one representation); a set value\nis bounded the same way `RecordingCreate.duration_ms` bounds its field \u2014\na sane domain limit (\u2264 10 years) keeps an absurd value a 422, not a\nsilently-accepted row nothing will ever hit.",
+        "properties": {
+          "intervalDays": {
+            "anyOf": [
+              {
+                "maximum": 3650.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intervaldays"
+          }
+        },
+        "title": "RecordingCadenceUpdate",
+        "type": "object"
+      },
       "RecordingCreate": {
         "properties": {
           "capturedAt": {
@@ -3214,6 +3282,122 @@
         "summary": "Delete Link",
         "tags": [
           "ideas"
+        ]
+      }
+    },
+    "/v1/recording-cadences": {
+      "get": {
+        "operationId": "list_recording_cadences_v1_recording_cadences_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RecordingCadenceRead"
+                  },
+                  "title": "Response List Recording Cadences V1 Recording Cadences Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Error (problem+json)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Error (problem+json)"
+          }
+        },
+        "summary": "List Recording Cadences",
+        "tags": [
+          "recording-cadences"
+        ]
+      }
+    },
+    "/v1/recording-cadences/{subject_kind}/{subject_id}": {
+      "put": {
+        "operationId": "put_recording_cadence_v1_recording_cadences__subject_kind___subject_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "subject_kind",
+            "required": true,
+            "schema": {
+              "title": "Subject Kind",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "subject_id",
+            "required": true,
+            "schema": {
+              "title": "Subject Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordingCadenceUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecordingCadenceRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Error (problem+json)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Error (problem+json)"
+          }
+        },
+        "summary": "Put Recording Cadence",
+        "tags": [
+          "recording-cadences"
         ]
       }
     },

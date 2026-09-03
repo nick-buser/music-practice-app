@@ -20,7 +20,15 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, Integer, String
+from sqlalchemy import (
+    BigInteger,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, OwnedMixin, PKMixin, SoftDeleteMixin, TimestampMixin
@@ -106,3 +114,59 @@ class RecordingTrack(PKMixin, TimestampMixin, SoftDeleteMixin, Base):
     # the audio stream — so rejecting a negative value would reject a real
     # take, not just bad data.
     offset_ms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
+class RecordingCadence(PKMixin, OwnedMixin, TimestampMixin, Base):
+    """ "Record this weekly" — one row per (user, subject) naming how often
+    that subject wants a fresh take. RC3 (docs/recordings-provenance.md's
+    workstream table); no scheduler and no background job reads this — a
+    subject's due-ness is computed on read by pairing `interval_days` here
+    with its latest `Recording.captured_at`, in `app/src/data/cadence.ts`'s
+    `dueState`. That split is why this table carries no `subject`-shaped
+    foreign key to `Recording` itself: it only ever needs to be joined
+    against the *latest* one, which the frontend already fetches via
+    `useRecordings`.
+
+    Unlike `Recording.subject_kind`/`subject_id` (nullable — free practice
+    has no subject), both are **required** here: a cadence is always about a
+    specific subject, so there is no free-practice-shaped row to allow for.
+
+    `subject_kind`/`subject_id` are a plain pair (no `CheckConstraint`
+    vocabulary), mirroring `Recording`'s own reasoning: the set of subject
+    kinds is open-ended and owned by `app/src/data/subject.ts`.
+
+    "off" is `interval_days = NULL`, not `0` and not a deleted row:
+      * `0` would be a second spelling of "off" alongside NULL — the
+        `ck_recording_cadences_interval_positive` CHECK below rules it out
+        so there is exactly one representation, which is what keeps turning
+        a cadence off-and-on-again from ever being ambiguous about whether
+        a stray `0` row means "off" or "not set".
+      * A DELETE would work too, but this ticket exposes no DELETE route
+        (only `PUT .../{subject_kind}/{subject_id}` and `GET` list) — NULL
+        lets "off" go through the same upsert as every other interval
+        change, so the picker's "off" option is just another `PUT` body,
+        not a different HTTP verb with different error handling.
+    The frontend picker, `RecordingCadenceUpdate` (`app/schemas/recording.py`),
+    and this column all agree on that: NULL in, NULL out, "off" in the UI.
+    """
+
+    __tablename__ = "recording_cadences"
+    __table_args__ = (
+        # The upsert key `app.repositories.recording_cadences.upsert_cadence`
+        # get-or-creates against — one cadence per user per subject, so a
+        # second `PUT` on the same subject updates this row rather than
+        # inserting a sibling (RC3 acceptance criterion 2).
+        UniqueConstraint(
+            "user_id", "subject_kind", "subject_id", name="uq_recording_cadences_subject"
+        ),
+        CheckConstraint(
+            "interval_days IS NULL OR interval_days > 0",
+            name="ck_recording_cadences_interval_positive",
+        ),
+    )
+
+    subject_kind: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    subject_id: Mapped[str] = mapped_column(String, index=True, nullable=False)
+    # NULL = "off" — see the class docstring for why this, not `0` or a
+    # deleted row, is the one representation of "no cadence".
+    interval_days: Mapped[int | None] = mapped_column(Integer, default=None)
