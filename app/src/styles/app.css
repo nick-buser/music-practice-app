@@ -2570,6 +2570,18 @@ button { font-family: inherit; }
   letter-spacing: -0.022em; color: var(--foam);
   padding: 2px 0; margin: 0;
   border-bottom: 1px solid transparent;
+  /* FX3: a long or fallback headline was hard-clipped mid-glyph with no
+     ellipsis. The headline is an `<input>`, so wrapping to a second line —
+     the grooming doc's first suggestion — is not available without changing
+     the element, and `text-overflow` needs both of the properties below to
+     take effect. Measured in Chrome at 1440/1280/1100/900/760px: the input
+     itself was always already inside its card (`width: 100%` inside the
+     `flex: 1` wrapper), so a `min-width: 0` on that wrapper changes nothing
+     and is deliberately not added here — clipping, not containment, was the
+     whole bug. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .idea-title-input:hover, .idea-title-input:focus { border-bottom-color: var(--line-strong); }
 .idea-title-input::placeholder { color: var(--shoal); font-style: italic; }
