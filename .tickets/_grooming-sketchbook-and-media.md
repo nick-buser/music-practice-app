@@ -681,7 +681,7 @@ all hang on.
 - [ ] After merge, migrate Job green on both slots and a `curl` round trip
       on the dev slot succeeds (substrate: deployed)
 
-### RC2 — Capture UI: MediaRecorder in SessionView, takes list with playback  `[claimed: feat-0012]`
+### RC2 — Capture UI: MediaRecorder in SessionView, takes list with playback  `[merged: feat-0012, PR #24, 2026-09-03 — unit criteria met; the hardware verify note (real mic on the dev slot) is still OPEN]`
 **Tier:** T2 (first `getUserMedia` surface)
 **Depends on:** RC1
 **Why:** The "recording" badge in SessionView finally becomes real.
