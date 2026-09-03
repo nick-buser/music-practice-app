@@ -306,7 +306,7 @@ first real bytes-through-Garage path.
       it is in the stream; the sidebar count reads the inbox size
       (substrate: deployed)
 
-### SB3b — Idea page: body editor with `[[#n]]` links, attachments by revision, status/kinds/tags editing
+### SB3b — Idea page: body editor with `[[#n]]` links, attachments by revision, status/kinds/tags editing  `[claimed: feat-0008]`
 **Tier:** T2
 **Depends on:** SB3a
 **Why:** The stream is for capture; the idea page is where structure arrives
