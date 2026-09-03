@@ -413,7 +413,7 @@ practice session can sit in front of a sketch.
       validates against `IdeaManifest` (substrate: unit)
 - [ ] Gates green; contract regenerated (substrate: unit)
 
-### SB7 — Web MIDI quick capture → `.mid` attachment
+### SB7 — Web MIDI quick capture → `.mid` attachment  `[claimed: feat-0017]`
 **Tier:** T2 (first Web MIDI code; shared later by assessment and E1 step entry)
 **Depends on:** SB3a
 **Why:** Ten seconds of noodling into the inbox, no DAW. This is the capture
