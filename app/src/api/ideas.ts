@@ -4,6 +4,7 @@
  * `chords.ts`'s shape — one function per endpoint, no client-side caching or
  * state; that lives in `hooks/useIdeas.ts`.
  */
+import { API_BASE_URL } from '../config';
 import {
   type Idea,
   type IdeaAsset,
@@ -129,6 +130,17 @@ export async function downloadIdeaAsset(ideaId: string, assetId: string): Promis
   );
   if (error || !data) throw new Error('Failed to download idea asset');
   return data;
+}
+
+/**
+ * The URL an `<audio>` element or a plain download link can point at directly
+ * — SB3b's idea page needs a `src`/`href`, not a `Blob`, and building it here
+ * (rather than in the view) keeps `IdeaPage`/`AttachmentsPanel` free of any
+ * API-shape knowledge (docs/sketchbook.md; see `downloadIdeaAsset` above for
+ * the Blob-returning form other callers use).
+ */
+export function ideaAssetContentUrl(ideaId: string, assetId: string): string {
+  return `${API_BASE_URL ?? ''}/v1/ideas/${ideaId}/assets/${assetId}/content`;
 }
 
 export async function createIdeaLink(ideaId: string, input: IdeaLinkCreate): Promise<IdeaLinkEdge> {

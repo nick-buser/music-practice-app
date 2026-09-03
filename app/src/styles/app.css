@@ -2460,3 +2460,93 @@ button { font-family: inherit; }
   font-size: 11px;
   color: var(--fg-quiet);
 }
+
+/* ============================================================
+   IDEA PAGE — SB3b (title/body edit, attachments, metadata rail)
+   ============================================================ */
+.idea-page-back {
+  background: transparent; border: none; cursor: pointer;
+  font-family: var(--font-sans); font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--shoal);
+  padding: 0; margin-bottom: 20px;
+}
+.idea-page-back:hover { color: var(--foam); }
+
+.idea-title-input {
+  display: block;
+  width: 100%;
+  background: transparent; border: none; outline: none;
+  font-family: var(--font-display); font-size: 42px; font-weight: 400;
+  letter-spacing: -0.022em; color: var(--foam);
+  padding: 2px 0; margin: 0;
+  border-bottom: 1px solid transparent;
+}
+.idea-title-input:hover, .idea-title-input:focus { border-bottom-color: var(--line-strong); }
+.idea-title-input::placeholder { color: var(--shoal); font-style: italic; }
+
+.idea-body-view { cursor: text; min-height: 140px; border-radius: 4px; }
+.idea-body-view.empty { color: var(--shoal); font-style: italic; }
+.idea-body-edit {
+  width: 100%; min-height: 260px;
+  font-family: var(--font-display); font-style: italic; font-weight: 300;
+  font-size: 20px; line-height: 1.7;
+}
+.idea-link {
+  color: var(--lumen); cursor: pointer;
+  border-bottom: 1px dotted color-mix(in oklch, var(--lumen) 55%, transparent);
+}
+.idea-link:hover { color: var(--lumen-bright); }
+
+/* Attachments panel */
+.idea-head .c {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--shoal); letter-spacing: 0.04em;
+}
+.attachments-panel { display: flex; flex-direction: column; gap: 4px; }
+.attachments-rev { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
+.attachments-rev .rev-label {
+  font-family: var(--font-sans); font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--lumen); margin-bottom: 8px;
+}
+.asset-row {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 10px 0; border-bottom: 1px solid var(--line);
+}
+.asset-row .filename { font-family: var(--font-mono); font-size: 13px; color: var(--foam); flex: 1 1 auto; min-width: 140px; }
+.asset-row .size { font-family: var(--font-mono); font-size: 11px; color: var(--shoal); }
+.asset-row audio { height: 30px; max-width: 220px; }
+.attachments-upload { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 16px; }
+
+/* Metadata rail */
+.meta-rail { display: flex; flex-direction: column; gap: 22px; }
+.meta-field { display: flex; flex-direction: column; gap: 6px; }
+.meta-field label {
+  font-family: var(--font-sans); font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--shoal);
+}
+.meta-select, .meta-input {
+  background: var(--abyss-soft); border: 1px solid var(--line);
+  border-radius: 4px; color: var(--foam);
+  font-family: var(--font-mono); font-size: 13px;
+  padding: 8px 10px;
+}
+.meta-select:focus, .meta-input:focus {
+  outline: none;
+  border-color: color-mix(in oklch, var(--lumen) 40%, transparent);
+}
+.chip-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip-remove {
+  background: none; border: none; cursor: pointer;
+  color: inherit; font-size: 12px; line-height: 1; padding: 0; margin-left: 2px;
+}
+.meta-links { display: flex; flex-direction: column; gap: 8px; }
+.meta-links .link-row {
+  display: flex; justify-content: space-between; gap: 10px;
+  font-family: var(--font-mono); font-size: 12px; color: var(--mist);
+}
+.meta-links .link-kind { color: var(--shoal); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* Properties panel (PV3 fills this in) */
+.props-empty {
+  font-family: var(--font-body); font-style: italic; color: var(--shoal); font-size: 14px;
+}
