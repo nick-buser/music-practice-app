@@ -23,6 +23,10 @@ declare module 'verovio/esm' {
     constructor(module: unknown);
     setOptions(opts: Record<string, unknown>): void;
     getOptions(): Record<string, unknown>;
+    /** Back to Verovio's defaults — `setOptions` merges, it does not reset (`exp21`). */
+    resetOptions(): void;
+    getVersion(): string;
+    getMIDIValuesForElement(id: string): { pitch: number; duration: number; time: number };
     loadData(data: string): boolean;
     renderToSVG(pageNo: number): string;
     renderToTimemap(opts?: Record<string, unknown>): unknown;
