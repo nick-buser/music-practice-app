@@ -210,6 +210,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/recording-cadences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Recording Cadences */
+        get: operations["list_recording_cadences_v1_recording_cadences_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/recording-cadences/{subject_kind}/{subject_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Put Recording Cadence */
+        put: operations["put_recording_cadence_v1_recording_cadences__subject_kind___subject_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/recordings": {
         parameters: {
             query?: never;
@@ -933,6 +967,43 @@ export interface components {
             timeRange?: {
                 [key: string]: unknown;
             } | null;
+        };
+        /** RecordingCadenceRead */
+        RecordingCadenceRead: {
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Intervaldays */
+            intervalDays: number | null;
+            /** Subjectid */
+            subjectId: string;
+            /** Subjectkind */
+            subjectKind: string;
+            /**
+             * Updatedat
+             * Format: date-time
+             */
+            updatedAt: string;
+        };
+        /**
+         * RecordingCadenceUpdate
+         * @description The `PUT .../{subject_kind}/{subject_id}` body — RC3. `None` is "off"
+         *     (see `RecordingCadence`'s docstring in `app/models/recording.py` for why
+         *     that, and not `0` or a DELETE, is the one representation); a set value
+         *     is bounded the same way `RecordingCreate.duration_ms` bounds its field —
+         *     a sane domain limit (≤ 10 years) keeps an absurd value a 422, not a
+         *     silently-accepted row nothing will ever hit.
+         */
+        RecordingCadenceUpdate: {
+            /** Intervaldays */
+            intervalDays?: number | null;
         };
         /** RecordingCreate */
         RecordingCreate: {
@@ -1920,6 +1991,89 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    list_recording_cadences_v1_recording_cadences_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingCadenceRead"][];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    put_recording_cadence_v1_recording_cadences__subject_kind___subject_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                subject_kind: string;
+                subject_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordingCadenceUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingCadenceRead"];
+                };
             };
             /** @description Error (problem+json) */
             404: {

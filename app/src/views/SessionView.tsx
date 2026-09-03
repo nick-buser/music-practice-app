@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Topbar } from '../components/Topbar';
 import { Icon } from '../components/Icon';
 import { TakesList } from '../components/TakesList';
+import { CadenceControl } from '../components/CadenceControl';
 import { SessionScore } from '../verovio/SessionScore';
 import { useMetronome } from '../verovio/useMetronome';
 import { resolveSubject } from '../data/subject';
@@ -315,6 +316,12 @@ export function SessionView({ subjectId, onEnd, onOpenPiece }: Props) {
 
               {backendEnabled && (
                 <div className="session-subblock">
+                  <CadenceControl
+                    subjectKind={subject.kind}
+                    subjectId={subject.id}
+                    lastCapturedAt={takes.recordings[0]?.capturedAt ?? null}
+                    active
+                  />
                   <TakesList recordings={takes.recordings} error={takes.error} />
                 </div>
               )}

@@ -1321,6 +1321,34 @@ button { font-family: inherit; }
   font-family: var(--font-mono); font-size: 11px; color: var(--shoal);
 }
 
+/* Cadence control (RC3) — the picker + due chip that sit above the takes
+   list wherever it appears. Reuses .meta-select's look (MetadataRail) and
+   .chip's shape, so it doesn't introduce a third select/chip style. */
+.cadence-control {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 12px;
+}
+.cadence-select {
+  background: var(--abyss-soft); border: 1px solid var(--line);
+  border-radius: 4px; color: var(--foam);
+  font-family: var(--font-mono); font-size: 12px;
+  padding: 6px 8px;
+}
+.cadence-select:focus {
+  outline: none;
+  border-color: color-mix(in oklch, var(--lumen) 40%, transparent);
+}
+.cadence-chip.due {
+  color: var(--krill);
+  border-color: color-mix(in oklch, var(--krill) 45%, transparent);
+  background: color-mix(in oklch, var(--krill) 8%, transparent);
+}
+.cadence-chip.overdue {
+  color: var(--coral);
+  border-color: color-mix(in oklch, var(--coral) 45%, transparent);
+  background: color-mix(in oklch, var(--coral) 8%, transparent);
+}
+
 /* Session rail */
 .session-rail { display: flex; flex-direction: column; gap: 24px; }
 .loop-card, .quick-notes, .session-prog {

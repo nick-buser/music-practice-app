@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Topbar } from '../components/Topbar';
 import { Icon } from '../components/Icon';
 import { TakesList } from '../components/TakesList';
+import { CadenceControl } from '../components/CadenceControl';
 import { Score } from '../verovio/Score';
 import { findMeasureNumber, paintHeatmap, paintSelection, type HeatSection } from '../verovio/heatmap';
 import { INSTRUMENTS, PIECES } from '../data/sounddata';
@@ -253,6 +254,12 @@ export function PieceView({ pieceId, onBack, onStartSession }: Props) {
 
           {backendEnabled && (
             <div className="card">
+              <CadenceControl
+                subjectKind="piece"
+                subjectId={piece.id}
+                lastCapturedAt={takes.recordings[0]?.capturedAt ?? null}
+                active
+              />
               <TakesList recordings={takes.recordings} error={takes.error} />
             </div>
           )}
