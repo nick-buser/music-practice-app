@@ -66,6 +66,21 @@ class Settings(BaseSettings):
     # `.rpp` bundle without letting an unbounded upload reach Garage.
     media_max_upload_bytes: int = 200 * 1024 * 1024
 
+    # PV2: the embedded job worker (`app/jobs/worker.py`). `true` means
+    # `app.main`'s lifespan starts a daemon thread running `run_forever` in
+    # the api process — safe today because exactly one api replica runs
+    # in-cluster (a separate worker Deployment is later gitops work, if ever
+    # needed). Tests flip this to `false` (tests/conftest.py) so the suite
+    # never has a background thread polling the shared in-memory SQLite
+    # connection while assertions run — `tests/test_worker.py` drives
+    # `run_once`/the lifespan gate directly instead.
+    worker_embedded: bool = True
+    # How long `run_forever` sleeps between polls when it finds no queued
+    # run. Seconds, not milliseconds, because there is no latency budget
+    # here yet worth sub-second polling — enqueue→poll, never inline, is
+    # the whole point (PV2).
+    worker_poll_seconds: float = 2.0
+
     @property
     def storage_configured(self) -> bool:
         return bool(
