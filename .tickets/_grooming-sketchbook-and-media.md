@@ -306,7 +306,7 @@ first real bytes-through-Garage path.
       it is in the stream; the sidebar count reads the inbox size
       (substrate: deployed)
 
-### SB3b — Idea page: body editor with `[[#n]]` links, attachments by revision, status/kinds/tags editing  `[claimed: feat-0008]`
+### SB3b — Idea page: body editor with `[[#n]]` links, attachments by revision, status/kinds/tags editing  `[merged: feat-0008, PR #18, 2026-09-02 — deployed check MET 9/9 in a real browser; opus uploaded, decoded and played]`
 **Tier:** T2
 **Depends on:** SB3a
 **Why:** The stream is for capture; the idea page is where structure arrives
@@ -1130,6 +1130,26 @@ currently only documents the download path.
       this laptop with no browser download (substrate: local (e2e))
 - [ ] `.tickets/loop.md`'s `local (e2e)` row is updated to say the suite runs
       (substrate: unit — a docs diff)
+
+### FX3 — The `(untitled capture)` headline overflows its container on the idea page
+**Tier:** T0 (a CSS rule)
+**Depends on:** — (SB3b shipped the surface)
+**Found:** 2026-09-02, in SB3b's deployed screenshot on `soundings-dev`.
+**What:** `IdeaPage`'s headline renders the fallback `(untitled capture)` in
+the large italic serif, and on idea #1 it runs past the right edge of its
+card and is clipped mid-word with no ellipsis. Purely cosmetic — nothing
+functional depends on it — but it is the first thing you see on any idea
+that has no title yet, which is most of them by design
+(docs/sketchbook.md: "Title... come later, or never").
+**Fix:** a wrap/`overflow-wrap`/`text-overflow` rule on the headline in the
+"IDEA PAGE" section of `app/src/styles/app.css`. Decide whether long
+titles should wrap to a second line or ellipsize; wrapping is likelier
+right for a sketchbook.
+**Acceptance criteria:**
+- [ ] A long/fallback headline stays inside its container at the default
+      desktop width (substrate: local (e2e) — assert the headline element's
+      `scrollWidth <= clientWidth`)
+- [ ] Gates green (substrate: unit)
 
 ### FX1 — `GET /v1/ideas/{id}/assets/{asset_id}/content` is documented as JSON  `[merged: fix-0005, PR #17, 2026-09-02 — contract now application/octet-stream; typed downloadIdeaAsset landed]`
 **Tier:** T0 (one decorator argument + a regenerated contract)
