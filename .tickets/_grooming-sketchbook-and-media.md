@@ -649,7 +649,7 @@ inbox self-describing seconds after capture.
 
 ## Recordings
 
-### RC1 — `recordings` + `recording_tracks` schema, CRUD, track upload and streaming  `[claimed: feat-0011]`
+### RC1 — `recordings` + `recording_tracks` schema, CRUD, track upload and streaming  `[merged: feat-0011, PR #22, 2026-09-03]`
 **Tier:** T1 (mirrors SB1/SB2 on the same store)
 **Depends on:** MD1
 **Why:** The tables the capture UI, the extractors, and tempo-vs-target
@@ -1130,6 +1130,44 @@ currently only documents the download path.
       this laptop with no browser download (substrate: local (e2e))
 - [ ] `.tickets/loop.md`'s `local (e2e)` row is updated to say the suite runs
       (substrate: unit — a docs diff)
+
+### FX4 — The Alembic chain cannot run on SQLite, so migrations are only ever verified in CI
+**Tier:** T1 (a one-line type change plus a migration-chain re-verification)
+**Depends on:** —
+**Found:** 2026-09-03, by RC1 (feat-0011), which could not run its own
+migration round-trip locally.
+**What:** `uv run alembic upgrade head` fails at the very first revision on
+SQLite:
+
+```
+CompileError: (in table 'saved_chords', column 'identity'):
+  can't render element of type JSONB
+```
+
+`migrations/versions/0001_initial.py:45` declares
+`sa.Column("identity", postgresql.JSONB(), nullable=False)` — a bare
+Postgres type, where every later revision uses the
+`JSON().with_variant(JSONB(), "postgresql")` pattern (see
+`models/provenance.py`'s `ProvenanceJSON`). Reproduced independently against
+a clean SQLite file.
+**Why it matters beyond one file:** this laptop has no Postgres and no
+Docker by policy, so the *entire* migration chain is unverifiable here. Every
+migration ticket to date has had to substitute something weaker — RC1 drove
+0005 alone through alembic's `Operations` API — and the authoritative check
+only ever happens in CI. That is a permanent tax on every future schema
+ticket, and it is one line of cause.
+**Fix:** change 0001's column to the `with_variant` pattern the rest of the
+codebase already uses. Because 0001 has shipped, confirm on a scratch
+Postgres in CI that the change is a no-op there (`JSONB` either way) before
+relying on it, and note in the revision why an already-applied migration was
+edited.
+**Acceptance criteria:**
+- [ ] `uv run alembic upgrade head` then `downgrade base` then `upgrade head`
+      all succeed against a file-backed SQLite database (substrate: unit)
+- [ ] `tests/test_integration_postgres.py`'s round-trip still passes
+      (substrate: ci)
+- [ ] `.tickets/loop.md`'s Alembic constraint notes that the chain is now
+      locally runnable (substrate: unit)
 
 ### FX3 — The `(untitled capture)` headline overflows its container on the idea page
 **Tier:** T0 (a CSS rule)
