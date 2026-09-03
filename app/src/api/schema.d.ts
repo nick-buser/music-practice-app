@@ -1561,6 +1561,7 @@ export interface operations {
                 status?: ("inbox" | "active" | "shelved" | "done") | null;
                 kind?: string | null;
                 tag?: string | null;
+                q?: string | null;
                 limit?: number;
                 offset?: number;
             };

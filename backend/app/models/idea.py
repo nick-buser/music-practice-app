@@ -26,8 +26,9 @@ from sqlalchemy import (
     ForeignKey,
     String,
     UniqueConstraint,
+    column,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.links import IdeaAssetRole, IdeaLinkKind, IdeaStatus
@@ -35,6 +36,24 @@ from app.models.base import Base, OwnedMixin, PKMixin, SoftDeleteMixin, Timestam
 
 # JSONB on Postgres (indexable, queryable); plain JSON on SQLite for fast tests.
 IdeaJSON = JSON().with_variant(JSONB(), "postgresql")
+
+# SB5 (docs/sketchbook.md's "Search" seed): a bare, unmapped expression for
+# the generated `search_tsv` column that `migrations/versions/0007_ideas_
+# search.py` adds — on Postgres only. Deliberately NOT a `mapped_column` on
+# `Idea`: SQLAlchemy 2.0 has no per-dialect `Computed()`, so mapping it
+# would force `Base.metadata.create_all()` (the SQLite test path) to either
+# emit a `GENERATED ALWAYS AS` expression SQLite can't execute, or map a
+# plain column that never exists there at all. A bare `column()` sidesteps
+# both: it's just a name + type SQLAlchemy can build an expression against,
+# with no `create_all()`/mapper involvement.
+#
+# Lives here rather than in `app/search.py` because that module's own
+# docstring commits it to staying SQLAlchemy-free (pure, DB-less, trivially
+# unit-testable) — this is the one place a Postgres-only SQL fragment can
+# live without breaking that contract. Only the Postgres branch of
+# `app/repositories/ideas.py::list_ideas` ever references it; the SQLite
+# branch never touches it, matching the migration's own guard.
+IDEA_SEARCH_TSV = column("search_tsv", TSVECTOR)
 
 
 class Idea(PKMixin, OwnedMixin, TimestampMixin, SoftDeleteMixin, Base):

@@ -74,8 +74,11 @@ def list_ideas(
     status_filter: Annotated[IdeaStatus | None, Query(alias="status")] = None,
     kind: Annotated[str | None, Query()] = None,
     tag: Annotated[str | None, Query()] = None,
+    q: Annotated[str | None, Query()] = None,
 ) -> Page[IdeaSummary]:
-    items, total = repo.list_ideas(db, user.id, page.limit, page.offset, status_filter, kind, tag)
+    items, total = repo.list_ideas(
+        db, user.id, page.limit, page.offset, status_filter, kind, tag, q
+    )
     return Page(
         items=[IdeaSummary.model_validate(i) for i in items],
         total=total,

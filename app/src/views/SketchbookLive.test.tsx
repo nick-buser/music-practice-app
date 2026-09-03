@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { IdeaSummary } from '../api/client';
@@ -10,7 +10,9 @@ vi.mock('../config', () => ({ backendEnabled: true, API_BASE_URL: 'http://test' 
 // Mock the ideas API so the feature exercises the hook/UI without a server.
 // `guessAssetRole` is left as the real implementation (via importOriginal)
 // so the mime→role mapping under test is the actual production logic, not a
-// re-description of it.
+// re-description of it. `listIdeas` forwards its params through to the spy
+// (unlike the pre-SB5 version of this mock, which discarded them) so the
+// debounce test below can assert exactly what `q` reached the API.
 const listIdeas = vi.fn();
 const createIdea = vi.fn();
 const uploadIdeaAsset = vi.fn();
@@ -18,7 +20,7 @@ vi.mock('../api/ideas', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../api/ideas')>();
   return {
     ...actual,
-    listIdeas: () => listIdeas(),
+    listIdeas: (params?: unknown) => listIdeas(params),
     createIdea: (input: unknown) => createIdea(input),
     uploadIdeaAsset: (ideaId: string, file: File, role: string, newRevision?: boolean) =>
       uploadIdeaAsset(ideaId, file, role, newRevision),
@@ -113,5 +115,46 @@ describe('SketchbookLive with a backend (local build)', () => {
   it('does not fetch ideas until the view is mounted, and fetches exactly once on mount', () => {
     render(<SketchbookLive />);
     expect(listIdeas).toHaveBeenCalledTimes(1); // mounted → active → one initial fetch
+  });
+
+  it('debounces the search box 250ms before it reaches the API, and renders the filtered result', async () => {
+    vi.useFakeTimers();
+    try {
+      render(<SketchbookLive />);
+      // The initial mount fetch is driven by a resolved promise, not a
+      // timer — flush microtasks (inside `act` so the resulting state
+      // update is applied) rather than reaching for RTL's `findBy*`/
+      // `waitFor`, which poll via a real `setTimeout` and would hang
+      // forever under fake timers.
+      await act(async () => {});
+      expect(listIdeas).toHaveBeenCalledTimes(1);
+      expect(listIdeas).toHaveBeenLastCalledWith({ q: undefined });
+
+      const search = screen.getByLabelText(/search ideas/i);
+      // Typed as three separate keystrokes — each should reset the debounce
+      // timer rather than firing its own request.
+      fireEvent.change(search, { target: { value: 'j' } });
+      fireEvent.change(search, { target: { value: 'ja' } });
+      fireEvent.change(search, { target: { value: 'jazz' } });
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(200);
+      });
+      expect(listIdeas).toHaveBeenCalledTimes(1); // still inside the 250ms window
+
+      const jazzIdea = makeIdea({
+        id: 'a', handle: 1, capturedAt: '2026-09-01T10:00:00Z', body: 'a jazz riff',
+      });
+      listIdeas.mockResolvedValueOnce([jazzIdea]);
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(100); // crosses the 250ms mark
+      });
+      expect(listIdeas).toHaveBeenCalledTimes(2);
+      expect(listIdeas).toHaveBeenLastCalledWith({ q: 'jazz' });
+      expect(screen.getByText('a jazz riff')).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
