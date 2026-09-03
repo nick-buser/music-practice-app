@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { IdeaSummary } from '../api/client';
 import { Topbar } from '../components/Topbar';
 import { useIdeas } from '../hooks/useIdeas';
+import { IdeaPage } from './IdeaPage';
 
 /**
  * The stream's fallback "title" — a captured thought needs neither before it
@@ -43,6 +44,19 @@ export function SketchbookLive() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // SB3b's idea page (structure arrives later, after capture). There's no
+  // router in this app, so "open an idea" / "follow a [[#n]] link" is just
+  // this component pointing its own selection at a different id — the same
+  // view-switching idiom `App` uses for its top-level tabs.
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const navigateToHandle = useCallback(
+    (handle: number) => {
+      const target = ideasState.ideas.find((idea) => idea.handle === handle);
+      if (target) setSelectedId(target.id); // an unloaded handle is simply not followed
+    },
+    [ideasState.ideas],
+  );
+
   // Hotkey `c` jumps to the capture box, unless the user is already typing
   // somewhere. Listens on `window` for the component's lifetime, which is
   // exactly the lifetime of "the view is focused" — nothing else in this
@@ -81,6 +95,16 @@ export function SketchbookLive() {
   const visible = inboxOnly
     ? ideasState.ideas.filter((idea) => idea.status === 'inbox')
     : ideasState.ideas;
+
+  if (selectedId) {
+    return (
+      <IdeaPage
+        ideaId={selectedId}
+        onBack={() => setSelectedId(null)}
+        onNavigateToHandle={navigateToHandle}
+      />
+    );
+  }
 
   return (
     <div>
@@ -146,7 +170,17 @@ export function SketchbookLive() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {visible.map((idea) => (
-                <div key={idea.id} className="idea-card" data-testid="idea-card">
+                <div
+                  key={idea.id}
+                  className="idea-card"
+                  data-testid="idea-card"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedId(idea.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') setSelectedId(idea.id);
+                  }}
+                >
                   <div className="when">
                     #{idea.handle} · {formatCapturedAt(idea.capturedAt)}
                   </div>
