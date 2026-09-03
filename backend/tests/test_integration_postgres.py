@@ -30,6 +30,7 @@ from app.repositories import ideas as ideas_repo
 from app.repositories import provenance as provenance_repo
 from app.schemas.idea import IdeaCreate
 from app.schemas.provenance import RunCreate
+from app.seed import ensure_default_user
 
 IDENTITY = {
     "root": {"letter": "C", "accidental": "natural"},
@@ -270,8 +271,13 @@ def test_idea_search_tsvector_matches_free_text_and_0007_is_reversible() -> None
         command.upgrade(cfg, "head")
 
         with Session(engine) as s:
-            s.add(User(id=DEFAULT_USER_ID, display_name="Default User"))
-            s.flush()
+            # `ensure_default_user`, not a bare `s.add(User(...))` like the
+            # `create_all()`-based tests above: this test runs the real
+            # migrations, and `0001_initial` already inserts the default
+            # user itself, so a plain insert here duplicates `users_pkey`
+            # (it did — CI pipeline #64). The idempotent seeder is correct
+            # on both paths.
+            ensure_default_user(s)
             matching = ideas_repo.create_idea(
                 s,
                 DEFAULT_USER_ID,
