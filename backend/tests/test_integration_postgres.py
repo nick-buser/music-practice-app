@@ -40,8 +40,8 @@ IDENTITY = {
     "voicing": {"type": "block", "inversion": 0, "rootOctave": 4, "doubleRoot": False},
 }
 
-# The tables `migrations/versions/0001_initial.py`, `0002_provenance.py`,
-# and `0003_ideas.py` create/drop — kept in sync with `Base.metadata` by
+# The tables `migrations/versions/0001_initial.py` through
+# `0005_recordings.py` create/drop — kept in sync with `Base.metadata` by
 # convention, not by import, since the migration round-trip test asserts
 # against the *migration's* behavior, not the ORM's.
 APP_TABLES = {
@@ -52,6 +52,9 @@ APP_TABLES = {
     "extracted_properties",
     "ideas",
     "idea_links",
+    "idea_assets",
+    "recordings",
+    "recording_tracks",
 }
 
 

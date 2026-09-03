@@ -210,6 +210,77 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/recordings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Recordings */
+        get: operations["list_recordings_v1_recordings_get"];
+        put?: never;
+        /** Create Recording */
+        post: operations["create_recording_v1_recordings_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/recordings/{recording_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Recording */
+        get: operations["get_recording_v1_recordings__recording_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Recording */
+        delete: operations["delete_recording_v1_recordings__recording_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Recording */
+        patch: operations["update_recording_v1_recordings__recording_id__patch"];
+        trace?: never;
+    };
+    "/v1/recordings/{recording_id}/tracks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload Track */
+        post: operations["upload_track_v1_recordings__recording_id__tracks_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/recordings/{recording_id}/tracks/{track_id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Track */
+        get: operations["download_track_v1_recordings__recording_id__tracks__track_id__content_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/runs": {
         parameters: {
             query?: never;
@@ -346,6 +417,21 @@ export interface components {
              * @enum {string}
              */
             role: "melody" | "harmony" | "bass" | "drums" | "full" | "render" | "score" | "rpp" | "reference" | "image" | "other";
+        };
+        /** Body_upload_track_v1_recordings__recording_id__tracks_post */
+        Body_upload_track_v1_recordings__recording_id__tracks_post: {
+            /** File */
+            file: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "audio" | "midi";
+            /**
+             * Offsetms
+             * @default 0
+             */
+            offsetMs?: number;
         };
         /** ChordIdentity */
         ChordIdentity: {
@@ -725,6 +811,17 @@ export interface components {
             /** Total */
             total: number;
         };
+        /** Page[RecordingSummary] */
+        Page_RecordingSummary_: {
+            /** Items */
+            items: components["schemas"]["RecordingSummary"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /** Total */
+            total: number;
+        };
         /** Page[SavedChordRead] */
         Page_SavedChordRead_: {
             /** Items */
@@ -836,6 +933,146 @@ export interface components {
             timeRange?: {
                 [key: string]: unknown;
             } | null;
+        };
+        /** RecordingCreate */
+        RecordingCreate: {
+            /**
+             * Capturedat
+             * Format: date-time
+             */
+            capturedAt: string;
+            /** Durationms */
+            durationMs?: number | null;
+            /** Id */
+            id?: string | null;
+            /** Notes */
+            notes?: string | null;
+            /** Sessionid */
+            sessionId?: string | null;
+            /** Subjectid */
+            subjectId?: string | null;
+            /** Subjectkind */
+            subjectKind?: string | null;
+        };
+        /** RecordingRead */
+        RecordingRead: {
+            /**
+             * Capturedat
+             * Format: date-time
+             */
+            capturedAt: string;
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /** Durationms */
+            durationMs: number | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Notes */
+            notes: string | null;
+            /** Sessionid */
+            sessionId: string | null;
+            /** Subjectid */
+            subjectId: string | null;
+            /** Subjectkind */
+            subjectKind: string | null;
+            /** Tracks */
+            tracks: components["schemas"]["RecordingTrackRead"][];
+            /**
+             * Updatedat
+             * Format: date-time
+             */
+            updatedAt: string;
+        };
+        /**
+         * RecordingSummary
+         * @description The list-view shape — no tracks, so `GET /v1/recordings` stays one
+         *     query per page rather than N+1 (see `RecordingRead` for the
+         *     single-recording shape that does carry them) — the same split
+         *     `IdeaSummary`/`IdeaRead` use in `app/schemas/idea.py`, for the same
+         *     reason.
+         */
+        RecordingSummary: {
+            /**
+             * Capturedat
+             * Format: date-time
+             */
+            capturedAt: string;
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /** Durationms */
+            durationMs: number | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Notes */
+            notes: string | null;
+            /** Sessionid */
+            sessionId: string | null;
+            /** Subjectid */
+            subjectId: string | null;
+            /** Subjectkind */
+            subjectKind: string | null;
+            /**
+             * Updatedat
+             * Format: date-time
+             */
+            updatedAt: string;
+        };
+        /** RecordingTrackRead */
+        RecordingTrackRead: {
+            /** Bytes */
+            bytes: number;
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "audio" | "midi";
+            /** Mime */
+            mime: string;
+            /** Offsetms */
+            offsetMs: number;
+            /**
+             * Recordingid
+             * Format: uuid
+             */
+            recordingId: string;
+            /** Sha256 */
+            sha256: string;
+            /** Storagekey */
+            storageKey: string;
+            /**
+             * Updatedat
+             * Format: date-time
+             */
+            updatedAt: string;
+        };
+        /** RecordingUpdate */
+        RecordingUpdate: {
+            /** Durationms */
+            durationMs?: number | null;
+            /** Notes */
+            notes?: string | null;
         };
         /** Root */
         Root: {
@@ -1683,6 +1920,300 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    list_recordings_v1_recordings_get: {
+        parameters: {
+            query?: {
+                subjectKind?: string | null;
+                subjectId?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Page_RecordingSummary_"];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    create_recording_v1_recordings_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordingCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingRead"];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    get_recording_v1_recordings__recording_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recording_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingRead"];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    delete_recording_v1_recordings__recording_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recording_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    update_recording_v1_recordings__recording_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recording_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecordingUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingRead"];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    upload_track_v1_recordings__recording_id__tracks_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "content-length"?: number | null;
+            };
+            path: {
+                recording_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_track_v1_recordings__recording_id__tracks_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingTrackRead"];
+                };
+            };
+            /** @description Error (problem+json) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Error (problem+json) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+        };
+    };
+    download_track_v1_recordings__recording_id__tracks__track_id__content_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recording_id: string;
+                track_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": unknown;
+                };
             };
             /** @description Error (problem+json) */
             404: {
