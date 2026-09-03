@@ -1177,7 +1177,7 @@ edited.
 - [ ] `.tickets/loop.md`'s Alembic constraint notes that the chain is now
       locally runnable (substrate: unit)
 
-### FX3 — The `(untitled capture)` headline overflows its container on the idea page
+### FX3 — The `(untitled capture)` headline overflows its container on the idea page  `[claimed: fix-0008]`
 **Tier:** T0 (a CSS rule)
 **Depends on:** — (SB3b shipped the surface)
 **Found:** 2026-09-02, in SB3b's deployed screenshot on `soundings-dev`.
