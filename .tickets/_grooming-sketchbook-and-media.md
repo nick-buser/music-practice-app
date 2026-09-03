@@ -845,7 +845,7 @@ current; their acceptance criteria are written when SC1 has landed and the
 schema is concrete). Every "verified 4.5.1" behaviour SC1 relies on is
 re-runnable via `sh docs/probes/verovio/run-all.sh`.
 
-### SC1 — ScoreDoc schema + validity + `toMei()` + `timeline()` + `renderScoreDoc` + snapshot tests  `[claimed: feat-0018]`
+### SC1 — ScoreDoc schema + validity + `toMei()` + `timeline()` + `renderScoreDoc` + snapshot tests  `[merged: feat-0018, PR #31, 2026-09-03 — all nine criteria closed; 569 tests (was 342); determinism and sounding pitch independently re-verified by the orchestrator across 4 fixtures]`
 **Tier:** T3 (pattern-setter; the contract everything consumes)
 **Depends on:** —
 **Why:** Every semantic element id becomes the identity in the row, the MEI
@@ -1196,6 +1196,51 @@ right for a sketchbook.
       desktop width (substrate: local (e2e) — assert the headline element's
       `scrollWidth <= clientWidth`)
 - [ ] Gates green (substrate: unit)
+
+### FX7 — A commit SHA that looks like scientific notation breaks the image build
+**Tier:** T0 (quote a YAML scalar)
+**Depends on:** —
+**Found:** 2026-09-03, in pipeline #77 — the push build for FX3's merge
+commit `03487e27`, found while checking CI for SC1.
+**What:** `.woodpecker/docker.yml` tags both images with
+
+```yaml
+tags:
+  - latest
+  - ${CI_COMMIT_SHA:0:8}
+```
+
+The substituted value is an **unquoted YAML scalar**. When the short SHA
+happens to match YAML's float-with-exponent form — digits, `e`, digits —
+it is parsed as a number, not a string. `03487e27` became `3.487e+30`, and
+the build died with:
+
+```
+ERROR: failed to build: invalid tag
+  "git.bittern-chameleon.dev/nick-b/soundings-api:3.487e+30":
+  invalid reference format
+```
+
+`soundings-api` failed and `soundings-web` was skipped, so **that commit
+never produced images** and the dev slot did not roll. It self-healed on the
+next merge (SC1's `3e722d2f` contains `d`/`f`, so it stays a string), which
+is precisely why this is easy to miss: main goes red, then green again on its
+own, and the only trace is one failed push build.
+**Why it will recur:** any 8-char short SHA of the shape `\d+e\d+`. Not
+rare enough to ignore — it has already happened once.
+**Fix:** quote the scalar — `- "${CI_COMMIT_SHA:0:8}"` — on **both** steps.
+Also worth auditing every other `${...}` substitution in `.woodpecker/*.yml`
+for the same coercion.
+**Note:** `.woodpecker/*.yml` has **no local gate** by design (this laptop
+has no container runtime, and never will — the disk rule). The push build is
+its only gate, so the PR body must say "image build verified in CI only",
+and the verification is: merge, then confirm the main push pipeline's
+`docker` workflow is green.
+**Acceptance criteria:**
+- [ ] Both image tags are quoted in `.woodpecker/docker.yml` (substrate: unit
+      — a diff inspection; there is no local runtime to build against)
+- [ ] The push pipeline for the merge commit builds and pushes both images
+      (substrate: ci)
 
 ### FX5 — A long idea title makes the Topbar breadcrumb overflow the viewport
 **Tier:** T0 (a CSS rule)
