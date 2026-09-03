@@ -388,7 +388,7 @@ practice session can sit in front of a sketch.
 - [ ] After merge, on the dev slot: `GET /api/v1/ideas?q=hello` returns idea
       #1 (substrate: deployed)
 
-### SB6 — Export bundle: manifest schema, round-trip test, directory and zip sinks
+### SB6 — Export bundle: manifest schema, round-trip test, directory and zip sinks  `[claimed: feat-0016]`
 **Tier:** T1
 **Depends on:** SB2
 **Why:** The ten-year guarantee. Manifest first, then sinks.
