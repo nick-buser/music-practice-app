@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { beatsPerBar, relTime } from './time';
+import { beatsPerBar, formatMs, relTime } from './time';
 
 describe('relTime', () => {
   const today = new Date('2026-05-19');
@@ -46,5 +46,22 @@ describe('beatsPerBar', () => {
   it('falls back to 4 for unparseable meters', () => {
     expect(beatsPerBar('free')).toBe(4);
     expect(beatsPerBar('')).toBe(4);
+  });
+});
+
+describe('formatMs', () => {
+  it('formats sub-minute durations', () => {
+    expect(formatMs(0)).toBe('0:00');
+    expect(formatMs(9_000)).toBe('0:09');
+    expect(formatMs(59_000)).toBe('0:59');
+  });
+
+  it('formats minutes and rounds to the nearest second', () => {
+    expect(formatMs(60_000)).toBe('1:00');
+    expect(formatMs(125_400)).toBe('2:05');
+  });
+
+  it('clamps negative durations to zero', () => {
+    expect(formatMs(-500)).toBe('0:00');
   });
 });

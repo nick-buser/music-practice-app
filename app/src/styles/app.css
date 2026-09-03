@@ -1167,6 +1167,35 @@ button { font-family: inherit; }
 }
 .session-timer .controls .play-btn:hover { transform: scale(1.05); }
 
+/* Capture (RC2) — record/stop control beside the play button. */
+.session-timer .controls .record-btn {
+  align-self: center;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--mist);
+  border: 1px solid var(--line-strong);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all var(--dur-quick) var(--ease-glide);
+}
+.session-timer .controls .record-btn:hover { color: var(--foam); border-color: var(--shoal); }
+.session-timer .controls .record-btn:disabled { opacity: 0.5; cursor: default; }
+.session-timer .controls .record-btn.recording {
+  color: var(--coral);
+  border-color: color-mix(in oklch, var(--coral) 55%, transparent);
+  box-shadow: 0 0 10px color-mix(in oklch, var(--coral) 40%, transparent);
+}
+.capture-status, .capture-error {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  margin-top: -6px;
+}
+.capture-status { color: var(--shoal); }
+.capture-error { color: var(--coral); }
+
 /* Metronome */
 .metro {
   display: flex; align-items: center; justify-content: center; gap: 22px;
@@ -1257,6 +1286,39 @@ button { font-family: inherit; }
   background: var(--lumen-core);
   box-shadow: 0 0 8px var(--lumen-core);
   transform-origin: left;
+}
+
+/* A generic bordered sub-block within .session-stage, same top-border
+   separator as .session-score-block — the takes list (RC2) uses this. */
+.session-subblock { border-top: 1px solid var(--line); padding-top: 18px; }
+
+/* Takes list — SessionView's freshly-captured recordings and PieceView's
+   read-only history share this (RC2). */
+.takes-list .eyebrow {
+  font-family: var(--font-sans); font-size: 10px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--shoal); margin-bottom: 12px;
+}
+.take-row {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+}
+.take-row:first-of-type { border-top: 0; }
+.take-meta {
+  display: flex; flex-direction: column; gap: 2px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--shoal);
+  letter-spacing: 0.03em; white-space: nowrap;
+}
+.take-meta .take-date { color: var(--foam); }
+.take-row audio { flex: 1; min-width: 0; height: 32px; }
+.takes-empty, .takes-error {
+  font-family: var(--font-body); font-style: italic; font-size: 13px;
+  color: var(--shoal); padding: 4px 0 8px;
+}
+.takes-error { color: var(--coral); font-style: normal; }
+.take-no-audio {
+  font-family: var(--font-mono); font-size: 11px; color: var(--shoal);
 }
 
 /* Session rail */

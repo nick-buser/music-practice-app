@@ -1,10 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Topbar } from '../components/Topbar';
 import { Icon } from '../components/Icon';
+import { TakesList } from '../components/TakesList';
 import { SessionScore } from '../verovio/SessionScore';
 import { useMetronome } from '../verovio/useMetronome';
 import { resolveSubject } from '../data/subject';
-import { beatsPerBar } from '../lib/time';
+import { beatsPerBar, formatMs } from '../lib/time';
+import { useAudioRecorder } from '../media/recorder';
+import { useRecordings } from '../hooks/useRecordings';
+import { createRecording, uploadRecordingTrack } from '../api/recordings';
+import { backendEnabled } from '../config';
 import bioluminescence from '../assets/bioluminescence.svg';
 
 interface Props {
@@ -86,6 +91,47 @@ export function SessionView({ subjectId, onEnd, onOpenPiece }: Props) {
     };
   }, [playing]);
 
+  // Capture (RC2) — a mic take of this subject, uploaded as a track on a
+  // freshly created recording. Gated on `backendEnabled` (no server on the
+  // public build) and `recorder.supported` (MediaRecorder/getUserMedia may
+  // be absent — older browsers, insecure contexts, jsdom under vitest).
+  const recorder = useAudioRecorder();
+  const takes = useRecordings(subject.id, true);
+  const [savingTake, setSavingTake] = useState(false);
+  const [captureError, setCaptureError] = useState<string | null>(null);
+  const canRecord = backendEnabled && recorder.supported;
+
+  const handleToggleRecording = useCallback(async () => {
+    if (recorder.state === 'recording') {
+      const blob = await recorder.stop();
+      if (!blob) return;
+      setSavingTake(true);
+      setCaptureError(null);
+      try {
+        // Two calls: create the recording (subject + capture time — no
+        // dedicated bpm field exists on RecordingCreate, so the working
+        // tempo isn't stuffed into `notes` as prose), then upload the take
+        // as its audio track.
+        const recording = await createRecording({
+          capturedAt: new Date().toISOString(),
+          subjectKind: subject.kind,
+          subjectId: subject.id,
+        });
+        await uploadRecordingTrack(recording.id, blob, 'audio');
+        await takes.refresh();
+      } catch {
+        // If the upload failed, say so — never leave the player thinking
+        // the take was saved when it wasn't.
+        setCaptureError('Could not save that take.');
+      } finally {
+        setSavingTake(false);
+      }
+    } else {
+      setCaptureError(null);
+      await recorder.start();
+    }
+  }, [recorder, subject.kind, subject.id, takes.refresh]);
+
   const mm = Math.floor(elapsed / 60);
   const ss = String(elapsed % 60).padStart(2, '0');
   const goalProgress = Math.min(1, elapsed / (GOAL_MINS * 60));
@@ -122,7 +168,11 @@ export function SessionView({ subjectId, onEnd, onOpenPiece }: Props) {
     <div>
       <Topbar crumbs={['Soundings', crumb]} />
       <div style={{ marginTop: -20, marginBottom: 10, display: 'flex', justifyContent: 'flex-end', gap: 14, alignItems: 'center' }}>
-        <span className="recording-badge"><span className="dot deep" /> recording</span>
+        {recorder.state === 'recording' && (
+          <span className="recording-badge">
+            <span className="dot deep" /> recording · {formatMs(recorder.elapsedMs)}
+          </span>
+        )}
         <button className="btn btn-ghost" onClick={onEnd} style={{ padding: '6px 14px' }}>
           {isScale ? 'End warmup' : 'End session'}
         </button>
@@ -199,8 +249,24 @@ export function SessionView({ subjectId, onEnd, onOpenPiece }: Props) {
                   <button className="play-btn" onClick={() => setPlaying((p) => !p)} aria-label={playing ? 'Pause' : 'Play'}>
                     <Icon name={playing ? 'pause' : 'play'} size={28} />
                   </button>
+                  {canRecord && (
+                    <button
+                      className={`record-btn ${recorder.state === 'recording' ? 'recording' : ''}`}
+                      onClick={handleToggleRecording}
+                      disabled={recorder.state === 'stopping' || savingTake}
+                      aria-label={recorder.state === 'recording' ? 'Stop recording' : 'Record a take'}
+                    >
+                      <Icon name={recorder.state === 'recording' ? 'stop' : 'mic'} size={18} />
+                    </button>
+                  )}
                 </div>
               </div>
+
+              {canRecord && (recorder.error || captureError || savingTake) && (
+                <div className={recorder.error || captureError ? 'capture-error' : 'capture-status'}>
+                  {recorder.error || captureError || 'saving take…'}
+                </div>
+              )}
 
               <div className="metro">
                 <div className="tempo-ctl">
@@ -246,6 +312,12 @@ export function SessionView({ subjectId, onEnd, onOpenPiece }: Props) {
                   <div className="fill" style={{ transform: `scaleX(${scoreFraction})` }} />
                 </div>
               </div>
+
+              {backendEnabled && (
+                <div className="session-subblock">
+                  <TakesList recordings={takes.recordings} error={takes.error} />
+                </div>
+              )}
             </div>
 
             <div className="session-rail">

@@ -1,11 +1,14 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Topbar } from '../components/Topbar';
 import { Icon } from '../components/Icon';
+import { TakesList } from '../components/TakesList';
 import { Score } from '../verovio/Score';
 import { findMeasureNumber, paintHeatmap, paintSelection, type HeatSection } from '../verovio/heatmap';
 import { INSTRUMENTS, PIECES } from '../data/sounddata';
 import { ABC_BY_PIECE } from '../data/scores';
 import { emphasize } from '../lib/text';
+import { useRecordings } from '../hooks/useRecordings';
+import { backendEnabled } from '../config';
 import type { Piece, Section } from '../data/schemas';
 
 interface Props {
@@ -35,6 +38,11 @@ export function PieceView({ pieceId, onBack, onStartSession }: Props) {
   );
   const [selection, setSelection] = useState<[number, number] | null>(null);
   const [showHeat, setShowHeat] = useState(true);
+
+  // Read-only takes list (RC2) — hook must run unconditionally (before the
+  // "piece not found" early return below) to keep hook order stable; falls
+  // back to an inert subject id and stays inactive when there's no piece.
+  const takes = useRecordings(piece?.id ?? '', !!piece);
 
   if (!piece) {
     return (
@@ -240,6 +248,12 @@ export function PieceView({ pieceId, onBack, onStartSession }: Props) {
                   avg {Math.round(piece.minutesTotal / Math.max(1, piece.sessions))}m
                 </span>
               </div>
+            </div>
+          )}
+
+          {backendEnabled && (
+            <div className="card">
+              <TakesList recordings={takes.recordings} error={takes.error} />
             </div>
           )}
 
