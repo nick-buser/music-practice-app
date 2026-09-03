@@ -13,6 +13,7 @@ vi.mock('../config', () => ({ backendEnabled: true, API_BASE_URL: 'http://test' 
 // (AC2) is the actual production logic, not a re-description of it.
 const getIdea = vi.fn();
 const listIdeaAssets = vi.fn();
+const listIdeaProperties = vi.fn();
 const updateIdea = vi.fn();
 const uploadIdeaAsset = vi.fn();
 vi.mock('../api/ideas', async (importOriginal) => {
@@ -21,6 +22,7 @@ vi.mock('../api/ideas', async (importOriginal) => {
     ...actual,
     getIdea: (id: string) => getIdea(id),
     listIdeaAssets: (id: string) => listIdeaAssets(id),
+    listIdeaProperties: (id: string) => listIdeaProperties(id),
     updateIdea: (id: string, patch: IdeaUpdate) => updateIdea(id, patch),
     uploadIdeaAsset: (ideaId: string, file: File, role: string, newRevision?: boolean) =>
       uploadIdeaAsset(ideaId, file, role, newRevision),
@@ -65,6 +67,7 @@ describe('IdeaPage with a backend (local build)', () => {
   beforeEach(() => {
     getIdea.mockReset();
     listIdeaAssets.mockReset().mockResolvedValue([]);
+    listIdeaProperties.mockReset().mockResolvedValue([]);
     updateIdea.mockReset();
     uploadIdeaAsset.mockReset();
   });

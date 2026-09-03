@@ -2546,7 +2546,15 @@ button { font-family: inherit; }
 }
 .meta-links .link-kind { color: var(--shoal); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
 
-/* Properties panel (PV3 fills this in) */
+/* Properties panel */
 .props-empty {
   font-family: var(--font-body); font-style: italic; color: var(--shoal); font-size: 14px;
 }
+.properties-list { display: flex; flex-direction: column; }
+.prop-row {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px;
+  padding: 10px 0; border-bottom: 1px solid var(--line);
+}
+.prop-row:last-child { border-bottom: none; }
+.prop-desc { font-family: var(--font-mono); font-size: 13px; color: var(--foam); }
+.prop-lineage { font-family: var(--font-sans); font-size: 10px; letter-spacing: 0.04em; color: var(--shoal); }

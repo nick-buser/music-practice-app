@@ -42,3 +42,7 @@ export type IdeaAssetRevisionGroup = components['schemas']['IdeaAssetRevisionGro
 export type IdeaAssetRole = components['schemas']['IdeaAssetRead']['role'];
 export type IdeaLinkEdge = components['schemas']['IdeaLinkEdge'];
 export type IdeaLinkCreate = components['schemas']['IdeaLinkCreate'];
+
+// Provenance (PV1/PV3) — a property plus the run that produced it, the
+// lineage `PropertiesPanel` renders (docs/recordings-provenance.md).
+export type IdeaProperty = components['schemas']['ExtractedPropertyWithRun'];

@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { getIdea, listIdeaAssets, updateIdea, uploadIdeaAsset } from '../api/ideas';
-import type { Idea, IdeaAssetRevisionGroup, IdeaAssetRole, IdeaUpdate } from '../api/client';
+import { getIdea, listIdeaAssets, listIdeaProperties, updateIdea, uploadIdeaAsset } from '../api/ideas';
+import type { Idea, IdeaAssetRevisionGroup, IdeaAssetRole, IdeaProperty, IdeaUpdate } from '../api/client';
 import { backendEnabled } from '../config';
 
 export interface IdeaState {
   idea: Idea | null;
   assets: IdeaAssetRevisionGroup[];
+  /** PV3: extracted properties (key guess, tempo, ...), each with its producing run's lineage. */
+  properties: IdeaProperty[];
   loading: boolean;
   error: string | null;
   /**
@@ -28,6 +30,7 @@ export interface IdeaState {
 export function useIdea(ideaId: string): IdeaState {
   const [idea, setIdea] = useState<Idea | null>(null);
   const [assets, setAssets] = useState<IdeaAssetRevisionGroup[]>([]);
+  const [properties, setProperties] = useState<IdeaProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,12 +38,14 @@ export function useIdea(ideaId: string): IdeaState {
     if (!backendEnabled) return;
     setLoading(true);
     try {
-      const [loadedIdea, loadedAssets] = await Promise.all([
+      const [loadedIdea, loadedAssets, loadedProperties] = await Promise.all([
         getIdea(ideaId),
         listIdeaAssets(ideaId),
+        listIdeaProperties(ideaId),
       ]);
       setIdea(loadedIdea);
       setAssets(loadedAssets);
+      setProperties(loadedProperties);
       setError(null);
     } catch {
       setError('Could not load this idea.');
@@ -78,5 +83,5 @@ export function useIdea(ideaId: string): IdeaState {
     [ideaId],
   );
 
-  return { idea, assets, loading, error, patch, uploadAsset };
+  return { idea, assets, properties, loading, error, patch, uploadAsset };
 }

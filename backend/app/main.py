@@ -20,6 +20,19 @@ from starlette.middleware.base import RequestResponseEndpoint
 from app.config import settings
 from app.db import SessionLocal, engine
 from app.errors import install_error_handlers
+
+# Import side-effect: registers every built-in extractor (`register()` runs
+# at each extractor module's import time — see
+# `app/jobs/extractors/__init__.py`'s docstring for why this has to happen
+# *somewhere*, and why it's deliberately not `app/jobs/worker.py`). This is
+# the composition root, so it's the natural place: every test and the
+# embedded worker thread below both go through this module, so both see the
+# full registry before the first `run_once`. The standalone
+# `python -m app.jobs.worker` CLI path does not import this module and
+# would need the same import if it's ever run as a separate process
+# (`app/jobs/worker.py`'s docstring already flags that as unbuilt, later
+# gitops work).
+from app.jobs import extractors as extractors
 from app.jobs.worker import run_forever
 from app.logging import configure_logging
 from app.models import Base
