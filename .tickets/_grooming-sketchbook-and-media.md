@@ -536,7 +536,7 @@ before these tables do; SB2 already reserves `run_id`.
 - [ ] Gates green; contract regenerated (substrate: unit)
 - [ ] After merge, the migrate Job completes on both slots (substrate: deployed)
 
-### PV2 — Job worker: queued runs → extractor registry → properties, embedded in the api process
+### PV2 — Job worker: queued runs → extractor registry → properties, embedded in the api process  `[claimed: feat-0009]`
 **Tier:** T2 (the app's first background execution path)
 **Depends on:** PV1
 **Why:** Enqueue→poll, never inline. The thinnest thing that works: a loop
