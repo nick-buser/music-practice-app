@@ -388,7 +388,7 @@ practice session can sit in front of a sketch.
 - [ ] After merge, on the dev slot: `GET /api/v1/ideas?q=hello` returns idea
       #1 (substrate: deployed)
 
-### SB6 — Export bundle: manifest schema, round-trip test, directory and zip sinks  `[claimed: feat-0016]`
+### SB6 — Export bundle: manifest schema, round-trip test, directory and zip sinks  `[merged: feat-0016, PR #28, 2026-09-03 — all three criteria unit and closed; links by handle, mentions deliberately not exported; properties still [] — see Deferred]`
 **Tier:** T1
 **Depends on:** SB2
 **Why:** The ten-year guarantee. Manifest first, then sinks.
@@ -1091,6 +1091,14 @@ definitions):
 - **Sketchbook phase 3** (REAPER repo) — bundle → scratch project, "save
   revision" action, `reaper-render` agent. Needs the studio host.
 - **MIDI track alongside audio in RC2** — after SB7; one small ticket.
+- **Export bundle carries real `properties`** — SB6 fixed the manifest's
+  `ManifestProperty` shape but always writes `[]`, because the groomed
+  scope predated PV1 landing. PV1/PV2/PV3 are merged now, so a bundle is
+  lossy for extracted lineage today. One small ticket: populate
+  `properties` in `export_idea`, and decide whether `import_bundle`
+  recreates `ExtractionRun` rows (SB6 deliberately leaves an imported
+  asset's `run_id` as `None`). No `schema_version` bump needed — the
+  shape is already fixed *(found by SB6, 2026-09-03)*.
 - **Native score attachments on ideas** — a `scores` row linked from the
   idea, never a JSONB column on `idea_assets` (which stays a bytes table);
   sketchbook phase 2, after SC4 *(F1 amendment 2026-09-02)*. SB2 is
