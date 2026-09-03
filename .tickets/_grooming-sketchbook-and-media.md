@@ -1177,7 +1177,7 @@ edited.
 - [ ] `.tickets/loop.md`'s Alembic constraint notes that the chain is now
       locally runnable (substrate: unit)
 
-### FX3 — The `(untitled capture)` headline overflows its container on the idea page  `[claimed: fix-0008]`
+### FX3 — The `(untitled capture)` headline overflows its container on the idea page  `[merged: fix-0008, PR #30, 2026-09-03 — ellipsis, not wrapping (it is an <input>); the flex min-width hypothesis was measured false and its rule removed; verified in Chrome at 5 widths]`
 **Tier:** T0 (a CSS rule)
 **Depends on:** — (SB3b shipped the surface)
 **Found:** 2026-09-02, in SB3b's deployed screenshot on `soundings-dev`.
@@ -1195,6 +1195,44 @@ right for a sketchbook.
 - [ ] A long/fallback headline stays inside its container at the default
       desktop width (substrate: local (e2e) — assert the headline element's
       `scrollWidth <= clientWidth`)
+- [ ] Gates green (substrate: unit)
+
+### FX5 — A long idea title makes the Topbar breadcrumb overflow the viewport
+**Tier:** T0 (a CSS rule)
+**Depends on:** —
+**Found:** 2026-09-03, while verifying FX3 in Chrome.
+**What:** `Topbar`'s breadcrumb renders the idea title verbatim as its last
+crumb. With a long title, `.crumb`/`.here` reaches right=1325 and the
+topbar's `.right` block reaches right=1498 at a 1280px viewport, giving the
+whole page a horizontal scrollbar. Visible in FX3's verification screenshot.
+**Why it is filed separately:** this is the page-level overflow that is easy
+to mistake for FX3. FX3 was the headline `<input>` inside the card and is
+fixed; this is a different element in a different component, and fixing it
+inside a T0 CSS ticket about the headline would have been scope creep.
+**Fix sketch:** the last crumb needs a max-width plus `text-overflow:
+ellipsis`, or the topbar needs `min-width: 0` on the crumb column so the
+`.right` block keeps its place. Measure before choosing — FX3's own
+hypothesis about a flex `min-width` turned out to be false when measured.
+**Acceptance criteria:**
+- [ ] With an 87-character unbroken title, `document.documentElement.scrollWidth
+      <= clientWidth` on the idea page at a 1280px viewport
+      (substrate: local (e2e))
+- [ ] Gates green (substrate: unit)
+
+### FX6 — `.tech-rail` overflows the viewport by ~18px on the sketchbook stream
+**Tier:** T0 (a CSS rule)
+**Depends on:** —
+**Found:** 2026-09-03, while verifying FX3 in Chrome.
+**What:** On `SketchbookLive` at a 1280px viewport, `aside.tech-rail` (and
+its `.idea-rail`/`.idea-head` children, the quick-capture column) reaches
+right=1298 — an ~18px horizontal overflow. Independent of any idea title;
+it is there with the default seeded content.
+**Why it matters:** small, but it puts a horizontal scrollbar on the app's
+most-used view, and it is the kind of thing that gets normalised until
+someone measures. Purely cosmetic.
+**Acceptance criteria:**
+- [ ] `document.documentElement.scrollWidth <= clientWidth` on the sketchbook
+      stream at a 1280px viewport (substrate: local (e2e))
 - [ ] Gates green (substrate: unit)
 
 ### FX1 — `GET /v1/ideas/{id}/assets/{asset_id}/content` is documented as JSON  `[merged: fix-0005, PR #17, 2026-09-02 — contract now application/octet-stream; typed downloadIdeaAsset landed]`
