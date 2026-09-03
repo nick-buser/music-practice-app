@@ -707,7 +707,7 @@ all hang on.
 - [ ] Verify note: record ten seconds on the dev slot in desktop Chrome,
       reload, the take plays back (substrate: deployed, hardware)
 
-### RC3 — Cadence setting and due state  `[claimed: feat-0013]`
+### RC3 — Cadence setting and due state  `[merged: feat-0013, PR #25, 2026-09-03 — all criteria unit; migration 0006 round-tripped locally, the first since FX4]`
 **Tier:** T1
 **Depends on:** RC1
 **Why:** "Record this weekly" — the periodic half of the workstream, no
