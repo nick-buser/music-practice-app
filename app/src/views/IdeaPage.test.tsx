@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Idea, IdeaAsset, IdeaAssetRevisionGroup, IdeaUpdate } from '../api/client';
 
@@ -154,5 +154,60 @@ describe('IdeaPage with a backend (local build)', () => {
     await waitFor(() =>
       expect(updateIdea).toHaveBeenCalledWith('idea-1', { tags: ['sketch', 'chorus'] }),
     );
+  });
+
+  describe('Record MIDI as a new revision (SB7)', () => {
+    // Mirrors SketchbookLive.test.tsx's fakes for the same Web MIDI surface
+    // — see midi/access.test.ts for the canonical version of these.
+    class FakeMidiInput {
+      onmidimessage: ((event: unknown) => void) | null = null;
+      constructor(
+        public id: string,
+        public name: string,
+      ) {}
+    }
+    class FakeMidiAccess {
+      inputs = new Map<string, FakeMidiInput>();
+      outputs = new Map<string, never>();
+      sysexEnabled = false;
+      onstatechange: ((event: unknown) => void) | null = null;
+    }
+
+    afterEach(() => {
+      delete (navigator as unknown as { requestMIDIAccess?: unknown }).requestMIDIAccess;
+    });
+
+    it("a scripted recording on the open idea's attachments panel uploads as a new revision, role: melody", async () => {
+      const idea = makeIdea({ id: 'idea-1', handle: 1 });
+      getIdea.mockResolvedValue(idea);
+      uploadIdeaAsset.mockResolvedValue({ id: 'asset-1' });
+
+      const access = new FakeMidiAccess();
+      const input = new FakeMidiInput('dev-1', 'Test Keyboard');
+      access.inputs.set('dev-1', input);
+      Object.defineProperty(navigator, 'requestMIDIAccess', {
+        value: vi.fn().mockResolvedValue(access),
+        configurable: true,
+      });
+
+      render(<IdeaPage ideaId="idea-1" onBack={vi.fn()} onNavigateToHandle={vi.fn()} />);
+
+      const recordButton = await screen.findByRole('button', { name: /record midi/i });
+      fireEvent.click(recordButton);
+      await waitFor(() => expect(screen.getByRole('button', { name: /^■ stop$/ })).toBeInTheDocument());
+
+      input.onmidimessage?.({ data: new Uint8Array([0x90, 67, 90]) }); // note-on G4
+      input.onmidimessage?.({ data: new Uint8Array([0x80, 67, 0]) }); // note-off
+
+      fireEvent.click(screen.getByRole('button', { name: /^■ stop$/ }));
+
+      await waitFor(() => expect(uploadIdeaAsset).toHaveBeenCalledTimes(1));
+      const [ideaId, uploadedFile, role, newRevision] = uploadIdeaAsset.mock.calls[0];
+      expect(ideaId).toBe('idea-1');
+      expect(uploadedFile).toBeInstanceOf(File);
+      expect((uploadedFile as File).name).toMatch(/^capture-\d+\.mid$/);
+      expect(role).toBe('melody');
+      expect(newRevision).toBe(true); // the open-idea path is always a new revision, never a fresh idea
+    });
   });
 });
