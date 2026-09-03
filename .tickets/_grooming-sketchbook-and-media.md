@@ -1108,7 +1108,7 @@ definitions):
 
 ## Found in flight (proposed, not yet scheduled)
 
-### FX2 — Point the e2e suite at the installed Chrome so it can actually run here  `[claimed: fix-0004]`
+### FX2 — Point the e2e suite at the installed Chrome so it can actually run here  `[merged: fix-0004, PR #16, 2026-09-02 — 34 e2e tests passed here, zero downloads]`
 **Tier:** T0 (one line in `app/playwright.config.ts`, plus a comment)
 **Depends on:** —
 **Found:** 2026-09-02, while closing SB3a's deployed criterion.
