@@ -1131,7 +1131,7 @@ currently only documents the download path.
 - [ ] `.tickets/loop.md`'s `local (e2e)` row is updated to say the suite runs
       (substrate: unit — a docs diff)
 
-### FX4 — The Alembic chain cannot run on SQLite, so migrations are only ever verified in CI  `[claimed: fix-0007]`
+### FX4 — The Alembic chain cannot run on SQLite, so migrations are only ever verified in CI  `[merged: fix-0007, PR #23, 2026-09-03 — upgrade/downgrade/upgrade all exit 0 on SQLite; 11 tables present]`
 **Tier:** T1 (a one-line type change plus a migration-chain re-verification)
 **Depends on:** —
 **Found:** 2026-09-03, by RC1 (feat-0011), which could not run its own

@@ -94,7 +94,11 @@ commit on `main` that fix-0006 had to clean up.)
 - **Alembic:** one linear chain; a new revision's number and
   `down_revision` come from `alembic heads` on `main` at PR time (grooming
   docs say `<next>_<name>`, never a fixed number); rebase and renumber on
-  conflict.
+  conflict. The chain now runs locally end-to-end on SQLite (`alembic
+  upgrade head` / `downgrade base` / `upgrade head` all exit 0 against a
+  file-backed `sqlite+pysqlite` database) — a future migration ticket
+  should verify its own round-trip locally this way instead of
+  substituting something weaker.
 - **Cross-repo tickets** (a `**Repo:**` other than this one) are claimed in
   the owning repo per its own conventions — homelab_infra_and_planning
   enforces worktrees and has its own numbering; homelab-gitops follows the
