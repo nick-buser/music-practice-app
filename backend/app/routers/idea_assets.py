@@ -143,7 +143,16 @@ def list_assets(
     return [IdeaAssetRevisionGroup(revision=r, assets=groups[r]) for r in order]
 
 
-@router.get("/{idea_id}/assets/{asset_id}/content")
+# FastAPI infers responses from the return type annotation, but `-> StreamingResponse`
+# does not carry media-type information — FastAPI documents a 200 with `application/json`
+# schema, which mistypes every generated client. The explicit `responses=` entry below
+# is needed so FastAPI documents the actual binary media type and generated clients
+# (including app/src/api/schema.d.ts) type the response correctly.
+@router.get(
+    "/{idea_id}/assets/{asset_id}/content",
+    response_class=StreamingResponse,
+    responses={200: {"content": {"application/octet-stream": {}}}},
+)
 def download_asset(
     idea_id: uuid.UUID,
     asset_id: uuid.UUID,
