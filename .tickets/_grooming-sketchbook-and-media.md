@@ -362,7 +362,7 @@ practice session can sit in front of a sketch.
 - [ ] Gates green; `config.test.ts` still proves the public build never
       references the live path (substrate: unit)
 
-### SB5 — Search: Postgres full-text + filter grammar, search box on the stream
+### SB5 — Search: Postgres full-text + filter grammar, search box on the stream  `[claimed: feat-0015]`
 **Tier:** T1
 **Depends on:** SB1 (OPS2 for its `ci` criterion)
 **Why:** Small and high value once there are more ideas than fit on a screen.
