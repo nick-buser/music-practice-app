@@ -39,9 +39,20 @@ interface Props {
  * (SB5) is deliberately not.
  */
 export function SketchbookLive({ onStartSession }: Props) {
+  // SB5: the search box's raw value, debounced 250ms before it becomes the
+  // `q` that reaches `useIdeas`/`GET /v1/ideas?q=` — every keystroke firing
+  // its own request would be both wasteful and prone to exactly the
+  // out-of-order-response bug `useIdeas` otherwise has to guard against.
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  useEffect(() => {
+    const handle = setTimeout(() => setDebouncedQuery(searchInput), 250);
+    return () => clearTimeout(handle);
+  }, [searchInput]);
+
   // This component is only ever mounted while the Sketchbook tab is open, so
   // "active" is unconditionally true here — the enclosing switch is the gate.
-  const ideasState = useIdeas(true);
+  const ideasState = useIdeas(true, debouncedQuery);
   const [inboxOnly, setInboxOnly] = useState(true);
   const [draft, setDraft] = useState('');
   const [file, setFile] = useState<File | null>(null);
@@ -97,6 +108,12 @@ export function SketchbookLive({ onStartSession }: Props) {
   }, [draft, file, ideasState]);
 
   const inboxCount = ideasState.ideas.filter((idea) => idea.status === 'inbox').length;
+  // SB5: `q` (tag/kind/key/status filters plus free text) is applied
+  // server-side inside `useIdeas` — `ideasState.ideas` here has already
+  // been narrowed by the search box. `inboxOnly` stays a purely
+  // client-side filter on top of that, same as before this ticket, so the
+  // two compose: searching still respects the toggle, and toggling still
+  // respects whatever's currently searched.
   const visible = inboxOnly
     ? ideasState.ideas.filter((idea) => idea.status === 'inbox')
     : ideasState.ideas;
@@ -154,6 +171,16 @@ export function SketchbookLive({ onStartSession }: Props) {
             </button>
             <span className="c">{String(visible.length).padStart(2, '0')}</span>
           </div>
+
+          <input
+            type="search"
+            className="meta-input"
+            style={{ width: '100%', marginBottom: 12 }}
+            aria-label="Search ideas"
+            placeholder="tag:x kind:y — or just type…"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
 
           {ideasState.error && (
             <div style={{ fontFamily: 'var(--font-body)', color: 'var(--krill)', marginBottom: 12 }}>

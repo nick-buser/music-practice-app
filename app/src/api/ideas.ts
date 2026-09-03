@@ -24,6 +24,12 @@ export interface ListIdeasParams {
   status?: IdeaStatus;
   kind?: string;
   tag?: string;
+  /**
+   * SB5's search-box grammar (`tag:x kind:y key:z status:s` plus free
+   * text — `backend/app/search.py::parse_query`), applied server-side.
+   * ANDs with any of the explicit params above rather than replacing them.
+   */
+  q?: string;
   limit?: number;
   offset?: number;
 }

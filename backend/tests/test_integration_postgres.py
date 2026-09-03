@@ -244,3 +244,74 @@ def test_alembic_upgrade_downgrade_upgrade_roundtrip() -> None:
         assert tables >= APP_TABLES
     finally:
         engine.dispose()
+
+
+@pytest.mark.integration
+def test_idea_search_tsvector_matches_free_text_and_0007_is_reversible() -> None:
+    """SB5's one Postgres-only surface: the generated `search_tsv` column
+    and its GIN index (migration 0007). Runs the real migrations rather
+    than `Base.metadata.create_all()`, unlike the JSONB/FK tests above —
+    `search_tsv` is deliberately not a mapped column at all (see
+    `app/models/idea.py`'s `IDEA_SEARCH_TSV` docstring), so it only exists
+    once 0007 has actually applied; `create_all()` would silently produce
+    an `ideas` table with no `search_tsv` at all, and this test would pass
+    for the wrong reason (or rather, fail at the `list_ideas` call below
+    with a bare column referencing nothing).
+
+    Exercises the real production path — `app/repositories/ideas.py::
+    list_ideas`'s Postgres branch (`@@ plainto_tsquery`, `ts_rank`) — not a
+    hand-rolled query against the column, so a regression in that branch's
+    SQL (not just in the migration) fails this test too.
+    """
+    engine = create_engine(_postgres_database_url(), future=True)
+    try:
+        _reset_schema(engine)
+        cfg = _alembic_config()
+        command.upgrade(cfg, "head")
+
+        with Session(engine) as s:
+            s.add(User(id=DEFAULT_USER_ID, display_name="Default User"))
+            s.flush()
+            matching = ideas_repo.create_idea(
+                s,
+                DEFAULT_USER_ID,
+                IdeaCreate(
+                    title="Blue Reverie",
+                    body="a slow chord progression under a night sky",
+                ),
+            )
+            ideas_repo.create_idea(
+                s,
+                DEFAULT_USER_ID,
+                IdeaCreate(title="Golden Hook", body="a fast bright riff"),
+            )
+            s.commit()
+            matching_id = matching.id
+
+        with Session(engine) as s:
+            rows, total = ideas_repo.list_ideas(
+                s,
+                DEFAULT_USER_ID,
+                limit=50,
+                offset=0,
+                status=None,
+                kind=None,
+                tag=None,
+                q="reverie",
+            )
+            assert total == 1
+            assert [r.id for r in rows] == [matching_id]
+
+        # 0007 is reversible: downgrading drops search_tsv (and its index)
+        # without disturbing anything else, and a fresh upgrade brings it
+        # straight back — same "assert at each stage" idiom as the full
+        # head/base/head round trip above, scoped to just this migration.
+        command.downgrade(cfg, "0006")
+        cols = {c["name"] for c in inspect(engine).get_columns("ideas")}
+        assert "search_tsv" not in cols
+
+        command.upgrade(cfg, "head")
+        cols = {c["name"] for c in inspect(engine).get_columns("ideas")}
+        assert "search_tsv" in cols
+    finally:
+        engine.dispose()
