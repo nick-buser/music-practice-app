@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { IdeaSummary } from '../api/client';
 
@@ -156,5 +156,102 @@ describe('SketchbookLive with a backend (local build)', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  describe('Record MIDI (SB7)', () => {
+    // jsdom has no Web MIDI API of its own — a fake `navigator.requestMIDIAccess`
+    // stands in wherever a test opts in (mirrors midi/access.test.ts's fakes).
+    class FakeMidiInput {
+      onmidimessage: ((event: unknown) => void) | null = null;
+      constructor(
+        public id: string,
+        public name: string,
+      ) {}
+    }
+    class FakeMidiAccess {
+      inputs = new Map<string, FakeMidiInput>();
+      outputs = new Map<string, never>();
+      sysexEnabled = false;
+      onstatechange: ((event: unknown) => void) | null = null;
+    }
+
+    afterEach(() => {
+      delete (navigator as unknown as { requestMIDIAccess?: unknown }).requestMIDIAccess;
+    });
+
+    it('hides the button entirely when Web MIDI is unsupported (the default jsdom environment)', () => {
+      render(<SketchbookLive />);
+      expect(screen.queryByRole('button', { name: /record midi/i })).not.toBeInTheDocument();
+    });
+
+    it('a scripted note on/off, stopped by hand, uploads a .mid asset with role: melody', async () => {
+      const access = new FakeMidiAccess();
+      const input = new FakeMidiInput('dev-1', 'Test Keyboard');
+      access.inputs.set('dev-1', input);
+      Object.defineProperty(navigator, 'requestMIDIAccess', {
+        value: vi.fn().mockResolvedValue(access),
+        configurable: true,
+      });
+
+      render(<SketchbookLive />);
+      const recordButton = screen.getByRole('button', { name: /record midi/i });
+      fireEvent.click(recordButton);
+
+      // Requesting access is async (the permission prompt); the button
+      // flips to "stop" once the recorder is actually armed.
+      await waitFor(() => expect(screen.getByRole('button', { name: /^■ stop$/ })).toBeInTheDocument());
+      expect(input.onmidimessage).not.toBeNull(); // the recorder is wired to the (only) input
+
+      input.onmidimessage?.({ data: new Uint8Array([0x90, 60, 100]) }); // note-on C4
+      input.onmidimessage?.({ data: new Uint8Array([0x80, 60, 0]) }); // note-off
+
+      fireEvent.click(screen.getByRole('button', { name: /^■ stop$/ }));
+
+      await waitFor(() => expect(uploadIdeaAsset).toHaveBeenCalledTimes(1));
+      expect(createIdea).toHaveBeenCalledWith({ body: '' }); // no draft text was typed
+      const [ideaId, uploadedFile, role, newRevision] = uploadIdeaAsset.mock.calls[0];
+      expect(ideaId).toBe('new-idea');
+      expect(uploadedFile).toBeInstanceOf(File);
+      expect((uploadedFile as File).name).toMatch(/^capture-\d+\.mid$/);
+      expect((uploadedFile as File).type).toBe('audio/midi');
+      expect(role).toBe('melody'); // guessAssetRole's real mime->role mapping, not a re-description of it
+      expect(newRevision).toBeUndefined(); // a new inbox idea, not a revision
+
+      // Back to idle once the upload lands.
+      await waitFor(() => expect(screen.getByRole('button', { name: /record midi/i })).toBeInTheDocument());
+    });
+
+    it('a take stopped without ever playing a note uploads nothing', async () => {
+      const access = new FakeMidiAccess();
+      access.inputs.set('dev-1', new FakeMidiInput('dev-1', 'Test Keyboard'));
+      Object.defineProperty(navigator, 'requestMIDIAccess', {
+        value: vi.fn().mockResolvedValue(access),
+        configurable: true,
+      });
+
+      render(<SketchbookLive />);
+      fireEvent.click(screen.getByRole('button', { name: /record midi/i }));
+      await waitFor(() => expect(screen.getByRole('button', { name: /^■ stop$/ })).toBeInTheDocument());
+
+      fireEvent.click(screen.getByRole('button', { name: /^■ stop$/ }));
+      await waitFor(() => expect(screen.getByRole('button', { name: /record midi/i })).toBeInTheDocument());
+
+      expect(uploadIdeaAsset).not.toHaveBeenCalled();
+      expect(createIdea).not.toHaveBeenCalled();
+    });
+
+    it('a declined permission prompt surfaces an error distinct from "unsupported", and the button stays usable', async () => {
+      Object.defineProperty(navigator, 'requestMIDIAccess', {
+        value: vi.fn().mockRejectedValue(new DOMException('User declined', 'NotAllowedError')),
+        configurable: true,
+      });
+
+      render(<SketchbookLive />);
+      fireEvent.click(screen.getByRole('button', { name: /record midi/i }));
+
+      await waitFor(() => expect(screen.getByText(/denied/i)).toBeInTheDocument());
+      // Still there to retry — a denial doesn't remove the button the way "unsupported" does.
+      expect(screen.getByRole('button', { name: /record midi/i })).toBeInTheDocument();
+    });
   });
 });

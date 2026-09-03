@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import type { IdeaAssetRevisionGroup, IdeaAssetRole } from '../api/client';
 import { guessAssetRole, ideaAssetContentUrl } from '../api/ideas';
+import { useMidiCapture } from '../midi/useMidiCapture';
 
 // Mirrors `IdeaAssetRead.role`'s enum (schema.d.ts) — spelled out here rather
 // than derived at runtime because the role picker needs every option up
@@ -53,6 +54,14 @@ export function AttachmentsPanel({ ideaId, assets, onUpload }: Props) {
       setSubmitting(false);
     }
   };
+
+  // SB7: Web MIDI quick capture on an already-open idea always lands as a
+  // new revision — there's no "new inbox idea" concept on this page. Same
+  // `useMidiCapture` state machine `SketchbookLive`'s capture-box button
+  // drives, just handed `onUpload(file, 'melody', true)` instead of
+  // `useIdeas.capture` as its destination (see that hook's docstring).
+  const handleMidiCaptured = useCallback((captured: File) => onUpload(captured, 'melody', true), [onUpload]);
+  const midiCapture = useMidiCapture(handleMidiCaptured);
 
   return (
     <div className="attachments-panel">
@@ -120,7 +129,29 @@ export function AttachmentsPanel({ ideaId, assets, onUpload }: Props) {
         >
           + upload
         </button>
+        {/* SB7: absent Web MIDI the button simply doesn't exist — see midi/access.ts. */}
+        {midiCapture.status !== 'unsupported' && (
+          <button
+            type="button"
+            className={`btn btn-ghost ${midiCapture.recording ? 'on' : ''}`}
+            disabled={midiCapture.armPending || midiCapture.busy}
+            onClick={midiCapture.toggle}
+          >
+            {midiCapture.recording
+              ? '■ stop'
+              : midiCapture.armPending
+                ? 'requesting…'
+                : midiCapture.busy
+                  ? 'uploading…'
+                  : '● record MIDI (new revision)'}
+          </button>
+        )}
       </div>
+      {midiCapture.status === 'denied' && !midiCapture.recording && (
+        <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--krill)' }}>
+          {midiCapture.error ?? 'MIDI access was denied.'}
+        </div>
+      )}
     </div>
   );
 }

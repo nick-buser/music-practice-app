@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { IdeaSummary } from '../api/client';
 import { Topbar } from '../components/Topbar';
 import { useIdeas } from '../hooks/useIdeas';
+import { useMidiCapture } from '../midi/useMidiCapture';
 import { IdeaPage } from './IdeaPage';
 
 /**
@@ -106,6 +107,21 @@ export function SketchbookLive({ onStartSession }: Props) {
       setSubmitting(false);
     }
   }, [draft, file, ideasState]);
+
+  // SB7: Web MIDI quick capture — a new inbox idea, same as a text/file
+  // capture, just with the recorded take as the attachment. The state
+  // machine (arm → record → stop/silence → encode) is shared with
+  // `AttachmentsPanel`'s "new revision" capture button via `useMidiCapture`
+  // (see that module's docstring for why there are two call sites for one
+  // hook); only `onCaptured` differs.
+  const handleMidiCaptured = useCallback(
+    async (file: File) => {
+      await ideasState.capture(draft.trim(), file);
+      setDraft('');
+    },
+    [draft, ideasState],
+  );
+  const midiCapture = useMidiCapture(handleMidiCaptured);
 
   const inboxCount = ideasState.ideas.filter((idea) => idea.status === 'inbox').length;
   // SB5: `q` (tag/kind/key/status filters plus free text) is applied
@@ -265,14 +281,40 @@ export function SketchbookLive({ onStartSession }: Props) {
                 {file.name}
               </div>
             )}
-            <button
-              type="button"
-              className="btn btn-ghost"
-              disabled={submitting || (!draft.trim() && !file)}
-              onClick={() => void handleCapture()}
-            >
-              + capture
-            </button>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                disabled={submitting || (!draft.trim() && !file)}
+                onClick={() => void handleCapture()}
+              >
+                + capture
+              </button>
+              {/* SB7: absent Web MIDI (unsupported browser, or the public
+                  static build has no backend to upload to anyway) the
+                  button simply doesn't exist — see midi/access.ts. */}
+              {midiCapture.status !== 'unsupported' && (
+                <button
+                  type="button"
+                  className={`btn btn-ghost ${midiCapture.recording ? 'on' : ''}`}
+                  disabled={midiCapture.armPending || midiCapture.busy}
+                  onClick={midiCapture.toggle}
+                >
+                  {midiCapture.recording
+                    ? '■ stop'
+                    : midiCapture.armPending
+                      ? 'requesting…'
+                      : midiCapture.busy
+                        ? 'uploading…'
+                        : '● record MIDI'}
+                </button>
+              )}
+            </div>
+            {midiCapture.status === 'denied' && !midiCapture.recording && (
+              <div style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--krill)' }}>
+                {midiCapture.error ?? 'MIDI access was denied.'}
+              </div>
+            )}
           </div>
         </aside>
       </div>
