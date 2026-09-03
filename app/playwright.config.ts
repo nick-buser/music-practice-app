@@ -6,8 +6,10 @@ import { defineConfig, devices } from '@playwright/test';
  * locally.
  *
  * Browser setup:
- * - Locally / in CI: `npx playwright install chromium` downloads the matching
- *   browser into `~/.cache/ms-playwright`.
+ * - The suite runs against the locally installed Google Chrome via `channel: 'chrome'`,
+ *   so no browser download is required.
+ * - `npx playwright install chromium` remains the path for environments that want
+ *   the bundled browser instead.
  * - In our remote execution sandbox the CDN is blocked, so the browsers live at
  *   `/opt/pw-browsers`. Set `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers` before
  *   running `npm run test:e2e`. The @playwright/test version is pinned to the
@@ -26,7 +28,11 @@ export default defineConfig({
     navigationTimeout: 30_000,
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    // Use the installed Google Chrome instead of a bundled chromium, since this
+    // machine deliberately does not install Playwright's browser downloads (disk
+    // discipline). CI runs npx playwright install, so the channel simply resolves
+    // to the Chrome present there.
+    { name: 'chromium', use: { ...devices['Desktop Chrome'], channel: 'chrome' } },
   ],
   webServer: {
     command: 'npm run dev',
