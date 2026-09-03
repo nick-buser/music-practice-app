@@ -158,6 +158,44 @@ def get_idea(db: Session, user_id: uuid.UUID, idea_id: uuid.UUID) -> Idea | None
     )
 
 
+def get_idea_by_handle(db: Session, user_id: uuid.UUID, handle: int) -> Idea | None:
+    """The live (non-deleted) idea at `handle`, or `None`.
+
+    SB6's `app/export/bundle.py::import_bundle` calls this to resolve a
+    manifest link's `to_handle` against the target database — the same
+    "not visible ⇒ not a valid target" rule `_sync_mentions` already
+    applies to `[[#n]]` handles below (a soft-deleted idea is not a link
+    target, even though its handle still permanently occupies the
+    `uq_ideas_user_handle` slot — see `handle_taken` for that half of the
+    rule).
+    """
+    return db.scalar(
+        select(Idea).where(
+            Idea.user_id == user_id, Idea.handle == handle, Idea.deleted_at.is_(None)
+        )
+    )
+
+
+def handle_taken(db: Session, user_id: uuid.UUID, handle: int) -> bool:
+    """Whether `handle` is already used by this user for *any* idea,
+    including a soft-deleted one.
+
+    Deliberately does **not** filter `deleted_at IS NULL` — mirroring
+    `_next_handle` above, `uq_ideas_user_handle` has no such filter either,
+    so a soft-deleted idea's handle can never be reused by a plain insert.
+    SB6's `import_bundle` (`app/export/bundle.py`) calls this, not
+    `get_idea_by_handle`, to decide whether a bundle's `manifest.handle`
+    can be kept verbatim in the target database or must be reminted via
+    `_next_handle` instead — using the deleted-filtering `get_idea_by_handle`
+    here would let it try (and fail on) a handle a soft-deleted row already
+    holds.
+    """
+    return (
+        db.scalar(select(Idea.id).where(Idea.user_id == user_id, Idea.handle == handle).limit(1))
+        is not None
+    )
+
+
 def create_idea(db: Session, user_id: uuid.UUID, data: IdeaCreate) -> Idea:
     for _attempt in range(_MAX_HANDLE_MINT_ATTEMPTS):
         idea = Idea(

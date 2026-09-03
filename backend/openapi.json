@@ -3182,6 +3182,55 @@
         ]
       }
     },
+    "/v1/ideas/{idea_id}/export": {
+      "get": {
+        "operationId": "export_idea_bundle_v1_ideas__idea_id__export_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idea_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Idea Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/zip": {}
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Error (problem+json)"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Error (problem+json)"
+          }
+        },
+        "summary": "Export Idea Bundle",
+        "tags": [
+          "idea-export"
+        ]
+      }
+    },
     "/v1/ideas/{idea_id}/links": {
       "post": {
         "operationId": "create_link_v1_ideas__idea_id__links_post",

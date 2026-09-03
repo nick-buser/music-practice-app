@@ -18,6 +18,11 @@ dependencies = [
     # PV3's `midi-features` extractor: pure-Python SMF parsing (~60 KB, no
     # native/compiled deps) — clears the laptop's disk-discipline rule.
     "mido>=1.3",
+    # SB6's `manifest.yaml` (app/export/manifest.py) needs YAML. Already
+    # installed as a transitive of `uvicorn[standard]` (confirmed with
+    # `uv tree`), so this declares an existing dependency honestly rather
+    # than adding a new download — the laptop's disk-discipline rule.
+    "pyyaml>=6.0",
 ]
 
 [dependency-groups]
