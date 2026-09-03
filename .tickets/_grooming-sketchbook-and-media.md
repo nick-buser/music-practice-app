@@ -570,7 +570,7 @@ over queued rows, no broker.
 - [ ] After merge: enqueue a `sha256-echo` run via the API on the dev slot;
       within 30 s `GET /runs/{id}` is `succeeded` (substrate: deployed)
 
-### PV3 — `midi-features` extractor + auto-enqueue on MIDI asset upload + properties panel
+### PV3 — `midi-features` extractor + auto-enqueue on MIDI asset upload + properties panel  `[claimed: feat-0010]`
 **Tier:** T2 (first real extractor; the key-guess has judgment)
 **Depends on:** PV2, SB2
 **Why:** First use of the provenance contract on real data; makes the
