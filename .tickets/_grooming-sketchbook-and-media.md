@@ -681,7 +681,7 @@ all hang on.
 - [ ] After merge, migrate Job green on both slots and a `curl` round trip
       on the dev slot succeeds (substrate: deployed)
 
-### RC2 — Capture UI: MediaRecorder in SessionView, takes list with playback
+### RC2 — Capture UI: MediaRecorder in SessionView, takes list with playback  `[claimed: feat-0012]`
 **Tier:** T2 (first `getUserMedia` surface)
 **Depends on:** RC1
 **Why:** The "recording" badge in SessionView finally becomes real.
