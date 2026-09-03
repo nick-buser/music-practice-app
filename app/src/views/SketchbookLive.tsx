@@ -27,13 +27,18 @@ function formatCapturedAt(iso: string): string {
   });
 }
 
+interface Props {
+  /** SB4: "Practice this" on an idea page — threaded straight through to `IdeaPage`. */
+  onStartSession?: (id: string) => void;
+}
+
 /**
  * The live Sketchbook: a reverse-chronological idea stream, an inbox filter,
  * and quick capture. Replaces `SketchbookMock` once a backend is configured
- * (see `SketchbookView.tsx`). The idea page (SB3b), links/graph (SB4/SB5)
- * are deliberately not here.
+ * (see `SketchbookView.tsx`). The idea page (SB3b) is here; links/graph
+ * (SB5) is deliberately not.
  */
-export function SketchbookLive() {
+export function SketchbookLive({ onStartSession }: Props) {
   // This component is only ever mounted while the Sketchbook tab is open, so
   // "active" is unconditionally true here — the enclosing switch is the gate.
   const ideasState = useIdeas(true);
@@ -102,6 +107,7 @@ export function SketchbookLive() {
         ideaId={selectedId}
         onBack={() => setSelectedId(null)}
         onNavigateToHandle={navigateToHandle}
+        onStartSession={onStartSession}
       />
     );
   }

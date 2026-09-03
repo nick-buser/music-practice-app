@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { resolveSubject } from './subject';
+import { resolveSubject, subjectFromIdea, type IdeaSubjectSource } from './subject';
+
+function makeIdeaSource(overrides: Partial<IdeaSubjectSource> & Pick<IdeaSubjectSource, 'id' | 'handle'>): IdeaSubjectSource {
+  return {
+    title: null,
+    kinds: [],
+    meter: null,
+    bpm: null,
+    ...overrides,
+  };
+}
 
 describe('resolveSubject', () => {
   it('returns a piece subject for a piece id', () => {
@@ -66,5 +76,49 @@ describe('resolveSubject', () => {
       expect(s.abc!.length).toBeGreaterThan(0);
       expect(s.bpmTarget).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('subjectFromIdea', () => {
+  it('a titled idea uses the title verbatim and joins kinds into the byline', () => {
+    const s = subjectFromIdea(makeIdeaSource({
+      id: 'aaaa-bbbb', handle: 7, title: 'A chorus in D', kinds: ['melody', 'lyric'],
+    }));
+    expect(s.id).toBe('idea:aaaa-bbbb');
+    expect(s.kind).toBe('idea');
+    expect(s.title).toBe('A chorus in D');
+    expect(s.byline).toBe('melody, lyric');
+    expect(s.hasPieceDetail).toBe(false);
+    expect(s.abc).toBeUndefined();
+    expect(s.sections).toHaveLength(0);
+  });
+
+  it('an untitled idea falls back to its handle, not the ideaHeadline body-line fallback', () => {
+    const s = subjectFromIdea(makeIdeaSource({ id: 'cccc-dddd', handle: 42, title: null }));
+    expect(s.title).toBe('#42');
+  });
+
+  it('an untitled idea with an empty-string title also falls back to its handle', () => {
+    const s = subjectFromIdea(makeIdeaSource({ id: 'eeee-ffff', handle: 3, title: '' }));
+    expect(s.title).toBe('#3');
+  });
+
+  it('defaults meter to 4/4 and bpm to 80 when the idea has neither', () => {
+    const s = subjectFromIdea(makeIdeaSource({ id: 'g', handle: 1, meter: null, bpm: null }));
+    expect(s.meter).toBe('4/4');
+    expect(s.bpmTarget).toBe(80);
+    expect(s.bpmCurrent).toBe(80);
+  });
+
+  it('uses the idea\'s own meter and bpm when both are set', () => {
+    const s = subjectFromIdea(makeIdeaSource({ id: 'h', handle: 2, meter: '3/4', bpm: 96 }));
+    expect(s.meter).toBe('3/4');
+    expect(s.bpmTarget).toBe(96);
+    expect(s.bpmCurrent).toBe(96);
+  });
+
+  it('an idea with no kinds gets an empty byline rather than throwing', () => {
+    const s = subjectFromIdea(makeIdeaSource({ id: 'i', handle: 9, kinds: [] }));
+    expect(s.byline).toBe('');
   });
 });

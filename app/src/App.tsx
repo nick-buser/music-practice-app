@@ -37,8 +37,13 @@ export default function App() {
 
   const startSession = (id: string) => {
     setSubjectId(id);
-    // A drill id may carry a voicing suffix (e.g. "c-maj7-chord~drop2").
-    if (DRILL_BY_ID.has(decodeVoicedId(id).id)) {
+    // An idea id ("idea:<uuid>", SB4) has no piece/drill counterpart to
+    // open — ending that session must land back on the Sketchbook it
+    // started from, not Library.
+    if (id.startsWith('idea:')) {
+      returnViewRef.current = 'sketchbook';
+    } else if (DRILL_BY_ID.has(decodeVoicedId(id).id)) {
+      // A drill id may carry a voicing suffix (e.g. "c-maj7-chord~drop2").
       returnViewRef.current = 'drills';
     } else {
       returnViewRef.current = 'library';
@@ -63,7 +68,10 @@ export default function App() {
   } else if (view === 'world-notation') {
     body = <WorldNotationView />;
   } else {
-    body = <SketchbookView />;
+    // SB4: "Practice this" on an idea page threads back up through here as
+    // an ordinary startSession(id) call — same callback every other view
+    // already uses, just newly wired onto this one.
+    body = <SketchbookView onStartSession={startSession} />;
   }
 
   return (

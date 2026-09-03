@@ -11,8 +11,9 @@ import { applyVoicing, CHORD_IDENTITY_BY_ID, decodeVoicedId } from './chord-cata
 import { displayName, subtitleLine, toAbc } from './chord-identity';
 import { WORLD_SCALE_BY_FAMILY } from './scales/world';
 import type { Drill, Section } from './schemas';
+import type { IdeaSummary } from '../api/client';
 
-export type SubjectKind = 'piece' | 'scale';
+export type SubjectKind = 'piece' | 'scale' | 'idea';
 
 export interface Subject {
   id: string;
@@ -101,6 +102,47 @@ export function resolveSubject(id: string): Subject {
     sessionsLogged: fallback.sessions,
     sections: fallback.sections,
     hasPieceDetail: true,
+  };
+}
+
+/**
+ * The idea fields `subjectFromIdea` actually needs — a structural subset
+ * shared by `IdeaSummary` (the stream list) and `Idea` (the single-idea
+ * page; see `api/client.ts`), so whichever caller already has an idea in
+ * hand can pass it straight through without an extra fetch.
+ */
+export type IdeaSubjectSource = Pick<IdeaSummary, 'id' | 'handle' | 'title' | 'kinds' | 'meter' | 'bpm'>;
+
+/**
+ * Build a Subject from a live idea (SB4). Deliberately *not* folded into
+ * `resolveSubject`: that stays synchronous over the bundled piece/scale
+ * catalog, but an idea lives behind the API and can't be resolved from an
+ * id alone. So this is a small, pure mapping — the caller (SessionView,
+ * matching the id against `useIdeas`' already-loaded list) does the async
+ * part and hands over the idea it found.
+ */
+export function subjectFromIdea(idea: IdeaSubjectSource): Subject {
+  return {
+    id: `idea:${idea.id}`,
+    kind: 'idea',
+    // `ideaHeadline` (SketchbookLive.tsx / IdeaPage.tsx) falls back to the
+    // idea's first non-empty body line, then "(untitled capture)" — right
+    // for a stream card or a page heading. A session heading should be
+    // short and available without reading the body, so this deliberately
+    // diverges: an untitled idea's Subject title is just its handle.
+    title: idea.title || `#${idea.handle}`,
+    byline: idea.kinds.join(', '),
+    subtitle: '',
+    abc: undefined,
+    meter: idea.meter || '4/4',
+    bpmTarget: idea.bpm ?? 80,
+    bpmCurrent: idea.bpm ?? 80,
+    // No session-tracking wiring exists yet for ideas (deferred — see the
+    // grooming doc's "Practice-tracking UI wiring" note); a fresh idea
+    // subject always starts at zero logged sessions.
+    sessionsLogged: 0,
+    sections: [],
+    hasPieceDetail: false,
   };
 }
 

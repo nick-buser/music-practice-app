@@ -5,10 +5,11 @@ import { TakesList } from '../components/TakesList';
 import { CadenceControl } from '../components/CadenceControl';
 import { SessionScore } from '../verovio/SessionScore';
 import { useMetronome } from '../verovio/useMetronome';
-import { resolveSubject } from '../data/subject';
+import { resolveSubject, subjectFromIdea, type Subject } from '../data/subject';
 import { beatsPerBar, formatMs } from '../lib/time';
 import { useAudioRecorder } from '../media/recorder';
 import { useRecordings } from '../hooks/useRecordings';
+import { useIdeas } from '../hooks/useIdeas';
 import { createRecording, uploadRecordingTrack } from '../api/recordings';
 import { backendEnabled } from '../config';
 import bioluminescence from '../assets/bioluminescence.svg';
@@ -40,8 +41,41 @@ const PIECE_SCORE_OPTS = { ...SESSION_SCORE_OPTS_FULL, measureRange: '1-8' };
 const GOAL_MINS = 35;
 const LOG_TAGS = ['Deep work', 'Slow drill', 'Run-through', 'Sight-read', 'Memorize', 'Recording'];
 
+/**
+ * Shown for the brief window between mounting an idea-backed session and
+ * `useIdeas` finishing its own fetch (SB4) — every render needs *some*
+ * Subject to feed the hooks below, and `abc: undefined` here doubles as the
+ * proof that the "no score" path renders cleanly even before a real idea
+ * has loaded.
+ */
+const LOADING_IDEA_SUBJECT: Subject = {
+  id: 'idea:loading',
+  kind: 'idea',
+  title: 'Loading…',
+  byline: '',
+  subtitle: '',
+  abc: undefined,
+  meter: '4/4',
+  bpmTarget: 80,
+  bpmCurrent: 80,
+  sessionsLogged: 0,
+  sections: [],
+  hasPieceDetail: false,
+};
+
 export function SessionView({ subjectId, onEnd, onOpenPiece }: Props) {
-  const subject = useMemo(() => resolveSubject(subjectId), [subjectId]);
+  const isIdeaSubject = subjectId.startsWith('idea:');
+  // `resolveSubject` stays synchronous over the bundled piece/scale catalog;
+  // an idea-backed session instead resolves itself against the live
+  // `useIdeas` list once it's loaded (SB4). `active` mirrors this session's
+  // own idea-ness rather than the Sketchbook tab's lifetime — same
+  // "only fetch what's actually in view" contract as `useRecordings` below.
+  const liveIdeas = useIdeas(isIdeaSubject);
+  const subject = useMemo(() => {
+    if (!isIdeaSubject) return resolveSubject(subjectId);
+    const idea = liveIdeas.ideas.find((i) => `idea:${i.id}` === subjectId);
+    return idea ? subjectFromIdea(idea) : LOADING_IDEA_SUBJECT;
+  }, [subjectId, isIdeaSubject, liveIdeas.ideas]);
   const isScale = subject.kind === 'scale';
 
   const meterBeats = useMemo(() => beatsPerBar(subject.meter), [subject.meter]);
