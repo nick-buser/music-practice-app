@@ -649,7 +649,7 @@ inbox self-describing seconds after capture.
 
 ## Recordings
 
-### RC1 — `recordings` + `recording_tracks` schema, CRUD, track upload and streaming
+### RC1 — `recordings` + `recording_tracks` schema, CRUD, track upload and streaming  `[claimed: feat-0011]`
 **Tier:** T1 (mirrors SB1/SB2 on the same store)
 **Depends on:** MD1
 **Why:** The tables the capture UI, the extractors, and tempo-vs-target
