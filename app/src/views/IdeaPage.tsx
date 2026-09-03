@@ -12,6 +12,13 @@ interface Props {
   onBack: () => void;
   /** Resolve `[[#n]]` — SketchbookLive owns the handle→id lookup across the whole stream. */
   onNavigateToHandle: (handle: number) => void;
+  /**
+   * SB4: start a practice session on this idea. Optional — SketchbookLive
+   * always supplies it via App, but IdeaPage.test.tsx renders this view
+   * standalone and shouldn't need to pass a callback just to keep compiling;
+   * the button itself only renders when one is given.
+   */
+  onStartSession?: (id: string) => void;
 }
 
 const IDEA_LINK_RE = /\[\[#(\d+)\]\]/g;
@@ -98,7 +105,7 @@ function formatDate(iso: string): string {
  * once an idea is selected — there's no router in this app, so "navigate to
  * idea #2" just means the parent re-pointing its selection.
  */
-export function IdeaPage({ ideaId, onBack, onNavigateToHandle }: Props) {
+export function IdeaPage({ ideaId, onBack, onNavigateToHandle, onStartSession }: Props) {
   const { idea, assets, properties, loading, error, patch, uploadAsset } = useIdea(ideaId);
 
   const [titleDraft, setTitleDraft] = useState('');
@@ -142,9 +149,20 @@ export function IdeaPage({ ideaId, onBack, onNavigateToHandle }: Props) {
     <div>
       <Topbar crumbs={['Soundings', 'Sketchbook', ideaHeadline(idea)]} />
 
-      <button type="button" className="idea-page-back" onClick={onBack}>
-        ← back to stream
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <button type="button" className="idea-page-back" onClick={onBack}>
+          ← back to stream
+        </button>
+        {onStartSession && (
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => onStartSession(`idea:${idea.id}`)}
+          >
+            Practice this
+          </button>
+        )}
+      </div>
 
       {error && (
         <div style={{ fontFamily: 'var(--font-body)', color: 'var(--krill)', marginBottom: 12 }}>
