@@ -6,6 +6,9 @@ This is the first route in the app that accepts bytes rather than JSON, so
 it is also the first to enforce `settings.media_max_upload_bytes` — see
 `_CappedStream` below for how, and why that is not the same thing as
 checking `Content-Length`.
+
+PV3 adds one more thing to `upload_asset`: an `audio/midi` upload
+auto-enqueues a `midi-features` extraction run — see `_auto_enqueue_midi_features`.
 """
 
 from __future__ import annotations
@@ -13,19 +16,34 @@ from __future__ import annotations
 import uuid
 from typing import Annotated, BinaryIO, cast
 
+import structlog
 from fastapi import APIRouter, File, Form, Header, UploadFile, status
 from fastapi.responses import StreamingResponse
+from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.deps import CurrentUserDep, DbSession, MediaStoreDep
 from app.errors import ProblemException, not_found
+from app.jobs.extractors.midi_features import MidiFeatures
 from app.links import IdeaAssetRole
+from app.models.idea import Idea, IdeaAsset
+from app.provenance import compose_subject
 from app.repositories import idea_assets as repo
 from app.repositories import ideas as ideas_repo
+from app.repositories import provenance as provenance_repo
 from app.schemas.idea_asset import IdeaAssetRead, IdeaAssetRevisionGroup
+from app.schemas.provenance import RunCreate
 from app.storage import stream_blob_response
 
+log = structlog.get_logger()
+
 router = APIRouter(prefix="/ideas", tags=["idea-assets"])
+
+# Both MIME strings name the same Standard MIDI File format — browsers/OSes
+# disagree on which one a `.mid`/`.midi` file gets sniffed as. Mirrors
+# `app/src/api/ideas.ts`'s `guessAssetRole`, which already treats the two
+# identically for the capture-path role guess.
+_MIDI_MIME_TYPES = frozenset({"audio/midi", "audio/x-midi"})
 
 
 def _too_large(max_bytes: int) -> ProblemException:
@@ -69,6 +87,55 @@ class _CappedStream:
         if self._seen > self._max_bytes:
             raise _too_large(self._max_bytes)
         return chunk
+
+
+def _auto_enqueue_midi_features(
+    db: Session, user_id: uuid.UUID, idea: Idea, asset: IdeaAsset
+) -> None:
+    """Auto-enqueue a `midi-features` run for a freshly-uploaded MIDI asset
+    (PV3's scope line: "SB2's upload path enqueues a `midi-features` run for
+    `audio/midi` assets ... subject = the idea"). Keyed on the asset's own
+    sha256, so re-uploading identical bytes hits `get_or_create_queued_run`'s
+    existing-identity check and enqueues nothing new — that's what makes
+    acceptance criterion 2 (no duplicate run for duplicate bytes) true; this
+    function doesn't hand-roll dedup itself.
+
+    An extraction is an enhancement, not a precondition: this must never
+    fail the upload. It runs inside its own SAVEPOINT (`db.begin_nested()`)
+    rather than the request's outer transaction, so a failed enqueue attempt
+    (e.g. a legitimate race against a concurrent identical upload hitting the
+    run-identity unique index) rolls back only itself — the `IdeaAsset` row
+    `upload_asset` already flushed earlier in this same transaction is
+    untouched and still commits normally when the request finishes. Any
+    failure is logged and swallowed, never re-raised.
+    """
+    try:
+        with db.begin_nested():
+            subject = compose_subject("idea", str(idea.id))
+            # `model_validate` (not direct kwargs) matches every other
+            # `RunCreate` construction in this codebase (see
+            # `tests/test_worker.py::_enqueue`) — `input_sha256s` carries an
+            # explicit, non-generator-derived alias (`schemas/provenance.py`),
+            # so this is the one construction path pydantic and pyright both
+            # agree on unambiguously.
+            data = RunCreate.model_validate(
+                {
+                    "subjectKind": subject.kind,
+                    "subjectId": subject.id,
+                    "extractor": MidiFeatures.name,
+                    "extractorVersion": MidiFeatures.version,
+                    "executor": "worker",
+                    "inputSha256s": [asset.sha256],
+                }
+            )
+            provenance_repo.get_or_create_queued_run(db, user_id, data)
+    except Exception:
+        log.warning(
+            "midi_features_auto_enqueue_failed",
+            idea_id=str(idea.id),
+            asset_id=str(asset.id),
+            exc_info=True,
+        )
 
 
 @router.post("/{idea_id}/assets", response_model=IdeaAssetRead, status_code=status.HTTP_201_CREATED)
@@ -120,6 +187,10 @@ def upload_asset(
         blob=blob,
         new_revision=new_revision,
     )
+
+    if mime in _MIDI_MIME_TYPES:
+        _auto_enqueue_midi_features(db, user.id, idea, asset)
+
     return IdeaAssetRead.model_validate(asset)
 
 

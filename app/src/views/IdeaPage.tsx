@@ -99,7 +99,7 @@ function formatDate(iso: string): string {
  * idea #2" just means the parent re-pointing its selection.
  */
 export function IdeaPage({ ideaId, onBack, onNavigateToHandle }: Props) {
-  const { idea, assets, loading, error, patch, uploadAsset } = useIdea(ideaId);
+  const { idea, assets, properties, loading, error, patch, uploadAsset } = useIdea(ideaId);
 
   const [titleDraft, setTitleDraft] = useState('');
   const [bodyDraft, setBodyDraft] = useState('');
@@ -215,7 +215,7 @@ export function IdeaPage({ ideaId, onBack, onNavigateToHandle }: Props) {
 
         <aside className="tech-rail">
           <MetadataRail idea={idea} onPatch={patch} />
-          <PropertiesPanel />
+          <PropertiesPanel properties={properties} />
         </aside>
       </div>
     </div>

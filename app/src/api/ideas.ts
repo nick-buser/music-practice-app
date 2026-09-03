@@ -13,6 +13,7 @@ import {
   type IdeaCreate,
   type IdeaLinkCreate,
   type IdeaLinkEdge,
+  type IdeaProperty,
   type IdeaStatus,
   type IdeaSummary,
   type IdeaUpdate,
@@ -141,6 +142,23 @@ export async function downloadIdeaAsset(ideaId: string, assetId: string): Promis
  */
 export function ideaAssetContentUrl(ideaId: string, assetId: string): string {
   return `${API_BASE_URL ?? ''}/v1/ideas/${ideaId}/assets/${assetId}/content`;
+}
+
+/**
+ * PV3: the extracted properties (key guess, tempo, ...) currently on
+ * record for this idea — newest run per kind, each with its producing
+ * run's lineage inline (`ExtractedPropertyWithRun`). `kind` is fixed to
+ * `'idea'`; `subject_id` here is the *bare* idea uuid, not the composed
+ * `idea:<uuid>` form — the server composes that itself
+ * (`app.provenance.compose_subject`), same convention as every other
+ * `subject_id`-typed path param.
+ */
+export async function listIdeaProperties(ideaId: string): Promise<IdeaProperty[]> {
+  const { data, error } = await requireApi().GET('/v1/subjects/{kind}/{subject_id}/properties', {
+    params: { path: { kind: 'idea', subject_id: ideaId } },
+  });
+  if (error || !data) throw new Error('Failed to load idea properties');
+  return data;
 }
 
 export async function createIdeaLink(ideaId: string, input: IdeaLinkCreate): Promise<IdeaLinkEdge> {

@@ -18,11 +18,14 @@ from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import select
 
 from app.config import settings
+from app.db import SessionLocal
 from app.deps import get_media_store
 from app.errors import ProblemException
 from app.main import app
+from app.models.provenance import ExtractionRun
 from app.routers.idea_assets import _CappedStream  # pyright: ignore[reportPrivateUsage]
 from app.storage import MemoryMediaStore, content_key
 
@@ -211,3 +214,77 @@ def test_delete_missing_asset_is_404(client: TestClient, media_store: MemoryMedi
     idea_id = _create_idea(client)
     r = client.delete(f"/v1/ideas/{idea_id}/assets/{uuid.uuid4()}")
     assert r.status_code == 404
+
+
+# ─── PV3: audio/midi upload auto-enqueues a midi-features run ─────────────
+
+
+def _upload_midi(
+    client: TestClient, idea_id: str, *, payload: bytes, filename: str = "sketch.mid"
+) -> Any:
+    # The enqueue path (`_auto_enqueue_midi_features`) never parses these
+    # bytes itself — that's the worker's job, later, when it actually claims
+    # the run — so arbitrary bytes are enough to exercise the enqueue-on-mime
+    # gate; `tests/test_midi_features.py` is what proves the extractor's own
+    # MIDI parsing against real fixture bytes.
+    return client.post(
+        f"/v1/ideas/{idea_id}/assets",
+        files={"file": (filename, payload, "audio/midi")},
+        data={"role": "melody"},
+    )
+
+
+def _queued_midi_features_runs(db: Any) -> list[ExtractionRun]:
+    return list(db.scalars(select(ExtractionRun).where(ExtractionRun.extractor == "midi-features")))
+
+
+def test_uploading_a_midi_asset_auto_enqueues_one_queued_midi_features_run(
+    client: TestClient, media_store: MemoryMediaStore
+) -> None:
+    idea_id = _create_idea(client)
+    payload = b"placeholder bytes standing in for a captured .mid file"
+    r = _upload_midi(client, idea_id, payload=payload)
+    assert r.status_code == 201
+    asset = r.json()
+
+    with SessionLocal() as db:
+        runs = _queued_midi_features_runs(db)
+        assert len(runs) == 1
+        run = runs[0]
+        assert run.status == "queued"
+        assert run.subject_kind == "idea"
+        assert run.subject_id == f"idea:{idea_id}"
+        assert run.input_sha256s == [asset["sha256"]]
+        assert run.extractor_version == "1.0.0"
+        assert run.executor == "worker"
+
+
+def test_uploading_identical_midi_bytes_again_does_not_create_a_second_run(
+    client: TestClient, media_store: MemoryMediaStore
+) -> None:
+    idea_id = _create_idea(client)
+    payload = b"identical midi bytes, uploaded twice"
+    r1 = _upload_midi(client, idea_id, payload=payload)
+    r2 = _upload_midi(client, idea_id, payload=payload, filename="sketch-take-2.mid")
+    assert r1.status_code == 201
+    assert r2.status_code == 201
+    # Two distinct asset rows (upload isn't deduped)...
+    assert r1.json()["id"] != r2.json()["id"]
+    assert r1.json()["sha256"] == r2.json()["sha256"]
+
+    # ...but one run — same subject, same extractor/version, same (single)
+    # input hash, so `get_or_create_queued_run`'s identity index collapses
+    # the second enqueue attempt into a no-op hit.
+    with SessionLocal() as db:
+        assert len(_queued_midi_features_runs(db)) == 1
+
+
+def test_uploading_a_non_midi_asset_does_not_auto_enqueue_anything(
+    client: TestClient, media_store: MemoryMediaStore
+) -> None:
+    idea_id = _create_idea(client)
+    r = _upload(client, idea_id, payload=b"just some audio bytes", role="reference")
+    assert r.status_code == 201
+
+    with SessionLocal() as db:
+        assert _queued_midi_features_runs(db) == []
