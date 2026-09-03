@@ -118,6 +118,19 @@ export async function deleteIdeaAsset(ideaId: string, assetId: string): Promise<
   if (error) throw new Error('Failed to delete idea asset');
 }
 
+/**
+ * Download the raw bytes of an idea asset. The route streams binary data; FX1 ensures
+ * the contract documents this as application/octet-stream, not JSON.
+ */
+export async function downloadIdeaAsset(ideaId: string, assetId: string): Promise<Blob> {
+  const { data, error } = await requireApi().GET(
+    '/v1/ideas/{idea_id}/assets/{asset_id}/content',
+    { params: { path: { idea_id: ideaId, asset_id: assetId } }, parseAs: 'blob' },
+  );
+  if (error || !data) throw new Error('Failed to download idea asset');
+  return data;
+}
+
 export async function createIdeaLink(ideaId: string, input: IdeaLinkCreate): Promise<IdeaLinkEdge> {
   const { data, error } = await requireApi().POST('/v1/ideas/{idea_id}/links', {
     params: { path: { idea_id: ideaId } },
