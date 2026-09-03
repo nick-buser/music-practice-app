@@ -337,7 +337,7 @@ later.
       persists; upload a small `.opus`, the player appears and plays
       (substrate: deployed)
 
-### SB4 — Ideas become subjects: `SubjectKind` gains `'idea'`, "Practice this" from an idea  `[claimed: feat-0014]`
+### SB4 — Ideas become subjects: `SubjectKind` gains `'idea'`, "Practice this" from an idea  `[merged: feat-0014, PR #26, 2026-09-03 — all criteria unit; resolveSubject stayed synchronous]`
 **Tier:** T1
 **Depends on:** SB3b
 **Why:** The decisive argument for living in Soundings: one timeline. A
