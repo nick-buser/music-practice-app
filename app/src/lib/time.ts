@@ -25,3 +25,14 @@ export function beatsPerBar(meter: string): number {
   if (den === 8 && num !== undefined && num > 0 && num % 3 === 0) return num / 3;
   return num && num > 0 ? num : 4;
 }
+
+/**
+ * Format a millisecond duration as "m:ss" — shared by the recording badge's
+ * live elapsed clock and the takes list's per-take duration (RC2).
+ */
+export function formatMs(ms: number): string {
+  const totalSeconds = Math.max(0, Math.round(ms / 1000));
+  const mm = Math.floor(totalSeconds / 60);
+  const ss = String(totalSeconds % 60).padStart(2, '0');
+  return `${mm}:${ss}`;
+}

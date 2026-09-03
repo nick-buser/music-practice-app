@@ -46,3 +46,11 @@ export type IdeaLinkCreate = components['schemas']['IdeaLinkCreate'];
 // Provenance (PV1/PV3) — a property plus the run that produced it, the
 // lineage `PropertiesPanel` renders (docs/recordings-provenance.md).
 export type IdeaProperty = components['schemas']['ExtractedPropertyWithRun'];
+
+// Recordings (RC2 capture) — a practice take (mic audio, later MIDI-in-
+// parallel) attached to a subject (piece/scale) or a session.
+export type Recording = components['schemas']['RecordingRead'];
+export type RecordingSummary = components['schemas']['RecordingSummary'];
+export type RecordingCreate = components['schemas']['RecordingCreate'];
+export type RecordingTrack = components['schemas']['RecordingTrackRead'];
+export type RecordingTrackKind = components['schemas']['RecordingTrackRead']['kind'];
