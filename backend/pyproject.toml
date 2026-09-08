@@ -75,7 +75,7 @@ select = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["app"]
+known-first-party = ["app", "scripts"]
 
 # ─── Pyright (strict type checking) ───────────────────────────────────
 [tool.pyright]
